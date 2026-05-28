@@ -1,0 +1,312 @@
+---
+// src/pages/fr/produits/[slug].astro
+// Individual product page — SSG via getStaticPaths.
+// Fetches all products at build time; each gets a static page.
+// Related products are derived from shared tags at build time.
+
+import StoreLayout from '~/layouts/StoreLayout.astro';
+import type { Product } from '~/scripts/api';
+
+// ── Static paths ───────────────────────────────────────────
+
+export async function getStaticPaths() {
+  const API_URL   = import.meta.env.PUBLIC_MERCHANT_API_URL ?? 'http://localhost:8787';
+  const API_KEY   = import.meta.env.PUBLIC_MERCHANT_PUBLIC_KEY ?? 'pk_your_public_key_here';
+
+  let products: Product[] = [];
+  try {
+    const res  = await fetch(`${API_URL}/v1/products`, {
+      headers: { Authorization: `Bearer ${API_KEY}` },
+    });
+    const data = await res.json() as { items: Product[] };
+    products   = data.items.filter((p) => p.status === 'active' && p.variants?.length > 0);
+  } catch (e) {
+    console.warn('[getStaticPaths] Could not fetch products — building with empty list.', e);
+  }
+
+  return products.map((product) => {
+    const slug = product.slug || product.id;
+
+    // Related: same tags, excluding self. Fall back to first 3 other products.
+    const tags = product.tags ?? [];
+    let related = products.filter((p) => {
+      if (p.id === product.id) return false;
+      if (tags.length === 0) return false;
+      return (p.tags ?? []).some((t) => tags.includes(t));
+    });
+    if (related.length === 0) {
+      related = products.filter((p) => p.id !== product.id).slice(0, 3);
+    } else {
+      related = related.slice(0, 4);
+    }
+
+    return {
+      params: { slug },
+      props:  { product, related },
+    };
+  });
+}
+
+// ── Props ──────────────────────────────────────────────────
+
+interface Props {
+  product: Product;
+  related: Product[];
+}
+
+const { product, related } = Astro.props;
+
+const defaultVariant = product.variants[0];
+const isDigital      = (defaultVariant.product_type || 'physical') === 'digital';
+const mainImage      = defaultVariant.image_url || product.image_url
+  || 'https://placehold.co/600x600/f4f4f5/a1a1aa?text=Image';
+
+const metadata = {
+  title:       product.title,
+  description: product.description ?? undefined,
+};
+---
+
+<StoreLayout metadata={metadata} cartUrl="/fr/panier">
+
+  <!-- Breadcrumb -->
+  <nav class="max-w-6xl mx-auto px-6 pt-6 pb-2 text-sm text-muted flex gap-2">
+    <a href="/" class="hover:text-default transition-colors">Accueil</a>
+    <span>/</span>
+    <a href="/fr/boutique" class="hover:text-default transition-colors">Boutique</a>
+    <span>/</span>
+    <span class="text-default">{product.title}</span>
+  </nav>
+
+  <!-- Product section -->
+  <section class="max-w-6xl mx-auto px-6 py-8">
+    <div class="grid md:grid-cols-2 gap-12">
+
+      <!-- Images -->
+      <div>
+        <div class="aspect-square bg-gray-100 dark:bg-slate-800 rounded-2xl overflow-hidden mb-3">
+          <img
+            id="main-image"
+            src={mainImage}
+            alt={product.title}
+            class="w-full h-full object-cover"
+            loading="eager"
+          />
+        </div>
+        <!-- Variant images thumbnails (filled by JS when variant selected) -->
+        <div id="variant-thumbs" class="flex gap-2 flex-wrap"></div>
+      </div>
+
+      <!-- Info -->
+      <div class="flex flex-col">
+        <div class="flex gap-2 mb-3">
+          {isDigital && (
+            <span class="bg-accent/10 text-accent text-xs font-medium px-2.5 py-1 rounded-full">
+              ⚡ Téléchargement numérique
+            </span>
+          )}
+          {(product.tags ?? []).map((tag) => (
+            <span class="bg-gray-100 dark:bg-slate-800 text-muted text-xs px-2.5 py-1 rounded-full">{tag}</span>
+          ))}
+        </div>
+
+        <h1 class="font-bold font-heading text-3xl md:text-4xl tracking-tight mb-3">
+          {product.title}
+        </h1>
+
+        <p id="product-price" class="text-2xl font-semibold text-default mb-4">
+          — {/* filled by JS */}
+        </p>
+
+        {product.description && (
+          <div class="prose dark:prose-invert prose-sm max-w-none mb-6 text-muted">
+            <p>{product.description}</p>
+          </div>
+        )}
+
+        <!-- Variant selector -->
+        {product.variants.length > 1 && (
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-default mb-2">
+              Option
+            </label>
+            <select
+              id="variant-select"
+              class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            >
+              {product.variants.map((v) => (
+                <option
+                  value={v.sku}
+                  data-price={v.price_cents}
+                  data-type={v.product_type || 'physical'}
+                  data-image={v.image_url || ''}
+                  data-title={v.title}
+                >
+                  {v.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <button
+          id="add-to-cart"
+          type="button"
+          class="btn-primary py-3.5 px-8 text-base rounded-xl font-semibold mb-4"
+          data-sku={defaultVariant.sku}
+          data-price={defaultVariant.price_cents}
+          data-product-type={defaultVariant.product_type || 'physical'}
+          data-variant-title={defaultVariant.title}
+          data-image={defaultVariant.image_url || ''}
+        >
+          {isDigital ? 'Acheter maintenant' : 'Ajouter au panier'}
+        </button>
+
+        <p class="text-xs text-muted mb-6">
+          {isDigital
+            ? 'Lien de téléchargement envoyé par e-mail après paiement.'
+            : 'Livraison disponible en France, Belgique et Bénin.'}
+        </p>
+
+        <!-- Trust signals -->
+        <div class="border-t border-gray-100 dark:border-slate-800 pt-5 grid grid-cols-2 gap-3 text-xs text-muted">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Paiement sécurisé
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            Confirmation par e-mail
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"/></svg>
+            Remboursement 14 jours
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Livraison Bénin & diaspora
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related products -->
+  {related.length > 0 && (
+    <section class="max-w-6xl mx-auto px-6 py-12 border-t border-gray-100 dark:border-slate-800">
+      <h2 class="font-bold font-heading text-2xl mb-6">Vous aimerez aussi</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {related.map((rp) => {
+          const rv    = rp.variants[0];
+          const rImg  = rv.image_url || rp.image_url || 'https://placehold.co/300x300/f4f4f5/a1a1aa?text=Image';
+          const rSlug = rp.slug || rp.id;
+          return (
+            <a href={`/fr/produits/${rSlug}`} class="group block">
+              <div class="aspect-square bg-gray-100 dark:bg-slate-800 rounded-xl overflow-hidden mb-3">
+                <img
+                  src={rImg}
+                  alt={rp.title}
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+              </div>
+              <p class="font-medium text-sm text-default group-hover:text-primary transition-colors">{rp.title}</p>
+              <p class="text-xs text-muted mt-0.5">
+                {/* Price rendered by JS to avoid SSG currency mismatch */}
+                <span data-price={rv.price_cents} data-currency class="related-price"></span>
+              </p>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+  )}
+
+</StoreLayout>
+
+<script>
+  import { addToCart, updateCartBadge, formatPrice } from '~/scripts/cart';
+  import { currency as getCurrency } from '~/scripts/api';
+
+  const CURRENCY = getCurrency();
+
+  // ── Hydrate prices ─────────────────────────────────────────
+  // Prices are in data attributes to avoid SSG/currency mismatch.
+
+  function hydratePrices() {
+    // Main price
+    const priceEl = document.getElementById('product-price');
+    const btn     = document.getElementById('add-to-cart') as HTMLButtonElement | null;
+    if (priceEl && btn) {
+      priceEl.textContent = formatPrice(Number(btn.dataset.price), CURRENCY);
+    }
+
+    // Related product prices
+    document.querySelectorAll('.related-price').forEach((el) => {
+      const price = Number((el as HTMLElement).dataset.price);
+      el.textContent = formatPrice(price, CURRENCY);
+    });
+  }
+
+  // ── Variant selector ──────────────────────────────────────
+
+  document.getElementById('variant-select')?.addEventListener('change', (e) => {
+    const select = e.target as HTMLSelectElement;
+    const opt    = select.options[select.selectedIndex];
+    const btn    = document.getElementById('add-to-cart') as HTMLButtonElement;
+    const img    = document.getElementById('main-image') as HTMLImageElement;
+
+    btn.dataset.sku          = select.value;
+    btn.dataset.price        = opt.dataset.price!;
+    btn.dataset.productType  = opt.dataset.type!;
+    btn.dataset.variantTitle = opt.dataset.title!;
+    btn.dataset.image        = opt.dataset.image!;
+
+    // Swap main image if variant has one
+    if (opt.dataset.image) {
+      img.src = opt.dataset.image;
+    }
+
+    document.getElementById('product-price')!.textContent =
+      formatPrice(Number(opt.dataset.price), CURRENCY);
+  });
+
+  // ── Add to cart ────────────────────────────────────────────
+
+  document.getElementById('add-to-cart')?.addEventListener('click', () => {
+    const btn = document.getElementById('add-to-cart') as HTMLButtonElement;
+
+    // Inline product title from the page h1
+    const title = document.querySelector('h1')?.textContent?.trim() ?? btn.dataset.sku!;
+
+    addToCart({
+      sku:           btn.dataset.sku!,
+      title,
+      price_cents:   Number(btn.dataset.price),
+      product_type:  (btn.dataset.productType as 'physical' | 'digital') || 'physical',
+      image_url:     btn.dataset.image || null,
+      variant_title: btn.dataset.variantTitle || '',
+    });
+
+    btn.textContent = 'Ajouté ✓';
+    btn.classList.add('opacity-75');
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = btn.dataset.productType === 'digital' ? 'Acheter maintenant' : 'Ajouter au panier';
+      btn.classList.remove('opacity-75');
+      btn.disabled = false;
+    }, 1500);
+
+    window.showCartToast?.(title);
+  });
+
+  // ── Init ──────────────────────────────────────────────────
+
+  hydratePrices();
+  updateCartBadge();
+
+  document.addEventListener('astro:after-swap', () => {
+    hydratePrices();
+    updateCartBadge();
+  });
+</script>

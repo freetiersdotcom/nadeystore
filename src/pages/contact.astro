@@ -1,79 +1,80 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import HeroText from '~/components/widgets/HeroText.astro';
-import ContactUs from '~/components/widgets/Contact.astro';
+import ContactWidget from '~/components/widgets/Contact.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 
 const metadata = {
-  title: 'Contact',
+  title: 'Contact — Nadey Naturel',
+  description: 'Une question sur nos produits, une commande, ou un partenariat ? Contactez l\'équipe Nadey Naturel.',
 };
 ---
 
 <Layout metadata={metadata}>
-  <!-- HeroText Widget ******************* -->
 
-  <HeroText tagline="Contact" title="Let's Connect!" />
-
-  <ContactUs
-    id="form"
-    title="Drop us a message today!"
-    subtitle="For quicker answers, explore our FAQs section. You may find the solution you're looking  for right there! If not, our support team is delighted to help you."
-    inputs={[
-      {
-        type: 'text',
-        name: 'name',
-        label: 'Name',
-      },
-      {
-        type: 'email',
-        name: 'email',
-        label: 'Email',
-      },
-    ]}
-    textarea={{
-      label: 'Message',
-    }}
-    disclaimer={{
-      label:
-        'By submitting this contact form, you acknowledge and agree to the collection of your personal information.',
-    }}
-    description="Our support team typically responds within 24 business hours."
+  <HeroText
+    tagline="Nous contacter"
+    title="Une question ? Nous sommes là."
+    subtitle="Que ce soit pour une question sur un produit, un problème de livraison ou une opportunité de partenariat — notre équipe vous répond en général sous 24 à 48 heures ouvrées."
   />
 
-  <!-- Features2 Widget ************** -->
-
+  <!-- ── Contact channels ────────────────────────────────────── -->
   <Features2
-    title="We are here to help!"
+    title="Comment nous joindre"
+    columns={3}
     items={[
       {
-        title: 'General support',
-        description: `Chat with us for inquiries related to account management, website navigation, payment issues, accessing purchased templates or general questions about the website's functionality.`,
-      },
-      {
-        title: 'Contact sales',
+        title: 'E-mail',
         description:
-          'Chat with us for questions about purchases, customization options, licensing for commercial use, inquiries about specific template, etc.',
-      },
-      {
-        title: 'Technical support',
-        description:
-          'Chat with us when facing issues like template installation, problems editing difficulties, compatibility issues with software or download errors, or other technical challenges related to using the templates.',
-      },
-      {
-        title: 'Phone',
-        description: '+1 (234) 567-890',
-        icon: 'tabler:headset',
-      },
-      {
-        title: 'Email',
-        description: 'contact@support.com',
+          'Pour toute question générale, commande ou réclamation :<br/><a href="mailto:contact@nadeynaturel.com" class="text-primary hover:underline font-medium">contact@nadeynaturel.com</a>',
         icon: 'tabler:mail',
       },
       {
-        title: 'Location',
-        description: '1234 Lorem Ipsum St, 12345, Miami, EEUU',
+        title: 'WhatsApp',
+        description:
+          'Pour un suivi rapide de commande ou une question urgente :<br/><a href="https://wa.me/22900000000" class="text-primary hover:underline font-medium">+229 XX XX XX XX</a>',
+        icon: 'tabler:brand-whatsapp',
+      },
+      {
+        title: 'Adresse',
+        description:
+          'Nadey Naturel<br/>Cotonou, Bénin<br/><span class="text-muted text-xs">Retrait sur place non disponible pour le moment.</span>',
         icon: 'tabler:map-pin',
       },
     ]}
   />
+
+  <!-- ── Contact form ────────────────────────────────────────── -->
+  <ContactWidget
+    id="formulaire"
+    title="Envoyez-nous un message"
+    subtitle="Remplissez ce formulaire et nous vous répondrons dans les plus brefs délais."
+    inputs={[
+      {
+        type: 'text',
+        name: 'name',
+        label: 'Nom complet',
+        placeholder: 'Votre nom',
+        autocomplete: 'name',
+      },
+      {
+        type: 'email',
+        name: 'email',
+        label: 'Adresse e-mail',
+        placeholder: 'vous@exemple.com',
+        autocomplete: 'email',
+      },
+    ]}
+    textarea={{
+      name: 'message',
+      label: 'Message',
+      placeholder: 'Décrivez votre question ou votre demande...',
+      rows: 6,
+    }}
+    button="Envoyer le message"
+    description="Vos informations ne seront jamais partagées avec des tiers. Consultez notre politique de confidentialité."
+  />
+  
+  <!-- <a href='/confidentialite' class='text-primary hover:underline'>politique de confidentialité</a> -->
+
 </Layout>

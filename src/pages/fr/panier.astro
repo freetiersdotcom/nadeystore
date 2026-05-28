@@ -1,0 +1,399 @@
+---
+// src/pages/fr/panier.astro
+// Cart page — renders from localStorage, runs the full checkout pipeline
+// (create cart → add items → set shipping → redirect to payment) on submit.
+import StoreLayout from '~/layouts/StoreLayout.astro';
+
+const metadata = {
+  title: 'Votre panier',
+};
+---
+
+<StoreLayout metadata={metadata} cartUrl="/fr/panier" cancelUrl="/fr/boutique">
+
+  <div class="max-w-5xl mx-auto px-6 py-12">
+    <h1 class="font-bold font-heading text-3xl mb-8">Votre panier</h1>
+
+    <p id="page-error" class="text-red-500 text-sm mb-4" style="display:none"></p>
+
+    <!-- Empty state -->
+    <div id="empty-cart" class="text-center py-20" style="display:none">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full mb-4">
+        <svg class="w-8 h-8 text-muted" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+      </div>
+      <h2 class="text-xl font-medium mb-2">Votre panier est vide</h2>
+      <p class="text-muted mb-6 text-sm">Ajoutez des articles pour commencer.</p>
+      <a href="/fr/boutique" class="btn-primary px-6 py-3 text-sm rounded-lg">Continuer les achats</a>
+    </div>
+
+    <!-- Cart content -->
+    <div id="cart-content" class="grid md:grid-cols-[1fr_360px] gap-10" style="display:none">
+
+      <!-- Left: items + shipping -->
+      <div>
+        <div id="cart-items" class="mb-8"></div>
+
+        <!-- Shipping section — only for physical items -->
+        <div id="shipping-section" class="mb-8" style="display:none">
+          <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-5">
+            <h2 class="text-base font-semibold mb-4 flex items-center gap-2">
+              <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9m-9 0a1.5 1.5 0 103 0m6 0a1.5 1.5 0 103 0" />
+              </svg>
+              Adresse de livraison
+            </h2>
+
+            <div class="grid grid-cols-1 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-muted mb-1">Nom complet *</label>
+                <input id="ship-name" type="text" placeholder="Jane Dupont" autocomplete="name"
+                  class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-muted mb-1">Adresse *</label>
+                <input id="ship-line1" type="text" placeholder="123 Rue de la Paix" autocomplete="address-line1"
+                  class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-muted mb-1">Complément d'adresse</label>
+                <input id="ship-line2" type="text" placeholder="Appartement, bâtiment, etc." autocomplete="address-line2"
+                  class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-muted mb-1">Ville *</label>
+                  <input id="ship-city" type="text" placeholder="Cotonou" autocomplete="address-level2"
+                    class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-muted mb-1">Téléphone / Code postal</label>
+                  <input id="ship-postal" type="text" placeholder="+229 61 XX XX XX ou 75001" autocomplete="tel"
+                    class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  <p class="text-xs text-muted mt-1">Numéro WhatsApp ou code postal selon votre pays.</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-muted mb-1">État / Province</label>
+                  <input id="ship-state" type="text" placeholder="Littoral" autocomplete="address-level1"
+                    class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-muted mb-1">Pays *</label>
+                  <input id="ship-country" type="text" placeholder="BJ" autocomplete="country"
+                    class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Discount code -->
+        <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-5">
+          <h2 class="text-base font-semibold mb-3">Code promo</h2>
+          <div class="flex gap-2">
+            <input id="discount-input" type="text" placeholder="MONCODE"
+              class="flex-1 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary uppercase" />
+            <button id="discount-btn" type="button"
+              class="btn px-4 py-2.5 text-sm rounded-lg">
+              Appliquer
+            </button>
+          </div>
+          <p id="discount-msg" class="text-sm mt-2" style="display:none"></p>
+        </div>
+      </div>
+
+      <!-- Right: order summary -->
+      <div>
+        <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-5 md:sticky md:top-24">
+          <h2 class="text-base font-semibold mb-4">Récapitulatif</h2>
+
+          <div class="space-y-2 text-sm mb-4">
+            <div class="flex justify-between">
+              <span class="text-muted">Sous-total</span>
+              <span id="summary-subtotal" class="font-medium text-default">—</span>
+            </div>
+            <div id="summary-discount-row" class="flex justify-between" style="display:none">
+              <span class="text-muted">Remise</span>
+              <span id="summary-discount" class="font-medium text-green-600">—</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-muted">Livraison</span>
+              <span class="font-medium text-default">Calculée à la commande</span>
+            </div>
+            <div class="border-t border-gray-200 dark:border-slate-700 pt-2 flex justify-between text-base font-semibold">
+              <span>Total</span>
+              <span id="summary-total">—</span>
+            </div>
+          </div>
+
+          <button
+            id="checkout-btn"
+            type="button"
+            class="w-full btn-primary py-3 text-sm rounded-lg font-semibold"
+          >
+            Passer la commande
+          </button>
+
+          <p id="checkout-error" class="text-red-500 text-xs mt-3 text-center" style="display:none"></p>
+
+          <div class="mt-4 flex items-center justify-center gap-2 text-xs text-muted">
+            <span>Visa</span><span>·</span><span>Mastercard</span><span>·</span><span>FedaPay</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</StoreLayout>
+
+<script>
+  import type { CartLineItem } from '~/scripts/cart';
+  import {
+    getCart, updateQty, removeFromCart, clearCart,
+    cartSubtotal, cartHasPhysical, updateCartBadge, formatPrice,
+  } from '~/scripts/cart';
+  import {
+    createCart, addCartItems, setCartShipping,
+    fedaPayCheckout, stripeCheckout,
+    currency as getCurrency, provider as getProvider,
+  } from '~/scripts/api';
+
+  const CURRENCY = getCurrency();
+  const PROVIDER = getProvider();
+
+  let appliedDiscount: { code: string; amount_cents: number } | null = null;
+
+  // ── Render ────────────────────────────────────────────────
+
+  function render() {
+    updateCartBadge();
+    const cart = getCart();
+    const emptyEl   = document.getElementById('empty-cart')!;
+    const contentEl = document.getElementById('cart-content')!;
+
+    if (cart.length === 0) {
+      emptyEl.style.display = 'block';
+      contentEl.style.display = 'none';
+      return;
+    }
+
+    emptyEl.style.display = 'none';
+    contentEl.style.display = 'grid';
+
+    renderItems(cart);
+    renderSummary(cart);
+    renderShippingSection(cart);
+  }
+
+  function renderItems(cart: CartLineItem[]) {
+    const container = document.getElementById('cart-items')!;
+    container.innerHTML = cart.map((item) => `
+      <div class="flex gap-4 py-4 border-b border-gray-100 dark:border-slate-800" data-sku="${item.sku}">
+        <div class="w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-lg overflow-hidden flex-shrink-0">
+          ${item.image_url
+            ? `<img src="${item.image_url}" alt="${item.title}" class="w-full h-full object-cover" loading="lazy">`
+            : `<div class="w-full h-full flex items-center justify-center text-muted text-xs">IMG</div>`}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-medium text-default text-sm">${item.title}</p>
+          ${item.variant_title ? `<p class="text-xs text-muted">${item.variant_title}</p>` : ''}
+          ${item.product_type === 'digital'
+            ? `<span class="text-xs text-accent font-medium">⚡ Numérique</span>`
+            : `<span class="text-xs text-muted">Livraison requise</span>`}
+        </div>
+        <div class="flex flex-col items-end gap-2">
+          <p class="font-semibold text-sm text-default">${formatPrice(item.price_cents * item.qty, CURRENCY)}</p>
+          ${item.product_type === 'physical'
+            ? `<div class="flex items-center gap-1">
+                <button class="qty-btn w-7 h-7 rounded border border-gray-200 dark:border-slate-700 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors flex items-center justify-center" data-sku="${item.sku}" data-delta="-1">−</button>
+                <span class="w-6 text-center text-sm font-medium">${item.qty}</span>
+                <button class="qty-btn w-7 h-7 rounded border border-gray-200 dark:border-slate-700 text-sm hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors flex items-center justify-center" data-sku="${item.sku}" data-delta="1">+</button>
+              </div>`
+            : `<span class="text-xs text-muted">Qté : ${item.qty}</span>`}
+          <button class="remove-btn text-xs text-red-400 hover:text-red-600 transition-colors" data-sku="${item.sku}">Supprimer</button>
+        </div>
+      </div>
+    `).join('');
+
+    container.querySelectorAll('.qty-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const el    = btn as HTMLElement;
+        const sku   = el.dataset.sku!;
+        const delta = Number(el.dataset.delta);
+        const item  = getCart().find((i) => i.sku === sku);
+        if (item) updateQty(sku, item.qty + delta);
+        render();
+      });
+    });
+
+    container.querySelectorAll('.remove-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        removeFromCart((btn as HTMLElement).dataset.sku!);
+        render();
+      });
+    });
+  }
+
+  function renderSummary(cart: CartLineItem[]) {
+    const subtotal = cartSubtotal(cart);
+    const discount = appliedDiscount?.amount_cents ?? 0;
+    const total    = subtotal - discount;
+
+    document.getElementById('summary-subtotal')!.textContent = formatPrice(subtotal, CURRENCY);
+    document.getElementById('summary-total')!.textContent    = formatPrice(total, CURRENCY);
+
+    const discountRow = document.getElementById('summary-discount-row')!;
+    if (discount > 0) {
+      discountRow.style.display = 'flex';
+      document.getElementById('summary-discount')!.textContent = `−${formatPrice(discount, CURRENCY)}`;
+    } else {
+      discountRow.style.display = 'none';
+    }
+  }
+
+  function renderShippingSection(cart: CartLineItem[]) {
+    const section = document.getElementById('shipping-section')!;
+    section.style.display = cartHasPhysical(cart) ? 'block' : 'none';
+  }
+
+  // ── Discount ──────────────────────────────────────────────
+  // Discount is validated on the backend after cart creation.
+  // For now we store the code and apply it after createCart().
+  // TODO: add a lightweight public validation endpoint to give
+  //       immediate feedback before checkout.
+
+  document.getElementById('discount-btn')?.addEventListener('click', () => {
+    const input = document.getElementById('discount-input') as HTMLInputElement;
+    const code  = input.value.trim().toUpperCase();
+    const msg   = document.getElementById('discount-msg')!;
+
+    if (!code) return;
+
+    // Store code for application at checkout time
+    (window as any).__pendingDiscountCode = code;
+    msg.textContent = `Code "${code}" sera appliqué à la commande.`;
+    msg.className   = 'text-sm mt-2 text-green-600';
+    msg.style.display = 'block';
+  });
+
+  // ── Checkout pipeline ─────────────────────────────────────
+
+  document.getElementById('checkout-btn')?.addEventListener('click', handleCheckout);
+
+  async function handleCheckout() {
+    const cart = getCart();
+    if (cart.length === 0) return;
+
+    const hasPhysical = cartHasPhysical(cart);
+
+    // Validate shipping address if needed
+    if (hasPhysical) {
+      const line1   = (document.getElementById('ship-line1') as HTMLInputElement).value.trim();
+      const city    = (document.getElementById('ship-city') as HTMLInputElement).value.trim();
+      const country = (document.getElementById('ship-country') as HTMLInputElement).value.trim();
+      if (!line1 || !city || !country) {
+        showError('Veuillez remplir les champs d\'adresse obligatoires (adresse, ville, pays).');
+        return;
+      }
+    }
+
+    // Collect email
+    const email = await window.promptEmail();
+    if (!email) return;
+
+    const btn = document.getElementById('checkout-btn') as HTMLButtonElement;
+    btn.textContent = 'Traitement en cours...';
+    btn.disabled = true;
+    clearError();
+
+    try {
+      // 1. Create cart on backend
+      const backendCart = await createCart(email);
+      const cartId = backendCart.id;
+
+      // 2. Add all items
+      await addCartItems(cartId, cart.map((i) => ({ sku: i.sku, qty: i.qty })));
+
+      // 3. Set shipping if needed
+      if (hasPhysical) {
+        const name    = (document.getElementById('ship-name') as HTMLInputElement).value.trim();
+        const line1   = (document.getElementById('ship-line1') as HTMLInputElement).value.trim();
+        const line2   = (document.getElementById('ship-line2') as HTMLInputElement).value.trim();
+        const city    = (document.getElementById('ship-city') as HTMLInputElement).value.trim();
+        const state   = (document.getElementById('ship-state') as HTMLInputElement).value.trim();
+        const postal  = (document.getElementById('ship-postal') as HTMLInputElement).value.trim();
+        const country = (document.getElementById('ship-country') as HTMLInputElement).value.trim();
+
+        await setCartShipping(cartId, {
+          name:        name  || undefined,
+          line1,
+          line2:       line2 || undefined,
+          city,
+          state:       state || undefined,
+          postal_code: postal || '',
+          country:     country || 'BJ',
+        });
+      }
+
+      // 4. Apply discount if one was entered
+      const pendingCode = (window as any).__pendingDiscountCode;
+      if (pendingCode) {
+        try {
+          const { applyDiscount } = await import('~/scripts/api');
+          await applyDiscount(cartId, pendingCode);
+        } catch {
+          // Non-fatal: proceed without discount and inform user
+          showError('Le code promo n\'a pas pu être appliqué, mais votre commande continue.');
+        }
+      }
+
+      // 5. Redirect to payment
+      const origin     = window.location.origin;
+      const successUrl = `${origin}/fr/confirmation?cart_id=${cartId}`;
+      const cancelUrl  = `${origin}/fr/panier`;
+
+      let paymentUrl: string;
+
+      if (PROVIDER === 'stripe') {
+        const result = await stripeCheckout(cartId, successUrl, cancelUrl, {
+          collectShipping: false, // we already collected it
+          shippingCountries: ['BJ', 'FR', 'BE', 'GB', 'CA'],
+        });
+        paymentUrl = result.checkout_url;
+      } else {
+        const result = await fedaPayCheckout(cartId, successUrl, cancelUrl);
+        paymentUrl = result.checkout_url;
+      }
+
+      // Clear local cart only after redirect is certain
+      clearCart();
+      window.location.href = paymentUrl;
+
+    } catch (err: any) {
+      console.error('Checkout failed:', err);
+      showError(err.message || 'Une erreur est survenue. Veuillez réessayer.');
+      btn.textContent = 'Passer la commande';
+      btn.disabled = false;
+    }
+  }
+
+  function showError(msg: string) {
+    const el = document.getElementById('checkout-error')!;
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  function clearError() {
+    const el = document.getElementById('checkout-error')!;
+    el.style.display = 'none';
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+
+  render();
+  document.addEventListener('astro:after-swap', render);
+</script>

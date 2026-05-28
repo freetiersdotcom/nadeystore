@@ -172,13 +172,7 @@ import { UI } from 'astrowind:config';
     animationCounter: 0,
     elements: null,
 
-    start(isNavigation) {
-      if (this.observer) {
-        this.observer.disconnect();
-      }
-
-      this.animationCounter = 0;
-
+    start() {
       const selectors = [
         '[class*=" intersect:"]',
         '[class*=":intersect:"]',
@@ -203,18 +197,6 @@ import { UI } from 'astrowind:config';
         el._intersectionThreshold = getThreshold(el);
       });
 
-      if (isNavigation) {
-        const vh = window.innerHeight;
-        this.elements.forEach((el) => {
-          const rect = el.getBoundingClientRect();
-          if (rect.top < vh && rect.bottom > 0) {
-            el.removeAttribute('no-intersect');
-            el.setAttribute('data-animated', 'true');
-            el.style.animationDuration = '0s';
-          }
-        });
-      }
-
       const callback = (entries) => {
         entries.forEach((entry) => {
           requestAnimationFrame(() => {
@@ -238,7 +220,6 @@ import { UI } from 'astrowind:config';
               if (!target.hasAttribute('data-animated')) {
                 target.removeAttribute('no-intersect');
                 target.setAttribute('data-animated', 'true');
-                target.style.animationDuration = '';
 
                 const delay = this.animationCounter * this.delayBetweenAnimations;
                 this.animationCounter++;
@@ -255,7 +236,6 @@ import { UI } from 'astrowind:config';
               target.removeAttribute('data-animated');
               target.style.transitionDelay = '';
               target.style.animationDelay = '';
-              target.style.animationDuration = '';
 
               this.animationCounter = 0;
             }
@@ -263,16 +243,14 @@ import { UI } from 'astrowind:config';
         });
       };
 
-      this.observer = new IntersectionObserver(callback, { threshold: [0, 0.25, 0.5, 0.99] });
+      this.observer = new IntersectionObserver(callback.bind(this), { threshold: [0, 0.25, 0.5, 0.99] });
 
       this.elements.forEach((el) => {
-        if (!el.hasAttribute('data-animated')) {
-          this.observer.observe(el);
-        }
+        this.observer.observe(el);
       });
     },
 
-    /*
+    /* 
       REF: #643;
       We need to remove the delay to fix flickering/delay
       when toggling the theme. Observer only removes them
@@ -288,9 +266,9 @@ import { UI } from 'astrowind:config';
     },
   };
 
-  Observer.start(false);
+  Observer.start();
 
   document.addEventListener('astro:after-swap', () => {
-    Observer.start(true);
+    Observer.start();
   });
 </script>

@@ -1,0 +1,90 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+
+const metadata = {
+  title: 'Politique de remboursement — Nadey Naturel',
+  robots: { index: false, follow: true },
+};
+
+const lastUpdated = '1er janvier 2025';
+---
+
+<Layout metadata={metadata}>
+
+  <HeroText
+    tagline="Légal"
+    title="Politique de remboursement"
+    subtitle={`Dernière mise à jour : ${lastUpdated}`}
+  />
+
+  <div class="max-w-3xl mx-auto px-6 pb-16 prose dark:prose-invert prose-headings:font-heading prose-headings:font-bold prose-a:text-primary">
+
+    <p class="lead text-xl">
+      Votre satisfaction est notre priorité. Si vous n'êtes pas entièrement satisfait de votre commande, nous ferons tout pour arranger les choses.
+    </p>
+
+    <h2>1. Produits physiques — délai de retour</h2>
+    <p>
+      Vous disposez de <strong>14 jours calendaires</strong> à compter de la réception de votre commande pour nous signaler tout problème et demander un remboursement ou un échange.
+    </p>
+
+    <h2>2. Conditions de remboursement</h2>
+    <p>Nous acceptons les demandes de remboursement dans les cas suivants :</p>
+    <ul>
+      <li>Produit reçu endommagé ou défectueux.</li>
+      <li>Produit ne correspondant pas à la description publiée sur notre boutique.</li>
+      <li>Commande non reçue après 45 jours ouvrés (au-delà du délai de livraison estimé).</li>
+    </ul>
+
+    <h2>3. Ce qui n'est pas remboursable</h2>
+    <ul>
+      <li>Produits ouverts ou entamés (pour des raisons d'hygiène et de sécurité alimentaire).</li>
+      <li>Produits retournés sans accord préalable de notre équipe.</li>
+      <li>Retards de livraison dus à des événements hors de notre contrôle (grèves, intempéries, blocages douaniers).</li>
+      <li>Droits de douane ou taxes d'importation engagés par l'acheteur.</li>
+    </ul>
+
+    <h2>4. Produits numériques</h2>
+    <p>
+      Les produits numériques (guides, e-books) ne sont pas remboursables une fois téléchargés, sauf en cas de défaut technique empêchant tout accès au fichier.
+    </p>
+
+    <h2>5. Comment faire une demande</h2>
+    <p>Pour initier une demande de remboursement :</p>
+    <ol>
+      <li>Contactez-nous à <a href="mailto:contact@nadeynaturel.com">contact@nadeynaturel.com</a> dans le délai imparti.</li>
+      <li>Indiquez votre numéro de commande et décrivez le problème rencontré.</li>
+      <li>Si possible, joignez des photos du produit reçu.</li>
+    </ol>
+    <p>
+      Notre équipe vous répondra sous 48 heures ouvrées avec les instructions à suivre.
+    </p>
+
+    <h2>6. Traitement du remboursement</h2>
+    <p>
+      Une fois votre demande validée, le remboursement est émis dans un délai de <strong>5 à 10 jours ouvrés</strong> sur le moyen de paiement utilisé lors de la commande. Les délais réels peuvent varier selon votre banque ou opérateur de mobile money.
+    </p>
+
+    <h2>7. Échanges</h2>
+    <p>
+      Si vous préférez un échange plutôt qu'un remboursement, nous ferons de notre mieux pour vous proposer une solution adaptée selon la disponibilité des produits. Les frais de réexpédition pour un échange sont pris en charge par Nadey Naturel lorsque l'erreur vient de notre côté.
+    </p>
+
+    <h2>8. Contact</h2>
+    <p>
+      Pour toute question relative à cette politique : <a href="mailto:contact@nadeynaturel.com">contact@nadeynaturel.com</a> ou via <a href="/contact">notre formulaire de contact</a>.
+    </p>
+
+  </div>
+
+  <CallToAction
+    title="Une question sur votre commande ?"
+    subtitle="Notre équipe est disponible par e-mail et WhatsApp pour vous aider rapidement."
+    actions={[
+      { variant: 'primary', text: 'Nous contacter', href: '/contact', icon: 'tabler:message' },
+    ]}
+  />
+
+</Layout>

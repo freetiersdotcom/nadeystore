@@ -1,398 +1,215 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
-
-import Hero from '~/components/widgets/Hero.astro';
-import Note from '~/components/widgets/Note.astro';
+import Hero2 from '~/components/widgets/Hero2.astro';
 import Features from '~/components/widgets/Features.astro';
-import Features2 from '~/components/widgets/Features2.astro';
-import Steps from '~/components/widgets/Steps.astro';
 import Content from '~/components/widgets/Content.astro';
-import BlogLatestPosts from '~/components/widgets/BlogLatestPosts.astro';
-import FAQs from '~/components/widgets/FAQs.astro';
-import Stats from '~/components/widgets/Stats.astro';
+import Steps from '~/components/widgets/Steps.astro';
+import Testimonials from '~/components/widgets/Testimonials.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 
 const metadata = {
-  title: 'AstroWind — Free template for creating websites with Astro + Tailwind CSS',
-  ignoreTitleTemplate: true,
+  title: 'Nadey Naturel — Produits de santé naturelle du Bénin',
+  description:
+    'Découvrez nos produits de santé naturelle à base de plantes d\'Afrique de l\'Ouest. Moringa, gingembre, et bien plus — livrés partout en Europe et dans la diaspora.',
 };
 ---
 
 <Layout metadata={metadata}>
-  <!-- Hero Widget ******************* -->
 
-  <Hero
+  <!-- ── Hero ──────────────────────────────────────────────── -->
+  <Hero2
+    tagline="100 % naturel · Origine Bénin"
+    title="La nature de <span class='text-accent dark:text-accent highlight'>l'Afrique de l'Ouest</span>,<br class='hidden md:block' /> livrée chez vous."
+    subtitle="Des plantes cultivées et transformées au Bénin, sélectionnées pour leurs bienfaits reconnus depuis des générations. Moringa, gingembre, baobab et plus — pour prendre soin de vous où que vous soyez."
     actions={[
-      {
-        variant: 'primary',
-        text: 'Get template',
-        href: 'https://github.com/arthelokyo/astrowind',
-        target: '_blank',
-        icon: 'tabler:download',
-      },
-      { text: 'Learn more', href: '#features' },
+      { variant: 'primary', text: 'Découvrir la boutique', href: '/fr/boutique', icon: 'tabler:shopping-cart' },
+      { text: 'Notre histoire', href: '/a-propos' },
     ]}
-    image={{ src: '~/assets/images/hero-image.png', alt: 'AstroWind Hero Image' }}
-  >
-    <Fragment slot="title">
-      Free template for <span class="hidden xl:inline">creating websites with</span>
-      <span class="text-accent dark:text-white"> Astro v6</span> + Tailwind CSS
-    </Fragment>
+    image={{
+      src: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80',
+      alt: 'Plantes médicinales africaines — moringa et gingembre',
+    }}
+  />
 
-    <Fragment slot="subtitle">
-      <span class="hidden sm:inline">
-        <span class="font-semibold">AstroWind</span> is a free, customizable and production-ready template for Astro v6 +
-        Tailwind CSS v4.</span
-      >
-      <span class="block mb-1 sm:hidden font-bold text-blue-600">AstroWind: Production-ready.</span>
-      Suitable for Startups, Small Business, SaaS websites, Professional Portfolios, Marketing websites, Landing Pages & Blogs.
-    </Fragment>
-  </Hero>
-
-  <!-- Note Widget ******************* -->
-
-  <Note title="Philosophy:" description="Simplicity, Best Practices and High Performance" />
-
-  <!-- Features Widget *************** -->
-
+  <!-- ── Trust strip ────────────────────────────────────────── -->
   <Features
-    id="features"
-    tagline="Features"
-    title="What you get with AstroWind"
-    subtitle="One of the most professional and comprehensive templates currently on the market. Most starred & forked Astro theme in 2022, 2023, 2024 and 2025."
+    id="avantages"
+    tagline="Pourquoi nous choisir"
+    title="Des produits en qui vous pouvez avoir confiance"
+    subtitle="Chaque produit est soigneusement sélectionné, transformé au Bénin et expédié directement à votre porte."
+    columns={4}
     items={[
       {
-        title: 'Astro + Tailwind CSS Integration',
+        title: 'Ingrédients authentiques',
         description:
-          'A seamless integration between two great frameworks that offer high productivity, performance and versatility. Now powered by Tailwind CSS v4.',
-        icon: 'tabler:brand-tailwind',
+          'Plantes natives d\'Afrique de l\'Ouest, cueillies et transformées selon des méthodes traditionnelles éprouvées.',
+        icon: 'tabler:leaf',
       },
       {
-        title: 'Ready-to-use Components',
+        title: 'Sans additifs',
         description:
-          'Widgets made with Tailwind CSS v4 ready to be used in Marketing Websites, SaaS, Blogs, Personal Profiles, Small Business...',
-        icon: 'tabler:components',
+          'Aucun conservateur artificiel, aucun arôme de synthèse. Ce que vous voyez sur l\'étiquette est tout ce qu\'il y a.',
+        icon: 'tabler:shield-check',
       },
       {
-        title: 'Best Practices',
+        title: 'Livraison diaspora',
         description:
-          'Creating secure, efficient, and user-friendly websites that deliver exceptional experiences and lasting value.',
-        icon: 'tabler:list-check',
+          'Expédition vers la France, la Belgique, le Royaume-Uni, le Canada et d\'autres destinations. Suivi inclus.',
+        icon: 'tabler:world',
       },
       {
-        title: 'Excellent Page Speed',
+        title: 'Paiement sécurisé',
         description:
-          'Having a good page speed impacts organic search ranking, improves user experience (UI/UX) and increase conversion rates.',
-        icon: 'tabler:rocket',
-      },
-      {
-        title: 'Search Engine Optimization (SEO)',
-        description:
-          "SEO lies in its ability to enhance a website's visibility, driving organic traffic and enabling it to reach a wider audience.",
-        icon: 'tabler:arrows-right-left',
-      },
-      {
-        title: 'Open to new ideas and contributions',
-        description:
-          'Embracing a culture that is open to new ideas and contributions is integral fostering innovation, collaboration, and a dynamic user experience.',
-        icon: 'tabler:bulb',
+          'Paiement via FedaPay avec protection acheteur. Remboursement garanti sous 14 jours si vous n\'êtes pas satisfait.',
+        icon: 'tabler:lock',
       },
     ]}
   />
 
-  <!-- Content Widget **************** -->
-
+  <!-- ── Featured products ──────────────────────────────────── -->
   <Content
+    id="produits"
+    tagline="Nos produits vedettes"
+    title="Ce que la nature a de mieux à offrir"
+    subtitle="Une sélection de produits phares, issus des plantes les plus prisées d'Afrique de l'Ouest."
     isReversed
-    tagline="Inside template"
-    title="AstroWind's Blueprint: Fun Meets Functionality!"
     items={[
       {
-        title: 'Built on top of Astro v6',
+        title: 'Moringa en poudre',
         description:
-          'Benefiting from the performance and developer-friendly features of this modern static site generator.',
+          'Surnommé « l\'arbre miracle », le moringa est l\'une des plantes les plus riches en nutriments connues. Notre poudre de feuilles séchées à froid conserve l\'intégralité de ses bienfaits.',
+        icon: 'tabler:plant',
       },
       {
-        title: 'Styled using Tailwind CSS v4',
+        title: 'Gingembre bio',
         description:
-          'Facilitating rapid design and consistent styling with this highly popular utility-first CSS framework.',
+          'Racines de gingembre cultivées sans pesticides dans les terres argileuses du sud du Bénin. Idéal pour les infusions, les smoothies et la cuisine.',
+        icon: 'tabler:flame',
       },
       {
-        title: 'Cross-browser compatibility',
+        title: 'Poudre de baobab',
         description:
-          'Ensure your website looks and functions consistently across various web browsers, delivering a seamless experience to all users.',
+          'La pulpe de baobab contient six fois plus de vitamine C que l\'orange. Un complément naturel pour renforcer l\'immunité et favoriser la digestion.',
+        icon: 'tabler:circle-plus',
       },
     ]}
     image={{
-      src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      alt: 'Colorful Image',
+      src: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&q=80',
+      alt: 'Poudre de moringa et épices naturelles',
     }}
-  >
-    <Fragment slot="content">
-      <h3 class="text-2xl font-bold tracking-tight dark:text-white sm:text-3xl mb-2">Building on modern foundations</h3>
-      Gain a competitive advantage by incorporating industry leading practices
-    </Fragment>
+    callToAction={{
+      text: 'Voir tous les produits',
+      href: '/fr/boutique',
+      icon: 'tabler:arrow-right',
+    }}
+  />
 
-    <Fragment slot="bg">
-      <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
-    </Fragment>
-  </Content>
-
-  <!-- Content Widget **************** -->
-
+  <!-- ── Story / About strip ────────────────────────────────── -->
   <Content
-    isAfterContent
+    tagline="Notre histoire"
+    title="Nés au Bénin, pour la diaspora"
+    content={`
+      <p>Pendant des siècles, les familles d'Afrique de l'Ouest ont soigné leur santé avec ce que la terre leur offrait. Le moringa pour l'énergie, le gingembre contre le rhume, le baobab pour la vitalité.</p>
+      <p class="mt-4">Nadey Naturel est né d'un constat simple : la diaspora africaine en Europe cherche ces produits de qualité, mais les trouve rarement authentiques ou accessibles. Nous avons créé un pont direct entre les producteurs béninois et vos tables.</p>
+      <p class="mt-4 font-medium">Chaque commande soutient une filière locale et vous apporte un morceau d'Afrique de l'Ouest.</p>
+    `}
     items={[
       {
-        title: 'High level of customization',
-        description: `Tailor the template effortlessly to match your brand's identity and requirements, making your website distinct and saving you time.`,
+        title: 'Producteurs locaux',
+        description: 'Partenariats directs avec des agriculteurs familiaux dans les régions du Mono et du Couffo.',
+        icon: 'tabler:users',
       },
       {
-        title: 'Multiple layout possibilities',
-        description:
-          'Explore various layout options to find the structure that best presents your content, enhancing user engagement and navigation.',
-      },
-      {
-        title: 'Fully responsive design',
-        description:
-          "Ensure your website's optimal performance on various devices and screen sizes, providing a consistent and enjoyable user experience.",
-      },
-      {
-        title: 'Integration of media',
-        description:
-          'Seamlessly incorporate images, videos, and multimedia elements that enhance your content and engage visitors effectively.',
+        title: 'Transformation artisanale',
+        description: 'Séchage, broyage et conditionnement réalisés au Bénin pour préserver les nutriments.',
+        icon: 'tabler:heart-handshake',
       },
     ]}
     image={{
-      src: 'https://images.unsplash.com/photo-1600132806370-bf17e65e942f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2194&q=80',
-      alt: 'Blueprint Image',
+      src: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80',
+      alt: 'Femme béninoise traitant des plantes médicinales',
     }}
-  >
-    <Fragment slot="content">Ensure your online presence truly represents you.</Fragment>
-
-    <Fragment slot="bg">
-      <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
-    </Fragment>
-  </Content>
-
-  <!-- Content Widget **************** -->
-
-  <Content
-    isReversed
-    isAfterContent
-    items={[
-      {
-        title: 'Enhanced user engagement',
-        description:
-          'Captivate your audience with interactive elements, intuitive navigation, and visually appealing layouts, encouraging longer visits.',
-      },
-      {
-        title: 'Continuous improvement',
-        description:
-          'Ensure your website stays aligned with the latest trends and technologies through regular updates and enhancements.',
-      },
-      {
-        title: 'Time and resource efficiency',
-        description:
-          'Skip the time-consuming process of building a website from scratch and launch your online presence sooner with AstroWind.',
-      },
-      {
-        title: 'Community support',
-        description: `Join the growing AstroWind community for insights, resources, and assistance, ensuring you're never alone on your web development journey.`,
-      },
-    ]}
-    image={{
-      src: 'https://images.unsplash.com/photo-1611462985358-60d3498e0364?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      alt: 'Astronauts Image',
+    callToAction={{
+      text: 'En savoir plus',
+      href: '/a-propos',
+      icon: 'tabler:arrow-right',
     }}
-  >
-    <Fragment slot="content">Designed to foster growth and success.</Fragment>
+  />
 
-    <Fragment slot="bg">
-      <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
-    </Fragment>
-  </Content>
-
-  <!-- Steps Widget ****************** -->
-
+  <!-- ── How it works ───────────────────────────────────────── -->
   <Steps
-    title="Get your dream website up and running in no time with AstroWind."
+    id="comment-ca-marche"
+    tagline="Simple et rapide"
+    title="Commander en 3 étapes"
     items={[
       {
-        title: 'Step 1: <span class="font-medium">Download</span>',
+        title: 'Parcourez la boutique',
         description:
-          "Kickstart with GitHub! Either fork the AstroWind template or simply click 'Use this template'. Your canvas awaits, ready for your digital masterpiece. In just a few clicks, you've already set the foundation.",
+          'Explorez notre catalogue de produits naturels. Chaque fiche produit détaille les ingrédients, les bienfaits et les conseils d\'utilisation.',
+        icon: 'tabler:search',
+      },
+      {
+        title: 'Passez votre commande',
+        description:
+          'Ajoutez vos produits au panier, renseignez votre adresse de livraison et payez en toute sécurité via FedaPay — carte ou mobile money acceptés.',
+        icon: 'tabler:shopping-cart',
+      },
+      {
+        title: 'Recevez chez vous',
+        description:
+          'Votre commande est préparée au Bénin et expédiée vers votre adresse en Europe ou ailleurs dans la diaspora. Confirmation et suivi par e-mail.',
         icon: 'tabler:package',
       },
-      {
-        title: 'Step 2: <span class="font-medium">Add content</span>',
-        description:
-          "Pour your vision into it. Add images, text, and all that jazz to breathe life into your digital space. Remember, it's the content that tells your story, so make it captivating.",
-        icon: 'tabler:letter-case',
-      },
-      {
-        title: 'Step 3: <span class="font-medium">Customize styles</span>',
-        description:
-          'Give it your personal touch. Tailor colors, fonts, and layouts until it feels just right. Your unique flair, amplified by AstroWind! Precision in design ensures a seamless user experience.',
-        icon: 'tabler:paint',
-      },
-      {
-        title: 'Ready!',
-        icon: 'tabler:check',
-      },
     ]}
     image={{
-      src: 'https://images.unsplash.com/photo-1616198814651-e71f960c3180?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80',
-      alt: 'Steps image',
+      src: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&q=80',
+      alt: 'Colis de produits naturels prêt à l\'expédition',
     }}
   />
 
-  <!-- Features2 Widget ************** -->
-
-  <Features2
-    title="Most used widgets"
-    subtitle="Provides frequently used components for building websites using Tailwind CSS v4"
-    tagline="Components"
-    items={[
+  <!-- ── Testimonials ───────────────────────────────────────── -->
+  <Testimonials
+    id="avis"
+    tagline="Ils nous font confiance"
+    title="Ce que disent nos clients"
+    subtitle="Des membres de la diaspora qui ont redécouvert les saveurs et les bienfaits de leurs racines."
+    testimonials={[
       {
-        title: 'Headers',
-        description: "Ever tried driving without GPS? Boom! That's why websites need headers for direction.",
-        icon: 'flat-color-icons:template',
+        testimonial:
+          'La poudre de moringa est incroyable. Je l\'ajoute à mon smoothie du matin et j\'ai l\'impression de retrouver l\'énergie de mes 20 ans. La qualité est vraiment au rendez-vous.',
+        name: 'Aminata D.',
+        job: 'Paris, France',
+        image: { src: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&q=80', alt: 'Aminata D.' },
       },
       {
-        title: 'Heros',
-        description:
-          "Picture a superhero landing – epic, right? That's the job of a Hero section, making grand entrances!",
-        icon: 'flat-color-icons:gallery',
+        testimonial:
+          'Enfin du vrai gingembre béninois ! Pas cette poudre fade qu\'on trouve en supermarché. La livraison en Belgique s\'est faite sans problème et l\'emballage était soigné.',
+        name: 'Kofi M.',
+        job: 'Bruxelles, Belgique',
+        image: { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80', alt: 'Kofi M.' },
       },
       {
-        title: 'Features',
-        description:
-          'Where websites strut their stuff and show off superpowers. No holding back on the bragging rights here!',
-        icon: 'flat-color-icons:approval',
-      },
-      {
-        title: 'Content',
-        description:
-          "Dive into the meat and potatoes of a site; without it, you'd just be window shopping. Content is king.",
-        icon: 'flat-color-icons:document',
-      },
-      {
-        title: 'Call-to-Action',
-        description:
-          'That enthusiastic friend who\'s always urging, "Do it! Do it!"? Yeah, that\'s this button nudging you towards adventure.',
-        icon: 'flat-color-icons:advertising',
-      },
-      {
-        title: 'Pricing',
-        description: 'Behold the dessert menu of the website world. Tempting choices await, can you resist?',
-        icon: 'flat-color-icons:currency-exchange',
-      },
-      {
-        title: 'Testimonial',
-        description: 'Step into the gossip corner! Here, other visitors spill the beans and share the juicy details.',
-        icon: 'flat-color-icons:voice-presentation',
-      },
-      {
-        title: 'Contact',
-        description:
-          'Like a digital mailbox, but faster! Drop a line, ask a question, or send a virtual high-five. Ding! Message in.',
-        icon: 'flat-color-icons:business-contact',
-      },
-      {
-        title: 'Footers',
-        description: "The footer's like the credits of a movie but sprinkled with easter eggs. Time to hunt!",
-        icon: 'flat-color-icons:database',
+        testimonial:
+          'Je commande pour toute la famille. Ma mère dit que ça lui rappelle ce que sa grand-mère utilisait. C\'est le plus beau des compliments pour un produit naturel.',
+        name: 'Fatou B.',
+        job: 'Londres, Royaume-Uni',
+        image: { src: 'https://images.unsplash.com/photo-1589156288859-f0cb0d82b065?w=80&q=80', alt: 'Fatou B.' },
       },
     ]}
-  >
-    <Fragment slot="bg">
-      <div class="absolute inset-0 bg-blue-50 dark:bg-transparent"></div>
-    </Fragment>
-  </Features2>
-
-  <!-- HighlightedPosts Widget ******* -->
-
-  <BlogLatestPosts
-    title="Find out more content in our Blog"
-    information={`The blog is used to display AstroWind documentation.
-                        Each new article will be an important step that you will need to know to be an expert in creating a website using Astro v6 + Tailwind CSS v4.
-                        Astro is a very interesting technology. Thanks.
-                `}
+    callToAction={{
+      text: 'Voir la boutique',
+      href: '/fr/boutique',
+    }}
   />
 
-  <!-- FAQs Widget ******************* -->
-
-  <FAQs
-    title="Frequently Asked Questions"
-    subtitle="Dive into the following questions to gain insights into the powerful features that AstroWind offers and how it can elevate your web development journey."
-    tagline="FAQs"
-    classes={{ container: 'max-w-6xl' }}
-    items={[
-      {
-        title: 'Why AstroWind?',
-        description:
-          "Michael Knight a young loner on a crusade to champion the cause of the innocent. The helpless. The powerless in a world of criminals who operate above the law. Here he comes Here comes Speed Racer. He's a demon on wheels.",
-      },
-      {
-        title: 'What do I need to start?',
-        description:
-          'Space, the final frontier. These are the voyages of the Starship Enterprise. Its five-year mission: to explore strange new worlds. Many say exploration is part of our destiny, but it’s actually our duty to future generations.',
-      },
-      {
-        title: 'How to install the Astro + Tailwind CSS template?',
-        description:
-          "Well, the way they make shows is, they make one show. That show's called a pilot. Then they show that show to the people who make shows, and on the strength of that one show they decide if they're going to make more shows.",
-      },
-      {
-        title: "What's something that you don't understand?",
-        description:
-          "A flower in my garden, a mystery in my panties. Heart attack never stopped old Big Bear. I didn't even know we were calling him Big Bear.",
-      },
-      {
-        title: 'What is something that you would like to try again?',
-        description:
-          "A business big enough that it could be listed on the NASDAQ goes belly up. Disappears! It ceases to exist without me. No, you clearly don't know who you're talking to, so let me clue you in.",
-      },
-      {
-        title: 'If you could only ask one question to each person you meet, what would that question be?',
-        description:
-          "This is not about revenge. This is about justice. A lot of things can change in twelve years, Admiral. Well, that's certainly good to know. About four years. I got tired of hearing how young I looked.",
-      },
-    ]}
-  />
-
-  <!-- Stats Widget ****************** -->
-
-  <Stats
-    stats={[
-      { title: 'Downloads', amount: '132K' },
-      { title: 'Stars', amount: '24.8K' },
-      { title: 'Forks', amount: '10.3K' },
-      { title: 'Users', amount: '48.4K' },
-    ]}
-  />
-
-  <!-- CallToAction Widget *********** -->
-
+  <!-- ── Final CTA ──────────────────────────────────────────── -->
   <CallToAction
+    tagline="Prêt à essayer ?"
+    title="Votre première commande vous attend"
+    subtitle="Livraison vers la France, la Belgique, le Royaume-Uni, le Canada et bien d'autres destinations. Satisfaction garantie ou remboursé."
     actions={[
-      {
-        variant: 'primary',
-        text: 'Get template',
-        href: 'https://github.com/arthelokyo/astrowind',
-        target: '_blank',
-        icon: 'tabler:download',
-      },
+      { variant: 'primary', text: 'Découvrir la boutique', href: '/fr/boutique', icon: 'tabler:shopping-cart' },
     ]}
-  >
-    <Fragment slot="title">
-      Astro&nbsp;+&nbsp;<br class="block sm:hidden" /><span class="sm:whitespace-nowrap">Tailwind CSS</span>
-    </Fragment>
+  />
 
-    <Fragment slot="subtitle">
-      Be very surprised by these huge fake numbers you are seeing on this page. <br class="hidden md:inline" />Don't
-      waste more time! :P
-    </Fragment>
-  </CallToAction>
 </Layout>

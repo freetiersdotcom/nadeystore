@@ -1,0 +1,242 @@
+---
+// src/pages/fr/telechargements.astro
+// Digital download delivery page.
+// Token comes from URL: /fr/telechargements?token=<uuid>
+//
+// i18n fix applied: static translated strings use data-i18n attributes
+// and are set once from a dictionary. Dynamic API data uses data-dynamic
+// attributes and is written separately. Zero overlap — order-independent.
+
+import StoreLayout from '~/layouts/StoreLayout.astro';
+
+const metadata = {
+  title: 'Téléchargements',
+  robots: { index: false, follow: false },
+};
+---
+
+<StoreLayout metadata={metadata} cartUrl="/fr/panier">
+
+  <div class="max-w-xl mx-auto px-6 py-16">
+
+    <!-- Loading -->
+    <div id="loading-state" class="text-center py-12">
+      <div class="inline-block w-8 h-8 border-2 border-gray-200 dark:border-slate-700 border-t-primary rounded-full animate-spin mb-4"></div>
+      <p class="text-muted text-sm" data-i18n="loading">Chargement...</p>
+    </div>
+
+    <!-- Token valid — download ready -->
+    <div id="download-state" style="display:none">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-accent/10 rounded-full mb-5">
+        <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+      </div>
+
+      <h1 class="font-bold font-heading text-2xl mb-2" data-i18n="title">Votre téléchargement</h1>
+      <p class="text-muted text-sm mb-6" data-i18n="subtitle">
+        Votre fichier est prêt. Le lien est valide pour un nombre limité de téléchargements.
+      </p>
+
+      <!-- File info card — populated by JS via data-dynamic -->
+      <div class="bg-gray-50 dark:bg-slate-800 rounded-xl p-5 mb-6">
+        <div class="flex items-start gap-4">
+          <div class="flex-shrink-0 w-10 h-10 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center shadow-sm">
+            <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <!-- data-dynamic: written by JS, never touched by i18n -->
+            <p class="font-medium text-default text-sm truncate" data-dynamic="sku"></p>
+            <div class="flex gap-3 mt-1 text-xs text-muted">
+              <span data-dynamic="downloads-remaining"></span>
+              <span>·</span>
+              <span data-dynamic="expires-at"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a
+        id="download-link"
+        href="#"
+        class="btn-primary w-full py-3 text-sm rounded-xl font-semibold inline-flex items-center justify-center gap-2 mb-3"
+        data-i18n-href="download"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        <span data-i18n="downloadBtn">Télécharger le fichier</span>
+      </a>
+
+      <p class="text-xs text-muted text-center" data-i18n="hint">
+        Si le téléchargement ne démarre pas, copiez le lien et ouvrez-le dans un nouvel onglet.
+      </p>
+    </div>
+
+    <!-- Expired -->
+    <div id="expired-state" class="text-center" style="display:none">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 dark:bg-yellow-900/20 rounded-full mb-5">
+        <svg class="w-8 h-8 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <h1 class="font-bold font-heading text-2xl mb-2" data-i18n="expiredTitle">Lien expiré</h1>
+      <p class="text-muted text-sm mb-6" data-i18n="expiredText">
+        Ce lien de téléchargement a expiré ou a atteint la limite de téléchargements.
+        Contactez-nous si vous avez besoin d'un nouveau lien.
+      </p>
+      <a href="/contact" class="btn-primary px-6 py-3 rounded-lg text-sm font-medium" data-i18n="contactUs">Nous contacter</a>
+    </div>
+
+    <!-- Error -->
+    <div id="error-state" class="text-center" style="display:none">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full mb-5">
+        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.072 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+      </div>
+      <h1 class="font-bold font-heading text-2xl mb-2" data-i18n="errorTitle">Lien invalide</h1>
+      <p class="text-muted text-sm mb-6" data-i18n="errorText">
+        Ce lien de téléchargement est invalide. Vérifiez l'e-mail de confirmation ou contactez-nous.
+      </p>
+      <a href="/contact" class="btn-primary px-6 py-3 rounded-lg text-sm font-medium">Nous contacter</a>
+    </div>
+
+  </div>
+
+</StoreLayout>
+
+<script>
+  import { apiUrl, publicKey } from '~/scripts/api';
+
+  // ── i18n dictionary (static strings only) ─────────────────
+  // These translations target [data-i18n] elements exclusively.
+  // Dynamic API data targets [data-dynamic] elements exclusively.
+  // The two sets never overlap.
+
+  const i18n = {
+    fr: {
+      loading:         'Chargement...',
+      title:           'Votre téléchargement',
+      subtitle:        'Votre fichier est prêt. Le lien est valide pour un nombre limité de téléchargements.',
+      downloadBtn:     'Télécharger le fichier',
+      hint:            'Si le téléchargement ne démarre pas, copiez le lien et ouvrez-le dans un nouvel onglet.',
+      expiredTitle:    'Lien expiré',
+      expiredText:     'Ce lien de téléchargement a expiré ou a atteint la limite de téléchargements. Contactez-nous si vous avez besoin d\'un nouveau lien.',
+      errorTitle:      'Lien invalide',
+      errorText:       'Ce lien de téléchargement est invalide. Vérifiez l\'e-mail de confirmation ou contactez-nous.',
+      contactUs:       'Nous contacter',
+      downloadsLeft:   (n: number) => `${n} téléchargement${n > 1 ? 's' : ''} restant${n > 1 ? 's' : ''}`,
+      expiresAt:       (date: string) => `Expire le ${date}`,
+    },
+    en: {
+      loading:         'Loading...',
+      title:           'Your download',
+      subtitle:        'Your file is ready. This link is valid for a limited number of downloads.',
+      downloadBtn:     'Download file',
+      hint:            'If the download doesn\'t start, copy the link and open it in a new tab.',
+      expiredTitle:    'Link expired',
+      expiredText:     'This download link has expired or reached its download limit. Contact us if you need a new link.',
+      errorTitle:      'Invalid link',
+      errorText:       'This download link is invalid. Check your confirmation email or contact us.',
+      contactUs:       'Contact us',
+      downloadsLeft:   (n: number) => `${n} download${n !== 1 ? 's' : ''} remaining`,
+      expiresAt:       (date: string) => `Expires ${date}`,
+    },
+  };
+
+  // Detect locale from URL path (/fr/ or /en/)
+  const locale = window.location.pathname.startsWith('/en/') ? 'en' : 'fr';
+  const t = i18n[locale];
+
+  // Apply static translations to [data-i18n] elements
+  function applyI18n() {
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const key = (el as HTMLElement).dataset.i18n as keyof typeof t;
+      const val = t[key];
+      if (typeof val === 'string') el.textContent = val;
+    });
+  }
+
+  // ── Show/hide helpers ──────────────────────────────────────
+
+  function show(id: string) {
+    ['loading-state', 'download-state', 'expired-state', 'error-state'].forEach((s) => {
+      (document.getElementById(s) as HTMLElement).style.display = s === id ? 'block' : 'none';
+    });
+  }
+
+  // ── Dynamic data writer ────────────────────────────────────
+  // Writes ONLY to [data-dynamic] elements — never touches [data-i18n].
+
+  function writeDynamic(key: string, value: string) {
+    document.querySelectorAll(`[data-dynamic="${key}"]`).forEach((el) => {
+      el.textContent = value;
+    });
+  }
+
+  // ── Fetch token and render ─────────────────────────────────
+
+  async function init() {
+    applyI18n();
+
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get('token');
+
+    if (!token) {
+      show('error-state');
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${apiUrl()}/v1/downloads/${token}`,
+        { headers: { Authorization: `Bearer ${publicKey()}` } }
+      );
+
+      if (res.status === 404 || res.status === 410) {
+        show('expired-state');
+        return;
+      }
+
+      if (!res.ok) {
+        show('error-state');
+        return;
+      }
+
+      const data = await res.json() as {
+        download_url: string;
+        sku: string;
+        expires_at: string;
+        downloads_remaining: number;
+      };
+
+      // Write dynamic data — completely separate from i18n pass
+      writeDynamic('sku', data.sku);
+      writeDynamic(
+        'downloads-remaining',
+        t.downloadsLeft(data.downloads_remaining)
+      );
+      writeDynamic(
+        'expires-at',
+        t.expiresAt(new Date(data.expires_at).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-GB'))
+      );
+
+      // Set download href
+      const link = document.getElementById('download-link') as HTMLAnchorElement;
+      link.href = data.download_url;
+      link.setAttribute('download', '');
+
+      show('download-state');
+
+    } catch (err) {
+      console.error('Download page error:', err);
+      show('error-state');
+    }
+  }
+
+  init();
+  document.addEventListener('astro:after-swap', init);
+</script>

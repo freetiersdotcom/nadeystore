@@ -1,0 +1,30 @@
+---
+// src/layouts/StoreLayout.astro
+// Wraps Astrowind's PageLayout and injects Merchant API config +
+// shared store components (cart toast, email modal) on every store page.
+
+import PageLayout from '~/layouts/PageLayout.astro';
+import CartToast from '~/components/store/CartToast.astro';
+import EmailModal from '~/components/store/EmailModal.astro';
+import type { MetaData } from '~/types';
+
+interface Props {
+  metadata?: MetaData;
+  cartUrl?: string;
+  cancelUrl?: string;
+}
+
+const {
+  metadata,
+  cartUrl    = '/fr/panier',
+  cancelUrl  = '/fr/boutique',
+} = Astro.props;
+---
+
+<PageLayout metadata={metadata}>
+  <slot />
+
+  <!-- Shared store UI — present on every store page -->
+  <CartToast cartUrl={cartUrl} />
+  <EmailModal />
+</PageLayout>

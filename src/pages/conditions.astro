@@ -1,0 +1,94 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+
+const metadata = {
+  title: 'Conditions générales de vente — Nadey Naturel',
+  robots: { index: false, follow: true },
+};
+
+const lastUpdated = '1er janvier 2025';
+---
+
+<Layout metadata={metadata}>
+
+  <HeroText
+    tagline="Légal"
+    title="Conditions générales de vente"
+    subtitle={`Dernière mise à jour : ${lastUpdated}`}
+  />
+
+  <div class="max-w-3xl mx-auto px-6 pb-16 prose dark:prose-invert prose-headings:font-heading prose-headings:font-bold prose-a:text-primary">
+
+    <h2>1. Vendeur</h2>
+    <p>
+      Nadey Naturel, entreprise basée à Cotonou, Bénin. Contact : <a href="mailto:contact@nadeynaturel.com">contact@nadeynaturel.com</a>.
+    </p>
+
+    <h2>2. Champ d'application</h2>
+    <p>
+      Les présentes conditions générales de vente (CGV) s'appliquent à toute commande passée sur la boutique en ligne de Nadey Naturel. En passant commande, vous acceptez sans réserve les présentes CGV.
+    </p>
+
+    <h2>3. Produits</h2>
+    <p>
+      Les produits proposés à la vente sont des produits de santé naturelle à base de plantes. Les descriptions, compositions et conseils d'utilisation sont fournis à titre informatif et ne constituent pas un avis médical. En cas de doute sur l'utilisation d'un produit, consultez un professionnel de santé.
+    </p>
+    <p>
+      Les produits ne sont pas destinés à diagnostiquer, traiter, guérir ou prévenir une maladie.
+    </p>
+
+    <h2>4. Prix</h2>
+    <p>
+      Les prix sont indiqués en Francs CFA (XOF) toutes taxes comprises. Nadey Naturel se réserve le droit de modifier ses prix à tout moment. Les prix appliqués sont ceux en vigueur au moment de la validation de la commande.
+    </p>
+
+    <h2>5. Commande</h2>
+    <p>
+      Toute commande est ferme et définitive après validation du paiement. Un e-mail de confirmation vous est envoyé à l'adresse fournie lors de la commande. En cas de problème avec votre commande, contactez-nous dans les 48 heures suivant la confirmation.
+    </p>
+
+    <h2>6. Paiement</h2>
+    <p>
+      Le paiement s'effectue en ligne au moment de la commande via les prestataires FedaPay (carte bancaire, mobile money) ou Stripe (carte bancaire). Aucun paiement à la livraison n'est disponible.
+    </p>
+
+    <h2>7. Livraison</h2>
+    <p>
+      Les commandes sont expédiées depuis le Bénin. Les délais indicatifs sont les suivants :
+    </p>
+    <ul>
+      <li><strong>Bénin et pays limitrophes :</strong> 3 à 7 jours ouvrés.</li>
+      <li><strong>France, Belgique, Suisse :</strong> 10 à 21 jours ouvrés.</li>
+      <li><strong>Royaume-Uni, Canada :</strong> 14 à 28 jours ouvrés.</li>
+    </ul>
+    <p>
+      Ces délais sont estimatifs et peuvent varier selon les prestataires de transport et les formalités douanières. Nadey Naturel ne saurait être tenu responsable des retards liés à des facteurs extérieurs.
+    </p>
+    <p>
+      Les éventuels droits de douane ou taxes à l'importation sont à la charge de l'acheteur.
+    </p>
+
+    <h2>8. Droit de rétractation et remboursements</h2>
+    <p>
+      Consultez notre <a href="/remboursement">politique de remboursement</a> pour les conditions détaillées.
+    </p>
+
+    <h2>9. Responsabilité</h2>
+    <p>
+      Nadey Naturel s'engage à livrer des produits conformes aux descriptions publiées. Notre responsabilité est limitée au montant de la commande concernée. Nous ne saurions être tenus responsables des dommages indirects liés à l'utilisation de nos produits.
+    </p>
+
+    <h2>10. Droit applicable</h2>
+    <p>
+      Les présentes CGV sont soumises au droit béninois. Tout litige sera soumis aux tribunaux compétents de Cotonou, Bénin.
+    </p>
+
+    <h2>11. Contact</h2>
+    <p>
+      Pour toute question relative à ces conditions : <a href="mailto:contact@nadeynaturel.com">contact@nadeynaturel.com</a>.
+    </p>
+
+  </div>
+
+</Layout>

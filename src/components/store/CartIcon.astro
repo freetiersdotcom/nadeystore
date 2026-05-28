@@ -1,0 +1,36 @@
+---
+// src/components/store/CartIcon.astro
+// Drop this into Header.astro's actions area or use directly in PageLayout.
+// The badge count is hydrated client-side from localStorage on every page load
+// and after View Transitions (astro:after-swap).
+
+const { cartUrl = '/fr/panier' } = Astro.props;
+---
+
+<a
+  href={cartUrl}
+  class="relative p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors inline-flex items-center"
+  aria-label="Panier"
+>
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+  </svg>
+  <span
+    id="cart-count"
+    class="absolute -top-1 -right-1 bg-primary text-white text-xs font-bold w-5 h-5 rounded-full items-center justify-center"
+    style="display:none"
+    aria-live="polite"
+  >0</span>
+</a>
+
+<script>
+  import { updateCartBadge } from '~/scripts/cart';
+
+  // Hydrate badge on first load and after every View Transition
+  function hydrate() {
+    updateCartBadge();
+  }
+
+  hydrate();
+  document.addEventListener('astro:after-swap', hydrate);
+</script>

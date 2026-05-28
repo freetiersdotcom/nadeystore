@@ -1,0 +1,111 @@
+---
+// src/components/store/EmailModal.astro
+// Shown once when the user clicks "Passer la commande" on the cart page.
+// Returns a Promise<string | null> via window.promptEmail().
+---
+
+<div
+  id="email-modal"
+  class="fixed inset-0 z-50 bg-black/70 items-center justify-center backdrop-blur-sm"
+  style="display:none"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="email-modal-title"
+>
+  <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl">
+    <h2 id="email-modal-title" class="text-lg font-semibold mb-1 text-default">
+      Presque là
+    </h2>
+    <p class="text-muted text-sm mb-4">
+      Entrez votre adresse e-mail pour finaliser votre commande. Votre confirmation y sera envoyée.
+    </p>
+    <input
+      id="modal-email"
+      type="email"
+      placeholder="vous@exemple.com"
+      autocomplete="email"
+      class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-2.5 text-default placeholder-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary mb-2 text-sm"
+    />
+    <p id="modal-error" class="text-red-500 text-xs mb-3" style="display:none">
+      Veuillez entrer une adresse e-mail valide.
+    </p>
+    <div class="flex gap-2">
+      <button
+        id="modal-cancel"
+        type="button"
+        class="flex-1 px-4 py-2.5 text-sm text-muted hover:text-default transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+      >
+        Annuler
+      </button>
+      <button
+        id="modal-confirm"
+        type="button"
+        class="flex-1 btn-primary py-2.5 px-4 text-sm rounded-lg"
+      >
+        Continuer
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // window.promptEmail() — returns Promise<string | null>
+  // null means the user cancelled.
+  window.promptEmail = function(): Promise<string | null> {
+    return new Promise((resolve) => {
+      const modal    = document.getElementById('email-modal')!;
+      const input    = document.getElementById('modal-email') as HTMLInputElement;
+      const confirm  = document.getElementById('modal-confirm')!;
+      const cancel   = document.getElementById('modal-cancel')!;
+      const errorEl  = document.getElementById('modal-error')!;
+
+      modal.style.display = 'flex';
+      input.value = '';
+      errorEl.style.display = 'none';
+      setTimeout(() => input.focus(), 50);
+
+      function onConfirm() {
+        const email = input.value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          errorEl.style.display = 'block';
+          return;
+        }
+        cleanup();
+        resolve(email);
+      }
+
+      function onCancel() {
+        cleanup();
+        resolve(null);
+      }
+
+      function onKey(e: KeyboardEvent) {
+        if (e.key === 'Enter') onConfirm();
+        if (e.key === 'Escape') onCancel();
+      }
+
+      function cleanup() {
+        modal.style.display = 'none';
+        confirm.removeEventListener('click', onConfirm);
+        cancel.removeEventListener('click', onCancel);
+        input.removeEventListener('keydown', onKey);
+        modal.removeEventListener('click', onBackdrop);
+      }
+
+      function onBackdrop(e: MouseEvent) {
+        if (e.target === modal) onCancel();
+      }
+
+      confirm.addEventListener('click', onConfirm);
+      cancel.addEventListener('click', onCancel);
+      input.addEventListener('keydown', onKey);
+      modal.addEventListener('click', onBackdrop);
+    });
+  };
+
+  declare global {
+    interface Window {
+      promptEmail: () => Promise<string | null>;
+    }
+  }
+</script>

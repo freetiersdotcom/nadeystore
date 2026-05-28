@@ -1,0 +1,251 @@
+---
+// src/pages/fr/boutique.astro
+// Product listing page — French locale.
+// Products are fetched client-side from the Merchant API.
+// Cart state lives in localStorage; no backend cart is created here.
+import StoreLayout from '~/layouts/StoreLayout.astro';
+
+const metadata = {
+  title: 'Boutique',
+  description: 'Découvrez nos produits de santé naturelle.',
+};
+---
+
+<StoreLayout metadata={metadata} cartUrl="/fr/panier">
+
+  <!-- Hero -->
+  <section class="border-b border-gray-200 dark:border-slate-700">
+    <div class="max-w-6xl mx-auto px-6 py-14">
+      <h1 class="font-bold font-heading text-4xl md:text-5xl tracking-tight mb-3">
+        Notre boutique
+      </h1>
+      <p class="text-muted text-lg max-w-md">
+        Produits de santé naturelle — livraison en France, Belgique et dans la diaspora.
+      </p>
+    </div>
+  </section>
+
+  <!-- Filter tabs -->
+  <div class="border-b border-gray-200 dark:border-slate-700">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="flex gap-1 py-3">
+        <button data-filter="all"      class="px-4 py-1.5 rounded-lg text-sm font-medium bg-primary text-white transition-colors">Tout</button>
+        <button data-filter="physical" class="px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default">Physique</button>
+        <button data-filter="digital"  class="px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default">Numérique</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products -->
+  <div class="max-w-6xl mx-auto px-6 py-10">
+    <!-- Loading -->
+    <div id="loading" class="text-center py-20">
+      <div class="inline-block w-8 h-8 border-2 border-gray-300 dark:border-slate-600 border-t-primary rounded-full animate-spin"></div>
+      <p class="text-muted mt-4 text-sm">Chargement des produits...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="error" class="text-center py-20 hidden">
+      <p class="text-red-500 mb-1">Impossible de charger les produits.</p>
+      <p class="text-muted text-sm">Vérifiez que l'API Merchant est disponible.</p>
+    </div>
+
+    <!-- Grid -->
+    <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+  </div>
+
+</StoreLayout>
+
+<script>
+  import { getProducts, currency as getCurrency } from '~/scripts/api';
+  import { addToCart, updateCartBadge, formatPrice } from '~/scripts/cart';
+
+  const CURRENCY = getCurrency();
+
+  let allProducts: Awaited<ReturnType<typeof getProducts>> = [];
+  let activeFilter = 'all';
+
+  // ── Init ──────────────────────────────────────────────────
+
+  async function init() {
+    updateCartBadge();
+
+    const loading  = document.getElementById('loading')!;
+    const errorEl  = document.getElementById('error')!;
+
+    try {
+      allProducts = await getProducts();
+      loading.style.display = 'none';
+
+      if (allProducts.length === 0) {
+        document.getElementById('products-grid')!.innerHTML =
+          `<div class="col-span-full text-center py-12 text-muted">Aucun produit disponible pour le moment.</div>`;
+        return;
+      }
+
+      renderGrid();
+      setupFilters();
+    } catch (err: any) {
+      loading.style.display = 'none';
+      errorEl.classList.remove('hidden');
+      console.error('Failed to load products:', err);
+    }
+  }
+
+  // ── Rendering ──────────────────────────────────────────────
+
+  function renderGrid() {
+    const grid = document.getElementById('products-grid')!;
+
+    const filtered = allProducts.filter((p) => {
+      if (activeFilter === 'all') return true;
+      return p.variants.some((v) => (v.product_type || 'physical') === activeFilter);
+    });
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `<div class="col-span-full text-center py-12 text-muted">Aucun produit dans cette catégorie.</div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(productCardHTML).join('');
+
+    grid.querySelectorAll('.add-to-cart').forEach((btn) => {
+      btn.addEventListener('click', handleAddToCart);
+    });
+    grid.querySelectorAll('.variant-select').forEach((sel) => {
+      sel.addEventListener('change', handleVariantChange);
+    });
+  }
+
+  function productCardHTML(product: typeof allProducts[0]): string {
+    const defaultVariant = product.variants[0];
+    const isDigital = (defaultVariant.product_type || 'physical') === 'digital';
+    const image = defaultVariant.image_url || product.image_url
+      || 'https://placehold.co/400x400/f4f4f5/a1a1aa?text=Image';
+    const slug = product.slug || product.id;
+
+    return `
+      <div class="group" data-product-id="${product.id}">
+        <a href="/fr/produits/${slug}" class="block aspect-square bg-gray-100 dark:bg-slate-800 rounded-xl overflow-hidden mb-4 relative">
+          <img
+            src="${image}"
+            alt="${product.title}"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            onerror="this.src='https://placehold.co/400x400/f4f4f5/a1a1aa?text=Image'"
+          >
+          <div class="absolute top-3 left-3 flex gap-2">
+            ${isDigital
+              ? `<span class="bg-accent text-white text-xs px-2 py-1 rounded-md font-medium">Numérique</span>`
+              : ''}
+            ${product.variants.length > 1
+              ? `<span class="bg-black/60 text-white text-xs px-2 py-1 rounded-md">${product.variants.length} options</span>`
+              : ''}
+          </div>
+        </a>
+
+        <a href="/fr/produits/${slug}" class="block hover:text-primary transition-colors">
+          <h3 class="font-semibold text-default mb-1">${product.title}</h3>
+        </a>
+        <p class="text-muted text-sm mb-1">${formatPrice(defaultVariant.price_cents, CURRENCY)}</p>
+        ${isDigital
+          ? `<p class="text-accent text-xs mb-3">⚡ Téléchargement immédiat</p>`
+          : `<p class="text-muted text-xs mb-3">Livraison requise</p>`}
+
+        ${product.variants.length > 1 ? `
+          <select class="variant-select w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-default mb-3 focus:outline-none focus:border-primary">
+            ${product.variants.map((v) => `
+              <option
+                value="${v.sku}"
+                data-price="${v.price_cents}"
+                data-type="${v.product_type || 'physical'}"
+                data-image="${v.image_url || ''}"
+                data-title="${v.title}"
+              >${v.title} — ${formatPrice(v.price_cents, CURRENCY)}</option>
+            `).join('')}
+          </select>
+        ` : ''}
+
+        <button
+          class="add-to-cart w-full btn-primary py-2.5 rounded-lg text-sm font-medium"
+          data-sku="${defaultVariant.sku}"
+          data-product-type="${defaultVariant.product_type || 'physical'}"
+          data-variant-title="${defaultVariant.title}"
+          data-price="${defaultVariant.price_cents}"
+          data-image="${defaultVariant.image_url || ''}"
+        >
+          Ajouter au panier
+        </button>
+      </div>
+    `;
+  }
+
+  // ── Filters ────────────────────────────────────────────────
+
+  function setupFilters() {
+    document.querySelectorAll('[data-filter]').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        activeFilter = (tab as HTMLElement).dataset.filter!;
+        document.querySelectorAll('[data-filter]').forEach((t) => {
+          const isActive = (t as HTMLElement).dataset.filter === activeFilter;
+          t.classList.toggle('bg-primary', isActive);
+          t.classList.toggle('text-white', isActive);
+          t.classList.toggle('text-muted', !isActive);
+        });
+        renderGrid();
+      });
+    });
+  }
+
+  // ── Variant change ─────────────────────────────────────────
+
+  function handleVariantChange(e: Event) {
+    const select = e.target as HTMLSelectElement;
+    const card = select.closest('[data-product-id]')!;
+    const btn = card.querySelector('.add-to-cart') as HTMLButtonElement;
+    const opt = select.options[select.selectedIndex];
+    btn.dataset.sku = select.value;
+    btn.dataset.productType = opt.dataset.type!;
+    btn.dataset.variantTitle = opt.dataset.title!;
+    btn.dataset.price = opt.dataset.price!;
+    btn.dataset.image = opt.dataset.image!;
+    // Update displayed price
+    const priceEl = card.querySelector('p.text-muted.text-sm') as HTMLElement;
+    if (priceEl) priceEl.textContent = formatPrice(Number(opt.dataset.price), CURRENCY);
+  }
+
+  // ── Add to cart ────────────────────────────────────────────
+
+  function handleAddToCart(e: Event) {
+    const btn = e.currentTarget as HTMLButtonElement;
+    const card = btn.closest('[data-product-id]')!;
+    const productId = (card as HTMLElement).dataset.productId!;
+    const product = allProducts.find((p) => p.id === productId);
+
+    addToCart({
+      sku:           btn.dataset.sku!,
+      title:         product?.title ?? btn.dataset.sku!,
+      price_cents:   Number(btn.dataset.price),
+      product_type:  (btn.dataset.productType as 'physical' | 'digital') || 'physical',
+      image_url:     btn.dataset.image || null,
+      variant_title: btn.dataset.variantTitle || '',
+    });
+
+    // Button feedback
+    btn.textContent = 'Ajouté ✓';
+    btn.classList.add('opacity-75');
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = 'Ajouter au panier';
+      btn.classList.remove('opacity-75');
+      btn.disabled = false;
+    }, 1500);
+
+    window.showCartToast?.(product?.title ?? 'Produit');
+  }
+
+  init();
+
+  // Re-init after View Transitions
+  document.addEventListener('astro:after-swap', init);
+</script>
