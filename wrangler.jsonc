@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nadeystore",
+  "compatibility_date": "2026-05-28",
+  "observability": {
+    "enabled": true
+  },
+  "main": "dist/_worker.js/index.js",
+  "compatibility_flags": [
+    "global_fetch_strictly_public",
+    "nodejs_compat"
+  ],
+  "vars": {
+		"PUBLIC_MERCHANT_API_URL": "https://merchant.freetiers-com.workers.dev",
+		"PUBLIC_MERCHANT_PUBLIC_KEY": "pk_3e27b968c1c877d19748c7d5ab97b48461faa0fc3e068021",
+		"PUBLIC_MERCHANT_CURRENCY": "XOF",
+		"PUBLIC_MERCHANT_PROVIDER": "fedapay"
+	},
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "dist"
+  }
+}
