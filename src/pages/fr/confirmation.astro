@@ -132,7 +132,7 @@ const metadata = {
 	  
 	  console.log(JSON.stringify(cart));
 
-      if (cart.status === 'checked_out') {
+      if (cart.status === 'expired') {
         // Display confirmation
         const emailEl = document.getElementById('confirmation-email')!;
         if (cart.customer_email) {
