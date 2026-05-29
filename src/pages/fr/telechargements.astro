@@ -194,7 +194,7 @@ const metadata = {
     try {
       const res = await fetch(
         `${apiUrl()}/v1/downloads/${token}`,
-        { headers: { Authorization: `Bearer ${publicKey()}` } }
+        { headers: { Authorization: `Bearer ${publicKey(), Accept: 'application/json'}` } }
       );
 	  
 	  let dump = await res.json();
