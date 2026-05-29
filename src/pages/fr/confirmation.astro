@@ -167,7 +167,7 @@ const metadata = {
 
         show('success-state');
 
-      } else if (cart.status === 'checked_out') { //instead of 'open'
+      } else if (cart.status === 'checked_out') { //instead of 'open' which should not be possible because the cart is supposed to be locked on checkout
         // Payment likely still processing (webhook not yet received)
         show('pending-state');
       } else {
