@@ -184,7 +184,6 @@ const metadata = {
 
     const params = new URLSearchParams(window.location.search);
     const token  = params.get('token');
-	console.log(token);
 
     if (!token) {
       show('error-state');
@@ -196,10 +195,6 @@ const metadata = {
         `${apiUrl()}/v1/downloads/${token}`,
         { headers: { Authorization: `Bearer ${publicKey()}`, Accept: 'application/json' } }
       );
-	  
-	  let dump = await res.json();
-	  console.log(JSON.stringify(dump));
-        
 
       if (res.status === 404 || res.status === 410) {
         show('expired-state');
