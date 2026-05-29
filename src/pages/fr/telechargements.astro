@@ -197,8 +197,8 @@ const metadata = {
         { headers: { Authorization: `Bearer ${publicKey()}` } }
       );
 	  
-	  let data = res.json();
-	  console.log(JSON.stringify(data));
+	  let dump = await res.json();
+	  console.log(JSON.stringify(dump));
         
 
       if (res.status === 404 || res.status === 410) {
