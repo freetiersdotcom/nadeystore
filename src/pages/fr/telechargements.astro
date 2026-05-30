@@ -207,7 +207,7 @@ const metadata = {
       }
 
       const data = await res.json() as {
-        redirect_url: string;
+        download_url: string;
         sku: string;
         expires_at: string;
         downloads_remaining: number;
@@ -228,7 +228,7 @@ const metadata = {
 
       // Set download href
       const link = document.getElementById('download-link') as HTMLAnchorElement;
-      link.href = data.redirect_url;
+      link.href = data.download_url;
       link.setAttribute('download', '');
 
       show('download-state');
