@@ -212,6 +212,8 @@ const metadata = {
         expires_at: string;
         downloads_remaining: number;
       };
+	  
+	  console.log(JSON.stringify(data));
 
       // Write dynamic data — completely separate from i18n pass
       writeDynamic('sku', data.sku);
