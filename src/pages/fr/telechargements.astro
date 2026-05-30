@@ -58,17 +58,16 @@ const metadata = {
         </div>
       </div>
 
-      <a
+      <button
         id="download-link"
-        href="#"
+        type="button"
         class="btn-primary w-full py-3 text-sm rounded-xl font-semibold inline-flex items-center justify-center gap-2 mb-3"
-        data-i18n-href="download"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
         </svg>
         <span data-i18n="downloadBtn">Télécharger le fichier</span>
-      </a>
+      </button>
 
       <p class="text-xs text-muted text-center" data-i18n="hint">
         Si le téléchargement ne démarre pas, copiez le lien et ouvrez-le dans un nouvel onglet.
@@ -212,8 +211,6 @@ const metadata = {
         expires_at: string;
         downloads_remaining: number;
       };
-	  
-	  console.log(JSON.stringify(data));
 
       // Write dynamic data — completely separate from i18n pass
       writeDynamic('sku', data.sku);
@@ -226,10 +223,57 @@ const metadata = {
         t.expiresAt(new Date(data.expires_at).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-GB'))
       );
 
-      // Set download href
-      const link = document.getElementById('download-link') as HTMLAnchorElement;
-      link.href = data.download_url;
-      link.setAttribute('download', '');
+      // Wire up download button — blob fetch pattern to prevent double requests
+      // and to avoid Astrowind ClientRouter intercepting the navigation.
+      const btn = document.getElementById('download-link') as HTMLButtonElement;
+      const downloadUrl = data.download_url;
+      const filename    = data.sku;
+      let downloading   = false;
+
+      btn.addEventListener('click', async () => {
+        if (downloading) return; // guard against double-click
+        downloading = true;
+
+        const span = btn.querySelector('span')!;
+        const originalText = span.textContent;
+        span.textContent = 'Téléchargement en cours...';
+        btn.disabled = true;
+
+        try {
+          const res = await fetch(downloadUrl);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const blob    = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const a       = document.createElement('a');
+          a.href        = blobUrl;
+          a.download    = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 10_000);
+
+          // Update remaining count display optimistically
+          writeDynamic(
+            'downloads-remaining',
+            t.downloadsLeft(Math.max(0, data.downloads_remaining - 1))
+          );
+
+          span.textContent = '✓ Téléchargé';
+          // Re-enable after a delay so they can download again if needed
+          setTimeout(() => {
+            span.textContent = originalText;
+            btn.disabled  = false;
+            downloading   = false;
+          }, 3000);
+
+        } catch (err) {
+          console.error('Download fetch error:', err);
+          span.textContent = originalText;
+          btn.disabled  = false;
+          downloading   = false;
+        }
+      });
 
       show('download-state');
 
@@ -239,6 +283,17 @@ const metadata = {
     }
   }
 
-  init();
-  document.addEventListener('astro:after-swap', init);
+  // Guard against double-init from astro:after-swap
+  let initialized = false;
+  function safeInit() {
+    if (initialized) return;
+    initialized = true;
+    init();
+  }
+
+  safeInit();
+  document.addEventListener('astro:after-swap', () => {
+    initialized = false; // reset for genuine page navigations
+    safeInit();
+  });
 </script>
