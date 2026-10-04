@@ -250,7 +250,7 @@ const metadata = {
 
   // ── Variant selector ──────────────────────────────────────
 
-  document.getElementById('variant-select')?.addEventListener('change', (e) => {
+  function handleVariantChange(e: Event) {
     const select = e.target as HTMLSelectElement;
     const opt    = select.options[select.selectedIndex];
     const btn    = document.getElementById('add-to-cart') as HTMLButtonElement;
@@ -269,11 +269,11 @@ const metadata = {
 
     document.getElementById('product-price')!.textContent =
       formatPrice(Number(opt.dataset.price), CURRENCY);
-  });
+  }
 
   // ── Add to cart ────────────────────────────────────────────
 
-  document.getElementById('add-to-cart')?.addEventListener('click', () => {
+  function handleAddToCart() {
     const btn = document.getElementById('add-to-cart') as HTMLButtonElement;
 
     // Inline product title from the page h1
@@ -298,15 +298,20 @@ const metadata = {
     }, 1500);
 
     window.showCartToast?.(title);
-  });
+  }
 
   // ── Init ──────────────────────────────────────────────────
+  // Re-run on every load AND after every Astro ClientRouter swap:
+  // swapped-in DOM nodes are new elements with no listeners attached yet.
 
-  hydratePrices();
-  updateCartBadge();
-
-  document.addEventListener('astro:after-swap', () => {
+  function initProductPage() {
     hydratePrices();
     updateCartBadge();
-  });
+    document.getElementById('variant-select')?.addEventListener('change', handleVariantChange);
+    document.getElementById('add-to-cart')?.addEventListener('click', handleAddToCart);
+  }
+
+  initProductPage();
+
+  document.addEventListener('astro:after-swap', initProductPage);
 </script>

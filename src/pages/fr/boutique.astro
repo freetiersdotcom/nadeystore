@@ -12,13 +12,10 @@ const metadata = {
 ---
 
 <StoreLayout metadata={metadata} cartUrl="/fr/panier">
-
   <!-- Hero -->
   <section class="border-b border-gray-200 dark:border-slate-700">
     <div class="max-w-6xl mx-auto px-6 py-14">
-      <h1 class="font-bold font-heading text-4xl md:text-5xl tracking-tight mb-3">
-        Notre boutique
-      </h1>
+      <h1 class="font-bold font-heading text-4xl md:text-5xl tracking-tight mb-3">Notre boutique</h1>
       <p class="text-muted text-lg max-w-md">
         Produits de santé naturelle — livraison en France, Belgique et dans la diaspora.
       </p>
@@ -29,9 +26,20 @@ const metadata = {
   <div class="border-b border-gray-200 dark:border-slate-700">
     <div class="max-w-6xl mx-auto px-6">
       <div class="flex gap-1 py-3">
-        <button data-filter="all"      class="px-4 py-1.5 rounded-lg text-sm font-medium bg-primary text-white transition-colors">Tout</button>
-        <button data-filter="physical" class="px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default">Physique</button>
-        <button data-filter="digital"  class="px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default">Numérique</button>
+        <button
+          data-filter="all"
+          class="px-4 py-1.5 rounded-lg text-sm font-medium bg-primary text-white transition-colors">Tout</button
+        >
+        <button
+          data-filter="physical"
+          class="px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default"
+          >Physique</button
+        >
+        <button
+          data-filter="digital"
+          class="px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default"
+          >Numérique</button
+        >
       </div>
     </div>
   </div>
@@ -40,7 +48,10 @@ const metadata = {
   <div class="max-w-6xl mx-auto px-6 py-10">
     <!-- Loading -->
     <div id="loading" class="text-center py-20">
-      <div class="inline-block w-8 h-8 border-2 border-gray-300 dark:border-slate-600 border-t-primary rounded-full animate-spin"></div>
+      <div
+        class="inline-block w-8 h-8 border-2 border-gray-300 dark:border-slate-600 border-t-primary rounded-full animate-spin"
+      >
+      </div>
       <p class="text-muted mt-4 text-sm">Chargement des produits...</p>
     </div>
 
@@ -53,7 +64,6 @@ const metadata = {
     <!-- Grid -->
     <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
   </div>
-
 </StoreLayout>
 
 <script>
@@ -70,8 +80,8 @@ const metadata = {
   async function init() {
     updateCartBadge();
 
-    const loading  = document.getElementById('loading')!;
-    const errorEl  = document.getElementById('error')!;
+    const loading = document.getElementById('loading')!;
+    const errorEl = document.getElementById('error')!;
 
     try {
       allProducts = await getProducts();
@@ -117,11 +127,11 @@ const metadata = {
     });
   }
 
-  function productCardHTML(product: typeof allProducts[0]): string {
+  function productCardHTML(product: (typeof allProducts)[0]): string {
     const defaultVariant = product.variants[0];
     const isDigital = (defaultVariant.product_type || 'physical') === 'digital';
-    const image = defaultVariant.image_url || product.image_url
-      || 'https://placehold.co/400x400/f4f4f5/a1a1aa?text=Image';
+    const image =
+      defaultVariant.image_url || product.image_url || 'https://placehold.co/400x400/f4f4f5/a1a1aa?text=Image';
     const slug = product.slug || product.id;
 
     return `
@@ -135,12 +145,16 @@ const metadata = {
             onerror="this.src='https://placehold.co/400x400/f4f4f5/a1a1aa?text=Image'"
           >
           <div class="absolute top-3 left-3 flex gap-2">
-            ${isDigital
-              ? `<span class="bg-accent text-white text-xs px-2 py-1 rounded-md font-medium">Numérique</span>`
-              : ''}
-            ${product.variants.length > 1
-              ? `<span class="bg-black/60 text-white text-xs px-2 py-1 rounded-md">${product.variants.length} options</span>`
-              : ''}
+            ${
+              isDigital
+                ? `<span class="bg-accent text-white text-xs px-2 py-1 rounded-md font-medium">Numérique</span>`
+                : ''
+            }
+            ${
+              product.variants.length > 1
+                ? `<span class="bg-black/60 text-white text-xs px-2 py-1 rounded-md">${product.variants.length} options</span>`
+                : ''
+            }
           </div>
         </a>
 
@@ -148,13 +162,19 @@ const metadata = {
           <h3 class="font-semibold text-default mb-1">${product.title}</h3>
         </a>
         <p class="text-muted text-sm mb-1">${formatPrice(defaultVariant.price_cents, CURRENCY)}</p>
-        ${isDigital
-          ? `<p class="text-accent text-xs mb-3">⚡ Téléchargement immédiat</p>`
-          : `<p class="text-muted text-xs mb-3">Livraison requise</p>`}
+        ${
+          isDigital
+            ? `<p class="text-accent text-xs mb-3">⚡ Téléchargement immédiat</p>`
+            : `<p class="text-muted text-xs mb-3">Livraison requise</p>`
+        }
 
-        ${product.variants.length > 1 ? `
+        ${
+          product.variants.length > 1
+            ? `
           <select class="variant-select w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-default mb-3 focus:outline-none focus:border-primary">
-            ${product.variants.map((v) => `
+            ${product.variants
+              .map(
+                (v) => `
               <option
                 value="${v.sku}"
                 data-price="${v.price_cents}"
@@ -162,9 +182,13 @@ const metadata = {
                 data-image="${v.image_url || ''}"
                 data-title="${v.title}"
               >${v.title} — ${formatPrice(v.price_cents, CURRENCY)}</option>
-            `).join('')}
+            `
+              )
+              .join('')}
           </select>
-        ` : ''}
+        `
+            : ''
+        }
 
         <button
           class="add-to-cart w-full btn-primary py-2.5 rounded-lg text-sm font-medium"
@@ -212,6 +236,14 @@ const metadata = {
     // Update displayed price
     const priceEl = card.querySelector('p.text-muted.text-sm') as HTMLElement;
     if (priceEl) priceEl.textContent = formatPrice(Number(opt.dataset.price), CURRENCY);
+    // Update card image if this variant has one; otherwise fall back to the product's default image
+    const img = card.querySelector('img') as HTMLImageElement | null;
+    if (img) {
+      const productId = (card as HTMLElement).dataset.productId!;
+      const product = allProducts.find((p) => p.id === productId);
+      const fallback = product?.image_url || 'https://placehold.co/400x400/f4f4f5/a1a1aa?text=Image';
+      img.src = opt.dataset.image || fallback;
+    }
   }
 
   // ── Add to cart ────────────────────────────────────────────
@@ -223,11 +255,11 @@ const metadata = {
     const product = allProducts.find((p) => p.id === productId);
 
     addToCart({
-      sku:           btn.dataset.sku!,
-      title:         product?.title ?? btn.dataset.sku!,
-      price_cents:   Number(btn.dataset.price),
-      product_type:  (btn.dataset.productType as 'physical' | 'digital') || 'physical',
-      image_url:     btn.dataset.image || null,
+      sku: btn.dataset.sku!,
+      title: product?.title ?? btn.dataset.sku!,
+      price_cents: Number(btn.dataset.price),
+      product_type: (btn.dataset.productType as 'physical' | 'digital') || 'physical',
+      image_url: btn.dataset.image || null,
       variant_title: btn.dataset.variantTitle || '',
     });
 
