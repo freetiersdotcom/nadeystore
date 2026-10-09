@@ -52,8 +52,10 @@ export interface Variant {
   title: string;
   price_cents: number;
   image_url: string | null;
+  weight_g: number;
   product_type: 'physical' | 'digital';
   digital_asset_key: string | null;
+  in_stock: boolean;
 }
 
 export interface Product {

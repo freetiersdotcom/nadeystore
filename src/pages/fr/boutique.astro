@@ -41,6 +41,8 @@ const metadata = {
           >Numérique</button
         >
       </div>
+      <!-- Tag chips, populated once products are loaded -->
+      <div id="tag-filters" class="flex flex-wrap gap-2 pb-3 hidden"></div>
     </div>
   </div>
 
@@ -74,6 +76,7 @@ const metadata = {
 
   let allProducts: Awaited<ReturnType<typeof getProducts>> = [];
   let activeFilter = 'all';
+  let activeTag: string | null = null;
 
   // ── Init ──────────────────────────────────────────────────
 
@@ -95,6 +98,7 @@ const metadata = {
 
       renderGrid();
       setupFilters();
+      setupTagFilters();
     } catch (err: any) {
       loading.style.display = 'none';
       errorEl.classList.remove('hidden');
@@ -108,8 +112,13 @@ const metadata = {
     const grid = document.getElementById('products-grid')!;
 
     const filtered = allProducts.filter((p) => {
-      if (activeFilter === 'all') return true;
-      return p.variants.some((v) => (v.product_type || 'physical') === activeFilter);
+      if (activeFilter !== 'all' && !p.variants.some((v) => (v.product_type || 'physical') === activeFilter)) {
+        return false;
+      }
+      if (activeTag && !(p.tags || []).includes(activeTag)) {
+        return false;
+      }
+      return true;
     });
 
     if (filtered.length === 0) {
@@ -156,6 +165,15 @@ const metadata = {
                 : ''
             }
           </div>
+          ${
+            !defaultVariant.in_stock
+              ? `
+            <div class="absolute inset-0 bg-white/60 dark:bg-slate-900/60 flex items-center justify-center">
+              <span class="bg-gray-900 dark:bg-slate-700 text-white text-xs px-3 py-1.5 rounded-md font-medium">Rupture de stock</span>
+            </div>
+          `
+              : ''
+          }
         </a>
 
         <a href="/fr/produits/${slug}" class="block hover:text-primary transition-colors">
@@ -181,7 +199,8 @@ const metadata = {
                 data-type="${v.product_type || 'physical'}"
                 data-image="${v.image_url || ''}"
                 data-title="${v.title}"
-              >${v.title} — ${formatPrice(v.price_cents, CURRENCY)}</option>
+                data-in-stock="${v.in_stock}"
+              >${v.title} — ${formatPrice(v.price_cents, CURRENCY)}${!v.in_stock ? ' (rupture)' : ''}</option>
             `
               )
               .join('')}
@@ -191,14 +210,15 @@ const metadata = {
         }
 
         <button
-          class="add-to-cart w-full btn-primary py-2.5 rounded-lg text-sm font-medium"
+          class="add-to-cart w-full btn-primary py-2.5 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           data-sku="${defaultVariant.sku}"
           data-product-type="${defaultVariant.product_type || 'physical'}"
           data-variant-title="${defaultVariant.title}"
           data-price="${defaultVariant.price_cents}"
           data-image="${defaultVariant.image_url || ''}"
+          ${!defaultVariant.in_stock ? 'disabled' : ''}
         >
-          Ajouter au panier
+          ${defaultVariant.in_stock ? 'Ajouter au panier' : 'Rupture de stock'}
         </button>
       </div>
     `;
@@ -215,6 +235,43 @@ const metadata = {
           t.classList.toggle('bg-primary', isActive);
           t.classList.toggle('text-white', isActive);
           t.classList.toggle('text-muted', !isActive);
+        });
+        renderGrid();
+      });
+    });
+  }
+
+  function setupTagFilters() {
+    const container = document.getElementById('tag-filters')!;
+    const allTags = Array.from(new Set(allProducts.flatMap((p) => p.tags || []))).sort();
+
+    if (allTags.length === 0) {
+      container.classList.add('hidden');
+      return;
+    }
+
+    container.classList.remove('hidden');
+    container.innerHTML = allTags
+      .map(
+        (tag) => `
+      <button
+        data-tag="${tag}"
+        class="px-3 py-1 rounded-full text-xs font-medium border border-gray-200 dark:border-slate-700 text-muted transition-colors hover:text-default"
+      >${tag}</button>
+    `
+      )
+      .join('');
+
+    container.querySelectorAll('[data-tag]').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const tag = (chip as HTMLElement).dataset.tag!;
+        activeTag = activeTag === tag ? null : tag; // click again to clear
+        container.querySelectorAll('[data-tag]').forEach((c) => {
+          const isActive = (c as HTMLElement).dataset.tag === activeTag;
+          c.classList.toggle('bg-primary', isActive);
+          c.classList.toggle('text-white', isActive);
+          c.classList.toggle('border-primary', isActive);
+          c.classList.toggle('text-muted', !isActive);
         });
         renderGrid();
       });
@@ -244,6 +301,10 @@ const metadata = {
       const fallback = product?.image_url || 'https://placehold.co/400x400/f4f4f5/a1a1aa?text=Image';
       img.src = opt.dataset.image || fallback;
     }
+    // Reflect the selected variant's stock status on the add-to-cart button
+    const inStock = opt.dataset.inStock === 'true';
+    btn.disabled = !inStock;
+    btn.textContent = inStock ? 'Ajouter au panier' : 'Rupture de stock';
   }
 
   // ── Add to cart ────────────────────────────────────────────

@@ -1,4 +1,4 @@
-import { getPermalink } from './utils/permalinks';
+//import { getPermalink } from './utils/permalinks';
 
 export const headerData = {
   links: [
@@ -8,7 +8,7 @@ export const headerData = {
   ],
   actions: [
     {
-      text: 'Commander',
+      text: 'Voir la boutique',
       href: '/fr/boutique',
       variant: 'primary',
     },
