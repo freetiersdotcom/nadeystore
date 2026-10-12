@@ -62,6 +62,8 @@ export interface Product {
   id: string;
   title: string;
   description: string | null;
+  description_fr: string | null;
+  description_en: string | null;
   slug: string | null;
   status: 'active' | 'draft';
   image_url: string | null;
