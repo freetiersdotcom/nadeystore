@@ -48,9 +48,9 @@ export const footerData = {
     // Add your client's actual social handles here
     // { ariaLabel: 'Facebook', icon: 'tabler:brand-facebook', href: 'https://facebook.com/nadeynaturel' },
     // { ariaLabel: 'Instagram', icon: 'tabler:brand-instagram', href: 'https://instagram.com/nadeynaturel' },
-    // { ariaLabel: 'WhatsApp', icon: 'tabler:brand-whatsapp', href: 'https://wa.me/22900000000' },
+    { ariaLabel: 'WhatsApp', icon: 'tabler:brand-whatsapp', href: 'https://wa.me/2290194458956' },
   ],
   footNote: `
-    <span class="text-sm text-muted">© ${new Date().getFullYear()} Nadey Naturel · Cotonou, Bénin · Tous droits réservés.</span>
+    <span class="text-sm text-muted">© ${new Date().getFullYear()} Santé Natur’ · Cotonou, Bénin · Tous droits réservés.</span>
   `,
 };

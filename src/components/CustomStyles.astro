@@ -25,19 +25,24 @@ import '@fontsource-variable/inter';
     --aw-font-serif: 'Inter Variable';
     --aw-font-heading: 'Inter Variable';
 
-    --aw-color-primary: rgb(1 97 239);
-    --aw-color-secondary: rgb(1 84 207);
-    --aw-color-accent: rgb(109 40 217);
+    /* Brand: deep emerald #0F6B4B, gold #C8A646, cream #F8F6F0, charcoal #2B2B2B.
+       --aw-color-accent is a darker gold (#8A6D1F) so gold text and white-on-gold
+       stay readable on the cream background (WCAG AA); the pure brand gold is
+       --aw-color-gold, for decoration (borders, dividers, highlights). */
+    --aw-color-primary: rgb(15 107 75);
+    --aw-color-secondary: rgb(11 82 56);
+    --aw-color-accent: rgb(138 109 31);
+    --aw-color-gold: rgb(200 166 70);
 
-    --aw-color-text-heading: rgb(0 0 0);
-    --aw-color-text-default: rgb(16 16 16);
-    --aw-color-text-muted: rgb(16 16 16 / 66%);
-    --aw-color-bg-page: rgb(255 255 255);
+    --aw-color-text-heading: rgb(43 43 43);
+    --aw-color-text-default: rgb(43 43 43);
+    --aw-color-text-muted: rgb(43 43 43 / 70%);
+    --aw-color-bg-page: rgb(248 246 240);
 
-    --aw-color-bg-page-dark: rgb(3 6 32);
+    --aw-color-bg-page-dark: rgb(11 22 18);
 
     ::selection {
-      background-color: lavender;
+      background-color: rgb(200 166 70 / 35%);
     }
   }
 
@@ -46,14 +51,15 @@ import '@fontsource-variable/inter';
     --aw-font-serif: 'Inter Variable';
     --aw-font-heading: 'Inter Variable';
 
-    --aw-color-primary: rgb(1 97 239);
-    --aw-color-secondary: rgb(1 84 207);
-    --aw-color-accent: rgb(109 40 217);
+    --aw-color-primary: rgb(27 127 90);
+    --aw-color-secondary: rgb(15 107 75);
+    --aw-color-accent: rgb(200 166 70);
+    --aw-color-gold: rgb(200 166 70);
 
-    --aw-color-text-heading: rgb(247, 248, 248);
-    --aw-color-text-default: rgb(229 236 246);
-    --aw-color-text-muted: rgb(229 236 246 / 66%);
-    --aw-color-bg-page: rgb(3 6 32);
+    --aw-color-text-heading: rgb(246 248 246);
+    --aw-color-text-default: rgb(232 238 233);
+    --aw-color-text-muted: rgb(232 238 233 / 66%);
+    --aw-color-bg-page: rgb(11 22 18);
 
     ::selection {
       background-color: black;

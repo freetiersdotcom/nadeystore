@@ -1,5 +1,5 @@
 site:
-  name: Nadey Naturel
+  name: Santé Natur’
   site: 'https://nadeynaturel.com'
   base: '/'
   trailingSlash: false
@@ -8,14 +8,14 @@ site:
 
 metadata:
   title:
-    default: Nadey Naturel
-    template: '%s — Nadey Naturel'
+    default: Santé Natur’
+    template: '%s — Santé Natur’'
   description: "Produits de santé naturelle à base de plantes d'Afrique de l'Ouest. Moringa, gingembre, baobab — livrés à la diaspora partout en Europe."
   robots:
     index: true
     follow: true
   openGraph:
-    site_name: Nadey Naturel
+    site_name: Santé Natur’
     images:
       - url: '~/assets/images/default.png'
         width: 1200
