@@ -28,6 +28,7 @@ export const footerData = {
       title: 'À propos',
       links: [
         { text: 'Notre histoire', href: '/a-propos' },
+        { text: 'Questions fréquentes', href: '/faq' },
         { text: 'Contact', href: '/contact' },
       ],
     },
@@ -51,6 +52,7 @@ export const footerData = {
     { ariaLabel: 'WhatsApp', icon: 'tabler:brand-whatsapp', href: 'https://wa.me/2290194458956' },
   ],
   footNote: `
-    <span class="text-sm text-muted">© ${new Date().getFullYear()} Santé Natur’ · Cotonou, Bénin · Tous droits réservés.</span>
+    <span class="text-sm text-muted">© ${new Date().getFullYear()} Santé Natur’ · Tous droits réservés.</span>
+    <span class="block text-xs text-muted mt-1">Fidjrossè Fiyegnon Jacquot, C/1755, Maison Alassane, Cotonou, Bénin</span>
   `,
 };

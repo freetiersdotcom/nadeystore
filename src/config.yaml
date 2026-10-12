@@ -10,7 +10,7 @@ metadata:
   title:
     default: Santé Natur’
     template: '%s — Santé Natur’'
-  description: "Produits de santé naturelle à base de plantes d'Afrique de l'Ouest. Moringa, gingembre, baobab — livrés à la diaspora partout en Europe."
+  description: "Tisanes, miels, huiles naturelles, savons, parfums, encens et produits de bien-être soigneusement sélectionnés. Boutique en ligne basée à Cotonou, livraison au Bénin et dans la diaspora."
   robots:
     index: true
     follow: true

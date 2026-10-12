@@ -9,6 +9,7 @@
 //          changes (the API triggers one through a deploy hook, see REBUILD_HOOK_URL).
 
 import StoreLayout from '~/layouts/StoreLayout.astro';
+import ProductVideo from '~/components/store/ProductVideo.astro';
 import type { Product } from '~/scripts/api';
 import { getActiveProducts, findProductBySlug, getRelatedProducts } from '~/utils/catalog';
 
@@ -201,6 +202,16 @@ const metadata = {
       </div>
     </div>
   </section>
+
+  <!-- Product video (optional) -->
+  {
+    product.video_url && (
+      <section class="max-w-6xl mx-auto px-6 pb-12">
+        <h2 class="font-bold font-heading text-2xl mb-6">Découvrir le produit en vidéo</h2>
+        <ProductVideo url={product.video_url} title={product.title} />
+      </section>
+    )
+  }
 
   <!-- Related products -->
   {

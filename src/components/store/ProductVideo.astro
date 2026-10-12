@@ -1,0 +1,85 @@
+---
+// src/components/store/ProductVideo.astro
+// Click-to-play product video. Nothing from YouTube / TikTok / Facebook loads until
+// the visitor taps play — good for slow mobile connections and for privacy.
+import { parseVideo } from '~/utils/video';
+
+interface Props {
+  url: string;
+  title: string;
+}
+const { url, title } = Astro.props;
+const video = parseVideo(url);
+---
+
+{
+  video && video.kind === 'embed' && (
+    <div
+      data-video-root
+      data-embed={video.embedUrl}
+      data-title={`Vidéo : ${title}`}
+      class:list={[
+        'relative mx-auto overflow-hidden rounded-2xl bg-gray-900',
+        video.vertical ? 'aspect-[9/16] w-full max-w-[320px]' : 'aspect-video w-full',
+      ]}
+    >
+      {video.thumb && (
+        <img src={video.thumb} alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover opacity-80" />
+      )}
+      <button
+        type="button"
+        data-video-play
+        aria-label={`Lire la vidéo : ${title}`}
+        class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white"
+      >
+        <span class="w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg">
+          <svg class="w-7 h-7 ml-1" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </span>
+        <span class="text-sm font-medium drop-shadow">Regarder la vidéo</span>
+      </button>
+    </div>
+  )
+}
+
+{
+  video && video.kind === 'file' && (
+    <video
+      controls
+      playsinline
+      preload="none"
+      src={video.src}
+      aria-label={`Vidéo : ${title}`}
+      class="mx-auto w-full max-w-3xl rounded-2xl bg-gray-900"
+    />
+  )
+}
+
+{
+  video && video.kind === 'link' && (
+    <a href={video.url} target="_blank" rel="noopener noreferrer" class="btn-secondary inline-flex">
+      Voir la vidéo du produit
+    </a>
+  )
+}
+
+<script>
+  // One delegated listener: it keeps working after Astro ClientRouter page swaps.
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as Element | null)?.closest('[data-video-play]');
+    if (!btn) return;
+    const root = btn.closest<HTMLElement>('[data-video-root]');
+    const src = root?.dataset.embed;
+    if (!root || !src) return;
+
+    const iframe = document.createElement('iframe');
+    iframe.src = src;
+    iframe.title = root.dataset.title ?? 'Vidéo';
+    iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    iframe.allowFullscreen = true;
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    iframe.className = 'absolute inset-0 w-full h-full border-0';
+    root.replaceChildren(iframe);
+  });
+</script>

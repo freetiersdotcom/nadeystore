@@ -68,6 +68,7 @@ export interface Product {
   status: 'active' | 'draft';
   image_url: string | null;
   tags: string[] | null;
+  video_url: string | null;
   created_at: string;
   variants: Variant[];
 }

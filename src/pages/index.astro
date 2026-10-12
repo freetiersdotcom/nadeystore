@@ -4,29 +4,28 @@ import Hero2 from '~/components/widgets/Hero2.astro';
 import Features from '~/components/widgets/Features.astro';
 import Content from '~/components/widgets/Content.astro';
 import Steps from '~/components/widgets/Steps.astro';
-import Testimonials from '~/components/widgets/Testimonials.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 
 const metadata = {
-  title: 'Santé Natur’ — Produits de santé naturelle du Bénin',
+  title: 'Santé Natur’ — Produits naturels de bien-être, livrés chez vous',
   description:
-    "Découvrez nos produits de santé naturelle à base de plantes d'Afrique de l'Ouest. Moringa, gingembre, et bien plus — livrés partout en Europe et dans la diaspora.",
+    'Tisanes, miels, huiles naturelles, savons, parfums, encens et produits de bien-être soigneusement sélectionnés. Boutique en ligne basée à Cotonou, livraison au Bénin et dans la diaspora.',
 };
 ---
 
 <Layout metadata={metadata}>
   <!-- ── Hero ──────────────────────────────────────────────── -->
   <Hero2
-    tagline="100 % naturel · Origine Bénin"
-    title="La nature de <span class='text-accent dark:text-accent highlight'>l'Afrique de l'Ouest</span>,<br class='hidden md:block' /> livrée chez vous."
-    subtitle="Des plantes cultivées et transformées au Bénin, sélectionnées pour leurs bienfaits reconnus depuis des générations. Moringa, gingembre, baobab et plus — pour prendre soin de vous où que vous soyez."
+    tagline="Produits naturels · Cotonou, Bénin"
+    title="La puissance de la nature <span class='text-accent dark:text-accent highlight'>au service de votre bien-être</span>"
+    subtitle="Tisanes, miels, huiles naturelles, savons, parfums, encens et produits de bien-être, soigneusement sélectionnés et livrés chez vous, au Bénin comme dans la diaspora."
     actions={[
-      { variant: 'primary', text: 'Découvrir la boutique', href: '/fr/boutique', icon: 'tabler:shopping-cart' },
-      { text: 'Notre histoire', href: '/a-propos' },
+      { variant: 'primary', text: 'Commandez maintenant', href: '/fr/boutique', icon: 'tabler:shopping-cart' },
+      { text: 'Nous écrire sur WhatsApp', href: 'https://wa.me/2290194458956', icon: 'tabler:brand-whatsapp' },
     ]}
     image={{
       src: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80',
-      alt: 'Plantes médicinales africaines — moringa et gingembre',
+      alt: 'Plantes et produits naturels',
     }}
   />
 
@@ -34,67 +33,68 @@ const metadata = {
   <Features
     id="avantages"
     tagline="Pourquoi nous choisir"
-    title="Des produits en qui vous pouvez avoir confiance"
-    subtitle="Chaque produit est soigneusement sélectionné, transformé au Bénin et expédié directement à votre porte."
+    title="Des produits et un service en qui vous pouvez avoir confiance"
+    subtitle="Une sélection soignée, un paiement sécurisé et une équipe qui vous accompagne jusqu'à votre satisfaction."
     columns={4}
     items={[
       {
-        title: 'Ingrédients authentiques',
-        description:
-          "Plantes natives d'Afrique de l'Ouest, cueillies et transformées selon des méthodes traditionnelles éprouvées.",
+        title: 'Sélection soignée',
+        description: 'Des produits naturels de qualité premium, dont les ingrédients sont choisis avec soin.',
         icon: 'tabler:leaf',
-      },
-      {
-        title: 'Sans additifs',
-        description:
-          "Aucun conservateur artificiel, aucun arôme de synthèse. Ce que vous voyez sur l'étiquette est tout ce qu'il y a.",
-        icon: 'tabler:shield-check',
-      },
-      {
-        title: 'Livraison diaspora',
-        description:
-          "Expédition vers la France, la Belgique, le Royaume-Uni, le Canada et d'autres destinations. Suivi inclus.",
-        icon: 'tabler:world',
       },
       {
         title: 'Paiement sécurisé',
         description:
-          "Paiement via FedaPay avec protection acheteur. Remboursement garanti sous 14 jours si vous n'êtes pas satisfait.",
+          'Réglez en ligne par Mobile Money ou carte bancaire (Visa, Mastercard) via des prestataires de paiement sécurisés.',
         icon: 'tabler:lock',
+      },
+      {
+        title: 'Livraison garantie',
+        description:
+          'Nous livrons au Bénin, dans la région et auprès de la diaspora. Les frais sont calculés avant le paiement.',
+        icon: 'tabler:truck-delivery',
+      },
+      {
+        title: 'Service client réactif',
+        description:
+          'Une question ? Écrivez-nous par WhatsApp ou par e-mail : nous vous répondons et vous expliquons clairement chaque produit.',
+        icon: 'tabler:message-circle',
       },
     ]}
   />
 
-  <!-- ── Featured products ──────────────────────────────────── -->
+  <!-- ── What we offer ──────────────────────────────────────── -->
   <Content
     id="produits"
-    tagline="Nos produits vedettes"
-    title="Ce que la nature a de mieux à offrir"
-    subtitle="Une sélection de produits phares, issus des plantes les plus prisées d'Afrique de l'Ouest."
+    tagline="Notre boutique"
+    title="Ce que vous trouverez chez nous"
+    subtitle="Une gamme pensée pour accompagner votre quotidien."
     isReversed
     items={[
       {
-        title: 'Moringa en poudre',
-        description:
-          "Surnommé « l'arbre miracle », le moringa est l'une des plantes les plus riches en nutriments connues. Notre poudre de feuilles séchées à froid conserve l'intégralité de ses bienfaits.",
-        icon: 'tabler:plant',
+        title: 'Tisanes et thés',
+        description: 'Des infusions et des thés à découvrir pour vos moments de détente au quotidien.',
+        icon: 'tabler:cup',
       },
       {
-        title: 'Gingembre bio',
-        description:
-          'Racines de gingembre cultivées sans pesticides dans les terres argileuses du sud du Bénin. Idéal pour les infusions, les smoothies et la cuisine.',
-        icon: 'tabler:flame',
+        title: 'Miels et huiles naturelles',
+        description: 'Des produits naturels pour la table et pour le soin, sélectionnés avec attention.',
+        icon: 'tabler:droplet',
       },
       {
-        title: 'Poudre de baobab',
-        description:
-          "La pulpe de baobab contient six fois plus de vitamine C que l'orange. Un complément naturel pour renforcer l'immunité et favoriser la digestion.",
-        icon: 'tabler:circle-plus',
+        title: 'Savons, parfums et encens',
+        description: 'Des créations pour prendre soin de vous et de votre intérieur.',
+        icon: 'tabler:flower',
+      },
+      {
+        title: 'Livres numériques',
+        description: 'Des ebooks à télécharger immédiatement après votre paiement.',
+        icon: 'tabler:book',
       },
     ]}
     image={{
       src: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&q=80',
-      alt: 'Poudre de moringa et épices naturelles',
+      alt: 'Produits naturels de bien-être',
     }}
     callToAction={{
       text: 'Voir tous les produits',
@@ -103,30 +103,30 @@ const metadata = {
     }}
   />
 
-  <!-- ── Story / About strip ────────────────────────────────── -->
+  <!-- ── About strip ────────────────────────────────────────── -->
   <Content
-    tagline="Notre histoire"
-    title="Nés au Bénin, pour la diaspora"
+    tagline="Qui sommes-nous"
+    title="Une boutique au service de votre bien-être"
     content={`
-      <p>Pendant des siècles, les familles d'Afrique de l'Ouest ont soigné leur santé avec ce que la terre leur offrait. Le moringa pour l'énergie, le gingembre contre le rhume, le baobab pour la vitalité.</p>
-      <p class="mt-4">Santé Natur’ est né d'un constat simple : la diaspora africaine en Europe cherche ces produits de qualité, mais les trouve rarement authentiques ou accessibles. Nous avons créé un pont direct entre les producteurs béninois et vos tables.</p>
-      <p class="mt-4 font-medium">Chaque commande soutient une filière locale et vous apporte un morceau d'Afrique de l'Ouest.</p>
+      <p>Santé Natur’ est une boutique en ligne basée à Cotonou, au Bénin. Nous proposons des produits naturels et de bien-être, soigneusement présentés et sélectionnés pour vous accompagner dans votre quotidien.</p>
+      <p class="mt-4">Notre clientèle : toute personne en quête de produits naturels, les personnes intéressées par la spiritualité africaine, la diaspora africaine et les entrepreneurs du bien-être.</p>
+      <p class="mt-4 font-medium">Notre engagement : un suivi attentif, de votre commande jusqu'à votre entière satisfaction.</p>
     `}
     items={[
       {
-        title: 'Producteurs locaux',
-        description: 'Partenariats directs avec des agriculteurs familiaux dans les régions du Mono et du Couffo.',
-        icon: 'tabler:users',
+        title: 'Des produits expliqués',
+        description: 'Fiches produits détaillées et, selon les produits, vidéos de présentation.',
+        icon: 'tabler:video',
       },
       {
-        title: 'Transformation artisanale',
-        description: 'Séchage, broyage et conditionnement réalisés au Bénin pour préserver les nutriments.',
+        title: 'Un suivi rigoureux',
+        description: 'Nous restons à votre écoute avant, pendant et après votre commande.',
         icon: 'tabler:heart-handshake',
       },
     ]}
     image={{
       src: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80',
-      alt: 'Femme béninoise traitant des plantes médicinales',
+      alt: 'Plantes et ingrédients naturels',
     }}
     callToAction={{
       text: 'En savoir plus',
@@ -144,70 +144,38 @@ const metadata = {
       {
         title: 'Parcourez la boutique',
         description:
-          "Explorez notre catalogue de produits naturels. Chaque fiche produit détaille les ingrédients, les bienfaits et les conseils d'utilisation.",
+          'Explorez nos produits. Chaque fiche présente le produit, ses options et, selon les cas, une vidéo de présentation.',
         icon: 'tabler:search',
       },
       {
         title: 'Passez votre commande',
         description:
-          'Ajoutez vos produits au panier, renseignez votre adresse de livraison et payez en toute sécurité via FedaPay — carte ou mobile money acceptés.',
+          'Ajoutez vos produits au panier, renseignez votre adresse de livraison et payez en ligne en toute sécurité, par Mobile Money ou carte bancaire.',
         icon: 'tabler:shopping-cart',
       },
       {
-        title: 'Recevez chez vous',
+        title: 'Recevez votre commande',
         description:
-          'Votre commande est préparée au Bénin et expédiée vers votre adresse en Europe ou ailleurs dans la diaspora. Confirmation et suivi par e-mail.',
+          'Vous recevez une confirmation par e-mail. Notre équipe reste joignable sur WhatsApp pour le suivi de votre commande.',
         icon: 'tabler:package',
       },
     ]}
     image={{
       src: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&q=80',
-      alt: "Colis de produits naturels prêt à l'expédition",
+      alt: "Colis prêt à l'expédition",
     }}
   />
 
-  <!-- ── Testimonials ───────────────────────────────────────── -->
-  <Testimonials
-    id="avis"
-    tagline="Ils nous font confiance"
-    title="Ce que disent nos clients"
-    subtitle="Des membres de la diaspora qui ont redécouvert les saveurs et les bienfaits de leurs racines."
-    testimonials={[
-      {
-        testimonial:
-          "La poudre de moringa est incroyable. Je l'ajoute à mon smoothie du matin et j'ai l'impression de retrouver l'énergie de mes 20 ans. La qualité est vraiment au rendez-vous.",
-        name: 'Aminata D.',
-        job: 'Paris, France',
-        image: { src: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=80&q=80', alt: 'Aminata D.' },
-      },
-      {
-        testimonial:
-          "Enfin du vrai gingembre béninois ! Pas cette poudre fade qu'on trouve en supermarché. La livraison en Belgique s'est faite sans problème et l'emballage était soigné.",
-        name: 'Kofi M.',
-        job: 'Bruxelles, Belgique',
-        image: { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80', alt: 'Kofi M.' },
-      },
-      {
-        testimonial:
-          "Je commande pour toute la famille. Ma mère dit que ça lui rappelle ce que sa grand-mère utilisait. C'est le plus beau des compliments pour un produit naturel.",
-        name: 'Fatou B.',
-        job: 'Londres, Royaume-Uni',
-        image: { src: 'https://images.unsplash.com/photo-1589156288859-f0cb0d82b065?w=80&q=80', alt: 'Fatou B.' },
-      },
-    ]}
-    callToAction={{
-      text: 'Voir la boutique',
-      href: '/fr/boutique',
-    }}
-  />
+  <!-- Customer reviews: add a Testimonials section here once real reviews have been collected. -->
 
   <!-- ── Final CTA ──────────────────────────────────────────── -->
   <CallToAction
-    tagline="Prêt à essayer ?"
-    title="Votre première commande vous attend"
-    subtitle="Livraison vers la France, la Belgique, le Royaume-Uni, le Canada et bien d'autres destinations. Satisfaction garantie ou remboursé."
+    tagline="Prêt à commander ?"
+    title="Découvrez la boutique"
+    subtitle="Livraison garantie. Une question avant de commander ? Écrivez-nous sur WhatsApp, nous vous répondons rapidement."
     actions={[
-      { variant: 'primary', text: 'Découvrir la boutique', href: '/fr/boutique', icon: 'tabler:shopping-cart' },
+      { variant: 'primary', text: 'Commandez maintenant', href: '/fr/boutique', icon: 'tabler:shopping-cart' },
+      { text: 'WhatsApp', href: 'https://wa.me/2290194458956', icon: 'tabler:brand-whatsapp' },
     ]}
   />
 </Layout>
