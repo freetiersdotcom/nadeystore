@@ -1,0 +1,96 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+
+const metadata = {
+  title: 'Privacy policy — Santé Natur’',
+  robots: { index: false, follow: true },
+};
+
+const lastUpdated = 'October 2026';
+---
+
+<Layout metadata={metadata}>
+  <HeroText tagline="Legal" title="Privacy policy" subtitle={`Last updated: ${lastUpdated}`} />
+
+  <div
+    class="max-w-3xl mx-auto px-6 pb-16 prose dark:prose-invert prose-headings:font-heading prose-headings:font-bold prose-a:text-primary"
+  >
+    <h2>1. Who are we?</h2>
+    <p>
+      Santé Natur’ is a business based in Cotonou, Benin, specialised in selling natural and wellness products. For any
+      question about your personal data, you can contact us at: <a href="mailto:agroalafia@gmail.com"
+        >agroalafia@gmail.com</a
+      >.
+    </p>
+
+    <h2>2. Data we collect</h2>
+    <p>We only collect the data needed to process your orders and communicate with you:</p>
+    <ul>
+      <li><strong>Contact data:</strong> name, email address, phone number (if provided).</li>
+      <li><strong>Delivery address:</strong> full postal address for shipping your orders.</li>
+      <li>
+        <strong>Payment data:</strong> payment is processed by FedaPay or Stripe. We never store your bank card information.
+      </li>
+      <li>
+        <strong>Browsing data:</strong> IP address, pages visited, session duration — collected through anonymised analytics
+        tools.
+      </li>
+    </ul>
+
+    <h2>3. How we use your data</h2>
+    <p>Your personal data is used exclusively to:</p>
+    <ul>
+      <li>Process and ship your orders.</li>
+      <li>Send you order confirmations and tracking information.</li>
+      <li>Answer your customer service requests.</li>
+      <li>Improve our shop and our service (anonymised browsing data).</li>
+    </ul>
+    <p>We never sell, rent or share your personal data with third parties for commercial purposes.</p>
+
+    <h2>4. Retention period</h2>
+    <p>
+      Your order data is kept for 3 years from the date of purchase, in line with legal accounting obligations. Your
+      contact data is deleted on simple request, unless its retention is required by law.
+    </p>
+
+    <h2>5. Your rights</h2>
+    <p>
+      In accordance with the GDPR (for residents of the European Union) and applicable laws, you have the following
+      rights:
+    </p>
+    <ul>
+      <li><strong>Right of access:</strong> obtain a copy of the data we hold about you.</li>
+      <li><strong>Right to rectification:</strong> correct inaccurate data.</li>
+      <li><strong>Right to erasure:</strong> request deletion of your data.</li>
+      <li><strong>Right to object:</strong> object to certain processing of your data.</li>
+    </ul>
+    <p>To exercise these rights, contact us at <a href="mailto:agroalafia@gmail.com">agroalafia@gmail.com</a>.</p>
+
+    <h2>6. Cookies</h2>
+    <p>
+      Our shop uses technical cookies necessary for it to work (shopping cart, language preferences). We do not use
+      third-party advertising cookies. You can disable cookies in your browser settings, but some features of the shop
+      may be affected.
+    </p>
+
+    <h2>7. Security</h2>
+    <p>
+      We put appropriate technical measures in place to protect your data against unauthorised access, loss or
+      disclosure. Payments are processed by PCI-DSS certified providers.
+    </p>
+
+    <h2>8. Changes</h2>
+    <p>
+      This policy may be updated from time to time. The date of the last change is shown at the top of this page. By
+      continuing to use our shop after a change, you accept the updated policy.
+    </p>
+
+    <h2>9. Contact</h2>
+    <p>
+      For any question about this policy or your personal data:<br />
+      <a href="mailto:agroalafia@gmail.com">agroalafia@gmail.com</a><br />
+      Santé Natur’, Fidjrossè Fiyegnon Jacquot, C/1755, Maison Alassane, Cotonou, Benin
+    </p>
+  </div>
+</Layout>

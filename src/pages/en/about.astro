@@ -1,0 +1,113 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import Content from '~/components/widgets/Content.astro';
+import Features2 from '~/components/widgets/Features2.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+
+const metadata = {
+  title: 'About — Santé Natur’',
+  description:
+    'Santé Natur’ is an online shop based in Cotonou, Benin: natural and wellness products, carefully selected, for Benin, West Africa and the diaspora.',
+};
+---
+
+<Layout metadata={metadata}>
+  <HeroText
+    tagline="Who we are"
+    title="The power of nature in service of your well-being"
+    subtitle="Santé Natur’ is an online shop based in Cotonou, Benin. We offer natural and wellness products, carefully presented and selected to support our customers in their everyday lives."
+  />
+
+  <!-- ── What we do ──────────────────────────────────────────── -->
+  <Content
+    tagline="What we do"
+    title="Natural products, simply explained"
+    content={`
+      <p>We offer herbal teas, honeys, natural oils, soaps, perfumes, incense and wellness products, as well as digital books.</p>
+      <p class="mt-4">Our goal: to let you discover, understand and easily order quality natural products, wherever you are. That is why each product comes with a clear presentation and, in some cases, an explanatory video.</p>
+    `}
+    isReversed
+    image={{
+      src: 'https://images.unsplash.com/photo-1605020420620-20c943cc4669?w=800&q=80',
+      alt: 'Plants and natural products',
+    }}
+  />
+
+  <!-- ── Who we serve ────────────────────────────────────────── -->
+  <Content
+    tagline="Our customers"
+    title="A shop for everyone looking for natural products"
+    content={`
+      <p>We serve anyone looking for natural products, in Benin, in West and Central Africa, and in the African diaspora in Europe, the Americas and elsewhere.</p>
+      <p class="mt-4">Our customers include people interested in African spirituality, families looking for everyday products, and wellness entrepreneurs.</p>
+    `}
+    items={[
+      {
+        title: 'In Benin and the region',
+        description: 'Order from Cotonou or from another West African country.',
+        icon: 'tabler:map-pin',
+      },
+      {
+        title: 'In the diaspora',
+        description: 'We also deliver to Europe, North America and other destinations.',
+        icon: 'tabler:world',
+      },
+    ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80',
+      alt: 'Natural plants and foliage',
+    }}
+  />
+
+  <!-- ── Commitments ─────────────────────────────────────────── -->
+  <Features2
+    tagline="Our commitments"
+    title="What you can expect from us"
+    subtitle="Simple principles, applied to every order."
+    items={[
+      {
+        title: 'A careful selection',
+        description: 'We choose our products and their ingredients with care, with a premium-quality mindset.',
+        icon: 'tabler:award',
+      },
+      {
+        title: 'Clear explanations',
+        description: 'Each product is presented in detail and, in some cases, on video. A question? We answer.',
+        icon: 'tabler:video',
+      },
+      {
+        title: 'Secure payment',
+        description: 'Pay online by Mobile Money or bank card, through secure payment providers.',
+        icon: 'tabler:lock',
+      },
+      {
+        title: 'Guaranteed delivery',
+        description:
+          'We follow your order until it is received. If there is a problem, contact us: we will look for a solution with you.',
+        icon: 'tabler:truck-delivery',
+      },
+      {
+        title: 'Responsive customer service',
+        description: 'Our team answers you on WhatsApp or by email, before and after your purchase.',
+        icon: 'tabler:message-circle',
+      },
+      {
+        title: 'Follow-up until you are satisfied',
+        description: 'We stay available until you are fully satisfied with your order.',
+        icon: 'tabler:heart-handshake',
+      },
+    ]}
+  />
+
+  <!-- ── CTA ─────────────────────────────────────────────────── -->
+  <CallToAction
+    tagline="Welcome"
+    title="Discover Santé Natur’"
+    subtitle="Browse the shop or write to us: we are here to advise you."
+    actions={[
+      { variant: 'primary', text: 'Order now', href: '/en/shop', icon: 'tabler:shopping-cart' },
+      { text: 'Contact us', href: '/en/contact' },
+    ]}
+  />
+</Layout>

@@ -1,0 +1,76 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import ContactWidget from '~/components/widgets/Contact.astro';
+import Features2 from '~/components/widgets/Features2.astro';
+
+const metadata = {
+  title: 'Contact — Santé Natur’',
+  description: 'A question about our products, an order, or a partnership? Contact the Santé Natur’ team.',
+};
+---
+
+<Layout metadata={metadata}>
+  <HeroText
+    tagline="Contact us"
+    title="A question? We are here."
+    subtitle="Whether it is a product question, a delivery issue or a partnership opportunity — our team usually replies within 24 to 48 business hours."
+  />
+
+  <!-- ── Contact channels ────────────────────────────────────── -->
+  <Features2
+    title="How to reach us"
+    columns={3}
+    items={[
+      {
+        title: 'Email',
+        description:
+          'For any general question, order or complaint:<br/><a href="mailto:agroalafia@gmail.com" class="text-primary hover:underline font-medium">agroalafia@gmail.com</a>',
+        icon: 'tabler:mail',
+      },
+      {
+        title: 'WhatsApp',
+        description:
+          'For quick order follow-up or an urgent question:<br/><a href="https://wa.me/2290194458956" class="text-primary hover:underline font-medium">+229 01 94 45 89 56</a>',
+        icon: 'tabler:brand-whatsapp',
+      },
+      {
+        title: 'Address',
+        description:
+          'Santé Natur’<br/>Cotonou, Benin<br/><span class="text-muted text-xs">In-person pickup is not available at the moment.</span>',
+        icon: 'tabler:map-pin',
+      },
+    ]}
+  />
+
+  <!-- ── Contact form ────────────────────────────────────────── -->
+  <ContactWidget
+    id="form"
+    title="Send us a message"
+    subtitle="Fill in this form and we will reply as soon as possible."
+    inputs={[
+      {
+        type: 'text',
+        name: 'name',
+        label: 'Full name',
+        placeholder: 'Your name',
+        autocomplete: 'name',
+      },
+      {
+        type: 'email',
+        name: 'email',
+        label: 'Email address',
+        placeholder: 'you@example.com',
+        autocomplete: 'email',
+      },
+    ]}
+    textarea={{
+      name: 'message',
+      label: 'Message',
+      placeholder: 'Describe your question or request...',
+      rows: 6,
+    }}
+    button="Send message"
+    description="Your information will never be shared with third parties. See our privacy policy."
+  />
+</Layout>

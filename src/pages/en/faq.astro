@@ -1,0 +1,190 @@
+---
+// src/pages/en/faq.astro
+// Frequently asked questions (English) — DRAFT for client review.
+// Answers only state what the store actually does; anything the client has not
+// confirmed yet (delivery times, exact fees) is phrased generically.
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+
+const metadata = {
+  title: 'Frequently asked questions',
+  description:
+    'Ordering, payment, delivery, digital products, returns: answers to the most common questions about Santé Natur’.',
+};
+
+type Item = { q: string; a: string; link?: { href: string; label: string } };
+type Group = { title: string; items: Item[] };
+
+const groups: Group[] = [
+  {
+    title: 'Ordering and paying',
+    items: [
+      {
+        q: 'How do I place an order?',
+        a: 'Browse the shop, choose your product (and its option if needed), add it to the cart, then click “Checkout”. Enter your email address and delivery details, then pay online. You receive a confirmation by email.',
+        link: { href: '/en/shop', label: 'Visit the shop' },
+      },
+      {
+        q: 'Which payment methods do you accept?',
+        a: 'Payment is made online, securely: Mobile Money (via FedaPay) and Visa or Mastercard bank cards. We never ask for your codes or card numbers by message.',
+      },
+      {
+        q: 'Which currency are prices shown in?',
+        a: 'Prices are shown in West African CFA francs (XOF), all taxes included. If you pay by card from abroad, your bank may apply its own exchange rate.',
+      },
+      {
+        q: 'Can I order or ask a question on WhatsApp?',
+        a: 'Yes. Write to us on WhatsApp with a question before buying or to follow an order. Payment, however, is always made on the website.',
+        link: { href: 'https://wa.me/2290194458956', label: 'Write on WhatsApp' },
+      },
+    ],
+  },
+  {
+    title: 'Delivery',
+    items: [
+      {
+        q: 'Where do you deliver?',
+        a: 'We deliver in Benin, across the region and to the diaspora (Europe, North America…). Enter your country and address in the cart: the options available for your destination are shown before payment.',
+      },
+      {
+        q: 'How much does delivery cost?',
+        a: 'Delivery fees depend on the weight of your order and on your region. They are calculated and shown in the cart, before you pay.',
+      },
+      {
+        q: 'How long does delivery take?',
+        a: 'It varies depending on your destination and the carrier. Estimated times are shared with you before payment, and tracking for your parcel is sent as soon as it ships. Times are indicative and may be extended by customs procedures.',
+      },
+      {
+        q: 'Do I have to pay customs duties?',
+        a: 'Depending on your country, customs duties or import taxes may apply on receipt. They are the buyer’s responsibility and are not included in our prices. Check with your country’s customs authority before ordering.',
+      },
+      {
+        q: 'Delivery is guaranteed: what does that mean?',
+        a: 'If your order does not arrive, or arrives damaged, contact us: we follow your case until a solution is found (reshipment or refund), according to our refund policy.',
+        link: { href: '/en/refund-policy', label: 'Refund policy' },
+      },
+    ],
+  },
+  {
+    title: 'Our products',
+    items: [
+      {
+        q: 'Do your products replace medical treatment?',
+        a: 'No. Our natural products are offered for information and well-being purposes; they are not intended to diagnose, treat, cure or prevent any disease. If you are pregnant, breastfeeding, undergoing treatment or in doubt, ask a healthcare professional before use.',
+      },
+      {
+        q: 'Where do your products come from?',
+        a: 'Our products are carefully selected in Benin. Each product page presents its description and, for some products, a presentation video.',
+      },
+      {
+        q: 'How do I use a product?',
+        a: 'Refer to the product page and to the presentation video when there is one. For a more precise explanation, write to us: we take the time to guide you.',
+        link: { href: '/en/contact', label: 'Contact us' },
+      },
+    ],
+  },
+  {
+    title: 'Books and digital products',
+    items: [
+      {
+        q: 'How do I receive my digital product?',
+        a: 'After payment, you receive a personal download link by email and on the confirmation page. The link is valid for a limited time and a limited number of downloads: download your file promptly and keep it.',
+      },
+      {
+        q: 'I did not receive my link, or it no longer works',
+        a: 'First check your spam folder. Otherwise, write to us with your order number: we will send you a new link.',
+      },
+    ],
+  },
+  {
+    title: 'Returns and refunds',
+    items: [
+      {
+        q: 'Can I get a refund?',
+        a: 'Yes, in the cases covered by our policy: damaged or defective product, product not matching its description, or order not received. Contact us with your order number within the stated time limits.',
+        link: { href: '/remboursement', label: 'Read the refund policy' },
+      },
+      {
+        q: 'How do I contact customer service?',
+        a: 'By email or on WhatsApp. We usually reply within 24 to 48 business hours.',
+        link: { href: '/en/contact', label: 'Our contact details' },
+      },
+    ],
+  },
+];
+
+// Structured data so search engines can show these answers.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: groups.flatMap((g) =>
+    g.items.map((i) => ({
+      '@type': 'Question',
+      name: i.q,
+      acceptedAnswer: { '@type': 'Answer', text: i.a },
+    }))
+  ),
+};
+---
+
+<Layout metadata={metadata}>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <HeroText
+    tagline="Help"
+    title="Frequently asked questions"
+    subtitle="Ordering, payment, delivery, digital products, returns: the essentials in a few answers."
+  />
+
+  <div class="max-w-3xl mx-auto px-6 pb-16 space-y-10">
+    {
+      groups.map((group) => (
+        <section>
+          <h2 class="font-heading font-bold text-xl mb-4">{group.title}</h2>
+          <div class="space-y-3">
+            {group.items.map((item) => (
+              <details class="group rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 open:shadow-sm">
+                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-medium text-default [&::-webkit-details-marker]:hidden">
+                  <span>{item.q}</span>
+                  <svg
+                    class="h-5 w-5 shrink-0 text-primary transition-transform group-open:rotate-180"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </summary>
+                <div class="px-5 pb-5 text-sm text-muted leading-relaxed">
+                  <p>{item.a}</p>
+                  {item.link && (
+                    <p class="mt-3">
+                      <a
+                        href={item.link.href}
+                        class="font-medium text-primary hover:underline"
+                        {...(item.link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      >
+                        {item.link.label} →
+                      </a>
+                    </p>
+                  )}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+
+  <CallToAction
+    title="Can’t find your answer?"
+    subtitle="Write to us by email or on WhatsApp: we reply quickly."
+    actions={[{ variant: 'primary', text: 'Contact us', href: '/en/contact', icon: 'tabler:message' }]}
+  />
+</Layout>

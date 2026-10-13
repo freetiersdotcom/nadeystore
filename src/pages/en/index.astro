@@ -1,0 +1,179 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import Hero2 from '~/components/widgets/Hero2.astro';
+import Features from '~/components/widgets/Features.astro';
+import Content from '~/components/widgets/Content.astro';
+import Steps from '~/components/widgets/Steps.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+
+const metadata = {
+  title: 'Santé Natur’ — Natural wellness products, delivered to your door',
+  description:
+    'Herbal teas, honeys, natural oils, soaps, perfumes, incense and wellness products, carefully selected. Online shop based in Cotonou, delivering in Benin and to the diaspora.',
+};
+---
+
+<Layout metadata={metadata}>
+  <!-- ── Hero ──────────────────────────────────────────────── -->
+  <Hero2
+    tagline="Natural products · Cotonou, Benin"
+    title="The power of nature <span class='text-accent dark:text-accent highlight'>in service of your well-being</span>"
+    subtitle="Herbal teas, honeys, natural oils, soaps, perfumes, incense and wellness products, carefully selected and delivered to your door, in Benin and across the diaspora."
+    actions={[
+      { variant: 'primary', text: 'Order now', href: '/en/shop', icon: 'tabler:shopping-cart' },
+      { text: 'Message us on WhatsApp', href: 'https://wa.me/2290194458956', icon: 'tabler:brand-whatsapp' },
+    ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80',
+      alt: 'Plants and natural products',
+    }}
+  />
+
+  <!-- ── Trust strip ────────────────────────────────────────── -->
+  <Features
+    id="benefits"
+    tagline="Why choose us"
+    title="Products and service you can trust"
+    subtitle="A careful selection, secure payment and a team that supports you until you are satisfied."
+    columns={4}
+    items={[
+      {
+        title: 'Carefully selected',
+        description: 'Premium-quality natural products, with ingredients chosen with care.',
+        icon: 'tabler:leaf',
+      },
+      {
+        title: 'Secure payment',
+        description: 'Pay online by Mobile Money or bank card (Visa, Mastercard) through secure payment providers.',
+        icon: 'tabler:lock',
+      },
+      {
+        title: 'Guaranteed delivery',
+        description:
+          'We deliver in Benin, across the region and to the diaspora. Delivery fees are calculated before you pay.',
+        icon: 'tabler:truck-delivery',
+      },
+      {
+        title: 'Responsive customer service',
+        description:
+          'Have a question? Write to us on WhatsApp or by email: we answer and explain each product clearly.',
+        icon: 'tabler:message-circle',
+      },
+    ]}
+  />
+
+  <!-- ── What we offer ──────────────────────────────────────── -->
+  <Content
+    id="products"
+    tagline="Our shop"
+    title="What you will find with us"
+    subtitle="A range designed to support your everyday life."
+    isReversed
+    items={[
+      {
+        title: 'Herbal teas and teas',
+        description: 'Infusions and teas to enjoy during your everyday moments of relaxation.',
+        icon: 'tabler:cup',
+      },
+      {
+        title: 'Honeys and natural oils',
+        description: 'Natural products for the table and for personal care, selected with attention.',
+        icon: 'tabler:droplet',
+      },
+      {
+        title: 'Soaps, perfumes and incense',
+        description: 'Creations to care for yourself and your home.',
+        icon: 'tabler:flower',
+      },
+      {
+        title: 'Digital books',
+        description: 'Ebooks to download immediately after your payment.',
+        icon: 'tabler:book',
+      },
+    ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&q=80',
+      alt: 'Natural wellness products',
+    }}
+    callToAction={{
+      text: 'See all products',
+      href: '/en/shop',
+      icon: 'tabler:arrow-right',
+    }}
+  />
+
+  <!-- ── About strip ────────────────────────────────────────── -->
+  <Content
+    tagline="Who we are"
+    title="A shop in service of your well-being"
+    content={`
+      <p>Santé Natur’ is an online shop based in Cotonou, Benin. We offer natural and wellness products, carefully presented and selected to support you in your everyday life.</p>
+      <p class="mt-4">Our customers: anyone looking for natural products, people interested in African spirituality, the African diaspora and wellness entrepreneurs.</p>
+      <p class="mt-4 font-medium">Our commitment: attentive follow-up, from your order until you are fully satisfied.</p>
+    `}
+    items={[
+      {
+        title: 'Products explained',
+        description: 'Detailed product pages and, for some products, presentation videos.',
+        icon: 'tabler:video',
+      },
+      {
+        title: 'Rigorous follow-up',
+        description: 'We stay available before, during and after your order.',
+        icon: 'tabler:heart-handshake',
+      },
+    ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80',
+      alt: 'Plants and natural ingredients',
+    }}
+    callToAction={{
+      text: 'Learn more',
+      href: '/en/about',
+      icon: 'tabler:arrow-right',
+    }}
+  />
+
+  <!-- ── How it works ───────────────────────────────────────── -->
+  <Steps
+    id="how-it-works"
+    tagline="Simple and fast"
+    title="Order in 3 steps"
+    items={[
+      {
+        title: 'Browse the shop',
+        description:
+          'Explore our products. Each page presents the product, its options and, in some cases, a presentation video.',
+        icon: 'tabler:search',
+      },
+      {
+        title: 'Place your order',
+        description:
+          'Add your products to the cart, enter your delivery address and pay online securely, by Mobile Money or bank card.',
+        icon: 'tabler:shopping-cart',
+      },
+      {
+        title: 'Receive your order',
+        description: 'You receive a confirmation by email. Our team stays reachable on WhatsApp to follow your order.',
+        icon: 'tabler:package',
+      },
+    ]}
+    image={{
+      src: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&q=80',
+      alt: 'Parcel ready for shipping',
+    }}
+  />
+
+  <!-- Customer reviews: add a Testimonials section here once real reviews have been collected. -->
+
+  <!-- ── Final CTA ──────────────────────────────────────────── -->
+  <CallToAction
+    tagline="Ready to order?"
+    title="Discover the shop"
+    subtitle="Guaranteed delivery. A question before you order? Write to us on WhatsApp, we reply quickly."
+    actions={[
+      { variant: 'primary', text: 'Order now', href: '/en/shop', icon: 'tabler:shopping-cart' },
+      { text: 'WhatsApp', href: 'https://wa.me/2290194458956', icon: 'tabler:brand-whatsapp' },
+    ]}
+  />
+</Layout>

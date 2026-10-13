@@ -4,6 +4,9 @@
 // Returns a Promise<string | null> via window.promptEmail().
 // Mobile: bottom sheet pinned to the visual viewport (keyboard-safe).
 // Desktop (sm+): centered card.
+import { getLocale, UI } from '~/utils/i18n';
+
+const t = UI[getLocale(Astro.url.pathname)];
 ---
 
 <div
@@ -19,16 +22,18 @@
     class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 w-full sm:max-w-sm sm:mx-4 rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl"
     style="padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));"
   >
-    <h2 id="email-modal-title" class="text-lg font-semibold mb-1 text-default">Presque là</h2>
+    <h2 id="email-modal-title" class="text-lg font-semibold mb-1 text-default">
+      {t.emailTitle}
+    </h2>
     <p class="text-muted text-sm mb-4">
-      Entrez votre adresse e-mail pour finaliser votre commande. Votre confirmation y sera envoyée.
+      {t.emailIntro}
     </p>
     <input
       id="modal-email"
       type="email"
       inputmode="email"
       enterkeyhint="done"
-      placeholder="vous@exemple.com"
+      placeholder={t.emailPlaceholder}
       autocomplete="email"
       autocapitalize="off"
       autocorrect="off"
@@ -36,7 +41,7 @@
       style="font-size:16px;"
     />
     <p id="modal-error" class="text-red-500 text-xs mb-3" style="display:none">
-      Veuillez entrer une adresse e-mail valide.
+      {t.emailError}
     </p>
     <div class="flex gap-2 mt-2">
       <button
@@ -44,10 +49,10 @@
         type="button"
         class="flex-1 px-4 py-3 text-sm text-muted hover:text-default transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
       >
-        Annuler
+        {t.cancel}
       </button>
       <button id="modal-confirm" type="button" class="flex-1 btn-primary py-3 px-4 text-sm rounded-lg">
-        Continuer
+        {t.continue}
       </button>
     </div>
   </div>

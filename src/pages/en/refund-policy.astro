@@ -1,0 +1,97 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+
+const metadata = {
+  title: 'Refund policy — Santé Natur’',
+  robots: { index: false, follow: true },
+};
+
+const lastUpdated = 'October 2026';
+---
+
+<Layout metadata={metadata}>
+  <HeroText tagline="Legal" title="Refund policy" subtitle={`Last updated: ${lastUpdated}`} />
+
+  <div
+    class="max-w-3xl mx-auto px-6 pb-16 prose dark:prose-invert prose-headings:font-heading prose-headings:font-bold prose-a:text-primary"
+  >
+    <p class="lead text-xl">
+      Your satisfaction is our priority. If you are not fully satisfied with your order, we will do everything we can to
+      make things right.
+    </p>
+
+    <h2>1. Physical products — return period</h2>
+    <p>
+      You have <strong>14 calendar days</strong> from receipt of your order to report any problem and request a refund or
+      an exchange.
+    </p>
+
+    <h2>2. Refund conditions</h2>
+    <p>We accept refund requests in the following cases:</p>
+    <ul>
+      <li>Product received damaged or defective.</li>
+      <li>Product not matching the description published in our shop.</li>
+      <li>Order not received after 45 business days (beyond the estimated delivery time).</li>
+    </ul>
+
+    <h2>3. What is not refundable</h2>
+    <ul>
+      <li>Opened or used products (for hygiene and food-safety reasons).</li>
+      <li>Products returned without prior agreement from our team.</li>
+      <li>Delivery delays caused by events beyond our control (strikes, bad weather, customs holds).</li>
+      <li>Customs duties or import taxes incurred by the buyer.</li>
+    </ul>
+
+    <h2>4. Digital products</h2>
+    <p>
+      Digital products (guides, e-books) are not refundable once downloaded, except in the case of a technical defect
+      preventing any access to the file.
+    </p>
+
+    <h2>5. How to make a request</h2>
+    <p>To start a refund request:</p>
+    <ol>
+      <li>Contact us at <a href="mailto:agroalafia@gmail.com">agroalafia@gmail.com</a> within the time limit.</li>
+      <li>Give your order number and describe the problem.</li>
+      <li>If possible, attach photos of the product received.</li>
+    </ol>
+    <p>Our team will reply within 48 business hours with instructions.</p>
+
+    <h2>6. Processing the refund</h2>
+    <p>
+      Once your request is approved, we process the refund within <strong>5 to 10 business days</strong>.
+    </p>
+    <ul>
+      <li>
+        <strong>Payment by bank card (Stripe or FedaPay):</strong> the refund is made to the card used. How long it takes
+        to appear on your statement depends on your bank.
+      </li>
+      <li>
+        <strong>Payment by mobile money:</strong> the refund is made to the number used when the operator allows it; otherwise,
+        we agree with you on another refund method (for example a bank transfer or a mobile money transfer).
+      </li>
+    </ul>
+    <p>We confirm by email as soon as the refund has been issued.</p>
+
+    <h2>7. Exchanges</h2>
+    <p>
+      If you prefer an exchange to a refund, we will do our best to offer a suitable solution depending on product
+      availability. Reshipping costs for an exchange are covered by Santé Natur’ when the error is on our side.
+    </p>
+
+    <h2>8. Contact</h2>
+    <p>
+      For any question about this policy: <a href="mailto:agroalafia@gmail.com">agroalafia@gmail.com</a> or through <a
+        href="/en/contact">our contact form</a
+      >.
+    </p>
+  </div>
+
+  <CallToAction
+    title="A question about your order?"
+    subtitle="Our team replies quickly by email or on WhatsApp."
+    actions={[{ variant: 'primary', text: 'Contact us', href: '/en/contact', icon: 'tabler:message' }]}
+  />
+</Layout>

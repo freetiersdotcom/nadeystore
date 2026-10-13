@@ -6,6 +6,8 @@ import ToggleMenu from '~/components/common/ToggleMenu.astro';
 import Button from '~/components/ui/Button.astro';
 
 import { getHomePermalink } from '~/utils/permalinks';
+import LanguageSwitcher from '~/components/common/LanguageSwitcher.astro';
+import { getLocale, page } from '~/utils/i18n';
 import { trimSlash, getAsset } from '~/utils/permalinks';
 import type { CallToAction } from '~/types';
 
@@ -46,6 +48,7 @@ const {
   position = 'center',
 } = Astro.props;
 
+const locale = getLocale(Astro.url.pathname);
 const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
 ---
 
@@ -73,7 +76,7 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
     ]}
   >
     <div class:list={[{ 'mr-auto rtl:mr-0 rtl:ml-auto': position === 'right' }, 'flex justify-between']}>
-      <a class="flex items-center" href={getHomePermalink()}>
+      <a class="flex items-center" href={locale === 'en' ? '/en/' : getHomePermalink()}>
         <Logo />
       </a>
       <div class="flex items-center md:hidden">
@@ -152,8 +155,9 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
             )
           }
         </div>
-		<!-- Cart icon — always visible on store pages -->
-		<CartIcon cartUrl="/fr/panier" />
+        <!-- Cart icon — always visible on store pages -->
+        <LanguageSwitcher class="mr-1" />
+        <CartIcon cartUrl={page('cart', locale)} />
         {
           actions?.length ? (
             <span class="ml-4 rtl:ml-0 rtl:mr-4">

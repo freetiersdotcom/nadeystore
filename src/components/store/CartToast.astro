@@ -3,10 +3,13 @@
 // Shared toast notification shown after add-to-cart.
 // Controlled by showCartToast() exported below — import in page scripts.
 // cartUrl should match the locale: /fr/panier or /en/cart.
+import { getLocale, page, UI } from '~/utils/i18n';
+
 interface Props {
   cartUrl?: string;
 }
-const { cartUrl = '/fr/panier' } = Astro.props;
+const locale = getLocale(Astro.url.pathname);
+const { cartUrl = page('cart', locale) } = Astro.props;
 ---
 
 <div
@@ -16,26 +19,33 @@ const { cartUrl = '/fr/panier' } = Astro.props;
   role="status"
   aria-live="polite"
 >
-  <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+  <svg
+    class="w-4 h-4 text-green-500 flex-shrink-0"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.5"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
   </svg>
   <div class="min-w-0">
     <p class="text-sm font-medium text-default truncate" data-toast-title></p>
-    <p class="text-xs text-muted" data-toast-label>Ajouté au panier</p>
+    <p class="text-xs text-muted" data-toast-label>{UI[locale].addedToCart}</p>
   </div>
   <a
     id="toast-view"
     href={cartUrl}
     class="text-xs font-medium bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0 text-default"
   >
-    Voir le panier
+    {UI[locale].viewCart}
   </a>
 </div>
 
 <script>
   // showCartToast is called from product listing and product page scripts.
   // Exported on window so it can be called from inline scripts too.
-  window.showCartToast = function(productTitle: string) {
+  window.showCartToast = function (productTitle: string) {
     const toast = document.getElementById('cart-toast');
     if (!toast) return;
     const titleEl = toast.querySelector('[data-toast-title]') as HTMLElement;
