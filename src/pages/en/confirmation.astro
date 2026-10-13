@@ -1,0 +1,261 @@
+---
+// src/pages/en/confirmation.astro
+// Order confirmation page — reads cart_id from URL query params.
+// The backend webhook (FedaPay or Stripe) will have already created
+// the order by the time the user lands here. We fetch the cart to
+// confirm its status, then display appropriate messaging.
+//
+// URL pattern from checkout pipeline:
+//   /en/confirmation?cart_id=<uuid>
+
+import StoreLayout from '~/layouts/StoreLayout.astro';
+
+const metadata = {
+  title: 'Order confirmed',
+  robots: { index: false, follow: false },
+};
+---
+
+<StoreLayout metadata={metadata} cartUrl="/en/cart">
+  <div class="max-w-xl mx-auto px-6 py-20 text-center">
+    <!-- Loading state -->
+    <div id="loading-state">
+      <div
+        class="inline-block w-10 h-10 border-2 border-gray-200 dark:border-slate-700 border-t-primary rounded-full animate-spin mb-6"
+      >
+      </div>
+      <p class="text-muted">Checking your order...</p>
+    </div>
+
+    <!-- Success state -->
+    <div id="success-state" style="display:none">
+      <div
+        class="inline-flex items-center justify-center w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full mb-6"
+      >
+        <svg
+          class="w-10 h-10 text-green-600 dark:text-green-400"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h1 class="font-bold font-heading text-3xl mb-3">Order confirmed!</h1>
+      <p class="text-muted mb-2">Thank you for your purchase.</p>
+      <p id="confirmation-email" class="text-muted text-sm mb-8"></p>
+
+      <!-- Order summary (if available) -->
+      <div id="order-summary" class="bg-gray-50 dark:bg-slate-800 rounded-xl p-5 text-left mb-8" style="display:none">
+        <h2 class="font-semibold text-sm mb-3">Order summary</h2>
+        <div id="order-items" class="space-y-2 text-sm text-muted"></div>
+        <div
+          class="border-t border-gray-200 dark:border-slate-700 mt-3 pt-3 flex justify-between font-semibold text-sm"
+        >
+          <span>Total</span>
+          <span id="order-total"></span>
+        </div>
+      </div>
+
+      <!-- Digital downloads notice -->
+      <div
+        id="digital-notice"
+        class="bg-accent/5 border border-accent/20 rounded-xl p-4 text-left mb-8 text-sm"
+        style="display:none"
+      >
+        <p class="font-medium text-default mb-1">⚡ Digital product(s)</p>
+        <p class="text-muted">
+          Your download links have been sent to your email address. Please also check your spam folder.
+        </p>
+      </div>
+
+      <!-- Needs-review notice (payment confirmed late, stock being double-checked) -->
+      <div
+        id="review-notice"
+        class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 text-left mb-8 text-sm"
+        style="display:none"
+      >
+        <p class="text-muted">
+          We are checking the availability of one or more items in your order. We will contact you shortly if needed.
+        </p>
+      </div>
+
+      <a href="/en/shop" class="btn-primary px-8 py-3 rounded-xl text-sm font-semibold"> Continue shopping </a>
+    </div>
+
+    <!-- Pending state (payment processing) -->
+    <div id="pending-state" style="display:none">
+      <div
+        class="inline-flex items-center justify-center w-20 h-20 bg-yellow-100 dark:bg-yellow-900/30 rounded-full mb-6"
+      >
+        <svg
+          class="w-10 h-10 text-yellow-600 dark:text-yellow-400"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h1 class="font-bold font-heading text-2xl mb-3">Payment being processed</h1>
+      <p class="text-muted mb-8">
+        Your payment is being processed. You will receive a confirmation email in a few minutes.
+      </p>
+      <a href="/en/shop" class="btn px-8 py-3 rounded-xl text-sm"> Back to the shop </a>
+    </div>
+
+    <!-- Expired state (checkout session never completed) -->
+    <div id="expired-state" style="display:none">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 dark:bg-slate-800 rounded-full mb-6">
+        <svg class="w-10 h-10 text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h1 class="font-bold font-heading text-2xl mb-3">Payment session expired</h1>
+      <p class="text-muted mb-8">
+        This payment attempt did not go through. If you were charged, please contact us; otherwise you can try again.
+      </p>
+      <div class="flex gap-3 justify-center">
+        <a href="/en/cart" class="btn px-6 py-3 rounded-xl text-sm">My cart</a>
+        <a href="/en/contact" class="btn-primary px-6 py-3 rounded-xl text-sm">Contact us</a>
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div id="error-state" style="display:none">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full mb-6">
+        <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </div>
+      <h1 class="font-bold font-heading text-2xl mb-3">Something went wrong</h1>
+      <p id="error-message" class="text-muted mb-8">
+        We could not check the status of your order. If your payment was charged, you will receive a confirmation by
+        email.
+      </p>
+      <div class="flex gap-3 justify-center">
+        <a href="/en/shop" class="btn px-6 py-3 rounded-xl text-sm">Shop</a>
+        <a href="/en/contact" class="btn-primary px-6 py-3 rounded-xl text-sm">Contact us</a>
+      </div>
+    </div>
+  </div>
+</StoreLayout>
+
+<script>
+  import { formatPrice } from '~/scripts/cart';
+  import { apiUrl, publicKey, currency as getCurrency } from '~/scripts/api';
+
+  const CURRENCY = getCurrency();
+
+  function show(id: string) {
+    ['loading-state', 'success-state', 'pending-state', 'expired-state', 'error-state'].forEach((s) => {
+      const el = document.getElementById(s)!;
+      el.style.display = s === id ? 'block' : 'none';
+    });
+  }
+
+  function renderSuccess(cart: any, order: { needs_review: boolean }) {
+    const emailEl = document.getElementById('confirmation-email')!;
+    if (cart.customer_email) {
+      emailEl.textContent = `A confirmation email has been sent to ${cart.customer_email}.`;
+    }
+
+    if (cart.items?.length > 0) {
+      const summaryEl = document.getElementById('order-summary')!;
+      const itemsEl = document.getElementById('order-items')!;
+      const totalEl = document.getElementById('order-total')!;
+
+      itemsEl.innerHTML = cart.items
+        .map(
+          (item: any) => `
+        <div class="flex justify-between">
+          <span>${item.title} × ${item.qty}</span>
+          <span>${formatPrice(item.unit_price_cents * item.qty, CURRENCY)}</span>
+        </div>
+      `
+        )
+        .join('');
+
+      if (cart.totals?.total_cents !== undefined) {
+        totalEl.textContent = formatPrice(cart.totals.total_cents, CURRENCY);
+      }
+
+      summaryEl.style.display = 'block';
+
+      const hasDigital = cart.items.some((i: any) => i.product_type === 'digital');
+      if (hasDigital) {
+        document.getElementById('digital-notice')!.style.display = 'block';
+      }
+    }
+
+    if (order.needs_review) {
+      document.getElementById('review-notice')!.style.display = 'block';
+    }
+
+    show('success-state');
+  }
+
+  const MAX_POLL_ATTEMPTS = 10;
+  const POLL_INTERVAL_MS = 3000;
+
+  async function checkStatus(cartId: string, attempt = 1) {
+    try {
+      const res = await fetch(`${apiUrl()}/v1/carts/${cartId}`, {
+        headers: { Authorization: `Bearer ${publicKey()}` },
+      });
+
+      if (!res.ok) {
+        show('error-state');
+        return;
+      }
+
+      const cart = (await res.json()) as any;
+
+      // An order existing is the authoritative "payment succeeded" signal —
+      // independent of cart.status, which 'expired' otherwise overloads for
+      // both "converted to an order" and "abandoned checkout session".
+      if (cart.order) {
+        renderSuccess(cart, cart.order);
+        return;
+      }
+
+      if (cart.status === 'checked_out') {
+        // No order yet — the webhook may simply not have landed yet. Poll a
+        // few times before settling on "processing" rather than failing fast.
+        show('pending-state');
+        if (attempt < MAX_POLL_ATTEMPTS) {
+          setTimeout(() => checkStatus(cartId, attempt + 1), POLL_INTERVAL_MS);
+        }
+        return;
+      }
+
+      if (cart.status === 'expired') {
+        // No order was ever created for this cart — genuinely abandoned.
+        show('expired-state');
+        return;
+      }
+
+      show('error-state');
+    } catch (err) {
+      console.error('Confirmation page error:', err);
+      show('error-state');
+    }
+  }
+
+  function init() {
+    const params = new URLSearchParams(window.location.search);
+    const cartId = params.get('cart_id');
+
+    if (!cartId) {
+      show('error-state');
+      return;
+    }
+
+    checkStatus(cartId);
+  }
+
+  init();
+  document.addEventListener('astro:after-swap', init);
+</script>

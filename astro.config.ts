@@ -19,7 +19,7 @@ import cloudflare from "@astrojs/cloudflare";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// How product pages (src/pages/fr/produits/[slug].astro) are built:
+// How product pages (src/pages/fr/produits/[slug].astro and src/pages/en/products/[slug].astro) are built:
 //   PRODUCT_PAGES_MODE=ssr     (default) rendered on demand, always fresh
 //   PRODUCT_PAGES_MODE=static  prerendered at build; the API triggers rebuilds via a deploy hook
 // Set it as a build variable in Cloudflare (Workers Builds > Settings > Build variables).
@@ -29,7 +29,8 @@ const productPagesMode: AstroIntegration = {
   name: 'product-pages-mode',
   hooks: {
     'astro:route:setup': ({ route }) => {
-      if (route.component.replace(/\\/g, '/').endsWith('/fr/produits/[slug].astro')) {
+      const comp = route.component.replace(/\\/g, '/');
+      if (comp.endsWith('/fr/produits/[slug].astro') || comp.endsWith('/en/products/[slug].astro')) {
         route.prerender = productPagesStatic;
       }
     },
