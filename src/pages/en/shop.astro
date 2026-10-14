@@ -40,6 +40,12 @@ const metadata = {
           class="px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default"
           >Digital</button
         >
+        <button
+          data-filter="service"
+          id="filter-service"
+          class="hidden px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default"
+          >Services</button
+        >
       </div>
       <!-- Tag chips, populated once products are loaded -->
       <div id="tag-filters" class="flex flex-wrap gap-2 pb-3 hidden"></div>
@@ -74,6 +80,11 @@ const metadata = {
 
   const CURRENCY = getCurrency();
 
+  // Services are paid first, then scheduled with the customer.
+  function addLabel(type?: string): string {
+    return type === 'service' ? 'Book now' : 'Add to cart';
+  }
+
   let allProducts: Awaited<ReturnType<typeof getProducts>> = [];
   let activeFilter = 'all';
   let activeTag: string | null = null;
@@ -94,6 +105,10 @@ const metadata = {
         document.getElementById('products-grid')!.innerHTML =
           `<div class="col-span-full text-center py-12 text-muted">No products available at the moment.</div>`;
         return;
+      }
+
+      if (allProducts.some((pr) => pr.variants.some((v) => v.product_type === 'service'))) {
+        document.getElementById('filter-service')?.classList.remove('hidden');
       }
 
       renderGrid();
@@ -138,7 +153,9 @@ const metadata = {
 
   function productCardHTML(product: (typeof allProducts)[0]): string {
     const defaultVariant = product.variants[0];
-    const isDigital = (defaultVariant.product_type || 'physical') === 'digital';
+    const productType = defaultVariant.product_type || 'physical';
+    const isDigital = productType === 'digital';
+    const isService = productType === 'service';
     const image =
       defaultVariant.image_url || product.image_url || 'https://placehold.co/400x400/f4f4f5/a1a1aa?text=Image';
     const slug = product.slug || product.id;
@@ -157,6 +174,11 @@ const metadata = {
             ${
               isDigital
                 ? `<span class="bg-accent text-white dark:text-slate-900 text-xs px-2 py-1 rounded-md font-medium">Digital</span>`
+                : ''
+            }
+            ${
+              isService
+                ? `<span class="bg-primary text-white text-xs px-2 py-1 rounded-md font-medium">Service</span>`
                 : ''
             }
             ${
@@ -183,7 +205,9 @@ const metadata = {
         ${
           isDigital
             ? `<p class="text-accent text-xs mb-3">⚡ Instant download</p>`
-            : `<p class="text-muted text-xs mb-3">Shipping required</p>`
+            : isService
+              ? `<p class="text-muted text-xs mb-3">Scheduled with you after purchase</p>`
+              : `<p class="text-muted text-xs mb-3">Shipping required</p>`
         }
 
         ${
@@ -218,7 +242,7 @@ const metadata = {
           data-image="${defaultVariant.image_url || ''}"
           ${!defaultVariant.in_stock ? 'disabled' : ''}
         >
-          ${defaultVariant.in_stock ? 'Add to cart' : 'Out of stock'}
+          ${defaultVariant.in_stock ? addLabel(productType) : 'Out of stock'}
         </button>
       </div>
     `;
@@ -304,7 +328,7 @@ const metadata = {
     // Reflect the selected variant's stock status on the add-to-cart button
     const inStock = opt.dataset.inStock === 'true';
     btn.disabled = !inStock;
-    btn.textContent = inStock ? 'Add to cart' : 'Out of stock';
+    btn.textContent = inStock ? addLabel(opt.dataset.type) : 'Out of stock';
   }
 
   // ── Add to cart ────────────────────────────────────────────
@@ -329,7 +353,7 @@ const metadata = {
     btn.classList.add('opacity-75');
     btn.disabled = true;
     setTimeout(() => {
-      btn.textContent = 'Add to cart';
+      btn.textContent = addLabel(btn.dataset.productType);
       btn.classList.remove('opacity-75');
       btn.disabled = false;
     }, 1500);

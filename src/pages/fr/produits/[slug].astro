@@ -52,6 +52,7 @@ const description = product.description_fr || product.description;
 
 const defaultVariant = product.variants[0];
 const isDigital = (defaultVariant.product_type || 'physical') === 'digital';
+const isService = (defaultVariant.product_type || 'physical') === 'service';
 const mainImage =
   defaultVariant.image_url || product.image_url || 'https://placehold.co/600x600/f4f4f5/a1a1aa?text=Image';
 
@@ -91,6 +92,11 @@ const metadata = {
               <span class="bg-accent/10 text-accent text-xs font-medium px-2.5 py-1 rounded-full">
                 ⚡ Téléchargement numérique
               </span>
+            )
+          }
+          {
+            isService && (
+              <span class="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-full">Prestation</span>
             )
           }
           {
@@ -154,14 +160,24 @@ const metadata = {
           data-image={defaultVariant.image_url || ''}
           disabled={!defaultVariant.in_stock}
         >
-          {defaultVariant.in_stock ? (isDigital ? 'Acheter maintenant' : 'Ajouter au panier') : 'Rupture de stock'}
+          {
+            defaultVariant.in_stock
+              ? isDigital
+                ? 'Acheter maintenant'
+                : isService
+                  ? 'Réserver'
+                  : 'Ajouter au panier'
+              : 'Rupture de stock'
+          }
         </button>
 
         <p class="text-xs text-muted mb-6">
           {
             isDigital
               ? 'Lien de téléchargement envoyé par e-mail après paiement.'
-              : 'Frais de livraison calculés dans le panier avant le paiement.'
+              : isService
+                ? 'Après votre paiement, nous vous contactons pour convenir de la date et des modalités de votre séance.'
+                : 'Frais de livraison calculés dans le panier avant le paiement.'
           }
         </p>
 
@@ -253,6 +269,11 @@ const metadata = {
 
   const CURRENCY = getCurrency();
 
+  // Button label per product type (services are paid first, then scheduled).
+  function actionLabel(type?: string): string {
+    return type === 'digital' ? 'Acheter maintenant' : type === 'service' ? 'Réserver' : 'Ajouter au panier';
+  }
+
   // ── Hydrate prices ─────────────────────────────────────────
   // Prices are in data attributes to avoid SSG/currency mismatch.
 
@@ -295,11 +316,7 @@ const metadata = {
     // Reflect the selected variant's stock status
     const inStock = opt.dataset.inStock === 'true';
     btn.disabled = !inStock;
-    btn.textContent = inStock
-      ? btn.dataset.productType === 'digital'
-        ? 'Acheter maintenant'
-        : 'Ajouter au panier'
-      : 'Rupture de stock';
+    btn.textContent = inStock ? actionLabel(btn.dataset.productType) : 'Rupture de stock';
   }
 
   // ── Add to cart ────────────────────────────────────────────
@@ -324,7 +341,7 @@ const metadata = {
     btn.classList.add('opacity-75');
     btn.disabled = true;
     setTimeout(() => {
-      btn.textContent = btn.dataset.productType === 'digital' ? 'Acheter maintenant' : 'Ajouter au panier';
+      btn.textContent = actionLabel(btn.dataset.productType);
       btn.classList.remove('opacity-75');
       btn.disabled = false;
     }, 1500);

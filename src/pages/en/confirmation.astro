@@ -70,6 +70,19 @@ const metadata = {
         </p>
       </div>
 
+      <!-- Service notice (coaching / consultation: scheduled manually) -->
+      <div
+        id="service-notice"
+        class="bg-primary/5 border border-primary/20 rounded-xl p-4 text-left mb-8 text-sm"
+        style="display:none"
+      >
+        <p class="font-medium text-default mb-1">Service</p>
+        <p class="text-muted">
+          We will contact you shortly to agree on the date and arrangements for your service. A question? Write to us on
+          WhatsApp or by email.
+        </p>
+      </div>
+
       <!-- Needs-review notice (payment confirmed late, stock being double-checked) -->
       <div
         id="review-notice"
@@ -187,6 +200,11 @@ const metadata = {
       const hasDigital = cart.items.some((i: any) => i.product_type === 'digital');
       if (hasDigital) {
         document.getElementById('digital-notice')!.style.display = 'block';
+      }
+
+      const hasService = cart.items.some((i: any) => i.product_type === 'service');
+      if (hasService) {
+        document.getElementById('service-notice')!.style.display = 'block';
       }
     }
 

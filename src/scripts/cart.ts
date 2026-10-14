@@ -15,7 +15,7 @@ export interface CartLineItem {
   sku: string;
   title: string;
   price_cents: number;
-  product_type: 'physical' | 'digital';
+  product_type: 'physical' | 'digital' | 'service';
   qty: number;
   image_url: string | null;
   /** The product variant title shown in the cart (e.g. "100ml / Lavender") */

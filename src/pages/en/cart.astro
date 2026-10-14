@@ -289,7 +289,9 @@ const metadata = {
           ${
             item.product_type === 'digital'
               ? `<span class="text-xs text-accent font-medium">⚡ Digital</span>`
-              : `<span class="text-xs text-muted">Shipping required</span>`
+              : item.product_type === 'service'
+                ? `<span class="text-xs text-primary font-medium">Service</span>`
+                : `<span class="text-xs text-muted">Shipping required</span>`
           }
         </div>
         <div class="flex flex-col items-end gap-2">

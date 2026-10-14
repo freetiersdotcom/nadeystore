@@ -53,7 +53,7 @@ export interface Variant {
   price_cents: number;
   image_url: string | null;
   weight_g: number;
-  product_type: 'physical' | 'digital';
+  product_type: 'physical' | 'digital' | 'service';
   digital_asset_key: string | null;
   in_stock: boolean;
 }
@@ -89,7 +89,7 @@ export interface CartItem {
   title: string;
   qty: number;
   unit_price_cents: number;
-  product_type: 'physical' | 'digital';
+  product_type: 'physical' | 'digital' | 'service';
 }
 
 export interface Cart {
