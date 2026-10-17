@@ -24,6 +24,8 @@ const PAGE_MAP: Array<[fr: string, en: string]> = [
 
 const PRODUCT_FR = '/fr/produits/';
 const PRODUCT_EN = '/en/products/';
+const OFFER_FR = '/offre/';
+const OFFER_EN = '/en/offer/';
 
 function normalize(pathname: string): string {
   if (pathname === '/' || pathname === '/en' || pathname === '/en/') return pathname === '/' ? '/' : '/en/';
@@ -42,6 +44,9 @@ export function alternatePath(pathname: string, target: Locale): string {
 
   if (path.startsWith(PRODUCT_FR) && target === 'en') return PRODUCT_EN + path.slice(PRODUCT_FR.length);
   if (path.startsWith(PRODUCT_EN) && target === 'fr') return PRODUCT_FR + path.slice(PRODUCT_EN.length);
+
+  if (path.startsWith(OFFER_FR) && target === 'en') return OFFER_EN + path.slice(OFFER_FR.length);
+  if (path.startsWith(OFFER_EN) && target === 'fr') return OFFER_FR + path.slice(OFFER_EN.length);
 
   for (const [fr, en] of PAGE_MAP) {
     if ((from === 'fr' ? fr : en) === path) return target === 'fr' ? fr : en;
@@ -66,6 +71,9 @@ const NAMED: Record<string, [string, string]> = {
 export function page(name: keyof typeof NAMED, locale: Locale): string {
   return NAMED[name][locale === 'en' ? 1 : 0];
 }
+export function offerPath(slug: string, locale: Locale): string {
+  return (locale === 'en' ? OFFER_EN : OFFER_FR) + slug;
+}
 export function productPath(slug: string, locale: Locale): string {
   return (locale === 'en' ? PRODUCT_EN : PRODUCT_FR) + slug;
 }
@@ -87,6 +95,10 @@ export const UI = {
     emailError: 'Veuillez entrer une adresse e-mail valide.',
     cancel: 'Annuler',
     continue: 'Continuer',
+    consentText: 'Nous utilisons des cookies de mesure publicitaire (Meta, TikTok) pour savoir quelles annonces fonctionnent. Vous pouvez les refuser : la boutique fonctionne pareil.',
+    consentAccept: 'Accepter',
+    consentRefuse: 'Refuser',
+    consentMore: 'En savoir plus',
   },
   en: {
     cart: 'Cart',
@@ -100,5 +112,9 @@ export const UI = {
     emailError: 'Please enter a valid email address.',
     cancel: 'Cancel',
     continue: 'Continue',
+    consentText: 'We use advertising measurement cookies (Meta, TikTok) to learn which ads work. You can decline them: the shop works the same.',
+    consentAccept: 'Accept',
+    consentRefuse: 'Decline',
+    consentMore: 'Learn more',
   },
 } as const;

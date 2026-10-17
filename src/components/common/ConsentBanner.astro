@@ -1,0 +1,65 @@
+---
+// Shown only when at least one ad pixel is configured and no choice stored yet.
+import { getLocale, UI, page } from '~/utils/i18n';
+
+const hasPixels = !!(import.meta.env.PUBLIC_META_PIXEL_ID || import.meta.env.PUBLIC_TIKTOK_PIXEL_ID);
+const locale = getLocale(Astro.url.pathname);
+const t = UI[locale];
+---
+
+{
+  hasPixels && (
+    <div
+      id="sn-consent"
+      hidden
+      role="dialog"
+      aria-live="polite"
+      aria-label="Cookies"
+      class="fixed inset-x-0 bottom-0 z-[60] p-3 sm:p-4"
+      transition:persist
+    >
+      <div class="mx-auto max-w-3xl rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <p class="text-sm flex-1">
+          {t.consentText}{' '}
+          <a href={page('privacy', locale)} class="underline">
+            {t.consentMore}
+          </a>
+        </p>
+        <div class="flex gap-2 shrink-0">
+          <button
+            type="button"
+            data-consent="denied"
+            class="btn-secondary px-4 py-2 text-sm rounded-md border border-gray-300 dark:border-slate-600"
+          >
+            {t.consentRefuse}
+          </button>
+          <button type="button" data-consent="granted" class="btn-primary px-4 py-2 text-sm rounded-md">
+            {t.consentAccept}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+<script is:inline>
+  (function () {
+    var box = document.getElementById('sn-consent');
+    if (!box) return;
+    var stored = null;
+    try {
+      stored = localStorage.getItem('sn_consent');
+    } catch (e) {}
+    if (!stored) box.hidden = false;
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-consent]');
+      if (!b) return;
+      var v = b.getAttribute('data-consent');
+      try {
+        localStorage.setItem('sn_consent', v);
+      } catch (err) {}
+      box.hidden = true;
+      window.dispatchEvent(new CustomEvent('sn:consent', { detail: v }));
+    });
+  })();
+</script>

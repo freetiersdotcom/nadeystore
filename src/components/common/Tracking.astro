@@ -1,0 +1,146 @@
+---
+// Ad pixels, loaded ONLY after the visitor accepted. UTM capture is
+// first-party (sessionStorage) and runs regardless, so the order can
+// carry its source. Set PUBLIC_META_PIXEL_ID / PUBLIC_TIKTOK_PIXEL_ID to enable.
+const meta = import.meta.env.PUBLIC_META_PIXEL_ID || '';
+const tiktok = import.meta.env.PUBLIC_TIKTOK_PIXEL_ID || '';
+---
+
+<script is:inline define:vars={{ meta, tiktok }}>
+  (function () {
+    if (window.__snTracking) return;
+    window.__snTracking = true;
+
+    // ── UTM capture (first touch of the session) ──
+    try {
+      var q = new URLSearchParams(location.search);
+      var keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'ttclid'];
+      var found = {};
+      keys.forEach(function (k) {
+        if (q.get(k)) found[k] = q.get(k);
+      });
+      if (Object.keys(found).length && !sessionStorage.getItem('sn_attr')) {
+        found.landing = location.pathname;
+        sessionStorage.setItem('sn_attr', JSON.stringify(found));
+      }
+    } catch (e) {}
+
+    window.snAttribution = function () {
+      try {
+        return JSON.parse(sessionStorage.getItem('sn_attr') || 'null');
+      } catch (e) {
+        return null;
+      }
+    };
+
+    // ── Event queue: snTrack('ViewContent', {...}) works before/after consent ──
+    var loaded = false;
+    var queue = [];
+    window.snTrack = function (name, params) {
+      if (!loaded) {
+        queue.push([name, params]);
+        return;
+      }
+      send(name, params);
+    };
+
+    function send(name, p) {
+      p = p || {};
+      try {
+        if (window.fbq) window.fbq('track', name, p);
+      } catch (e) {}
+      try {
+        if (window.ttq) {
+          var map = {
+            ViewContent: 'ViewContent',
+            AddToCart: 'AddToCart',
+            InitiateCheckout: 'InitiateCheckout',
+            Purchase: 'CompletePayment',
+            Lead: 'Contact',
+          };
+          window.ttq.track(map[name] || name, p);
+        }
+      } catch (e) {}
+    }
+
+    function load() {
+      if (loaded) return;
+      loaded = true;
+      if (meta) {
+        !(function (f, b, e, v, n, t, s) {
+          if (f.fbq) return;
+          n = f.fbq = function () {
+            n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+          };
+          if (!f._fbq) f._fbq = n;
+          n.push = n;
+          n.loaded = !0;
+          n.version = '2.0';
+          n.queue = [];
+          t = b.createElement(e);
+          t.async = !0;
+          t.src = v;
+          s = b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t, s);
+        })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        window.fbq('init', meta);
+        window.fbq('track', 'PageView');
+      }
+      if (tiktok) {
+        !(function (w, d, t) {
+          w.TiktokAnalyticsObject = t;
+          var ttq = (w[t] = w[t] || []);
+          ((ttq.methods = [
+            'page',
+            'track',
+            'identify',
+            'instances',
+            'debug',
+            'on',
+            'off',
+            'once',
+            'ready',
+            'alias',
+            'group',
+            'enableCookie',
+            'disableCookie',
+          ]),
+            (ttq.setAndDefer = function (t, e) {
+              t[e] = function () {
+                t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+              };
+            }));
+          for (var i = 0; i < ttq.methods.length; i++) ttq.setAndDefer(ttq, ttq.methods[i]);
+          ttq.load = function (e) {
+            var n = 'https://analytics.tiktok.com/i18n/pixel/events.js';
+            ((ttq._i = ttq._i || {}),
+              (ttq._i[e] = []),
+              (ttq._i[e]._u = n),
+              (ttq._t = ttq._t || {}),
+              (ttq._t[e] = +new Date()),
+              (ttq._o = ttq._o || {}));
+            var o = document.createElement('script');
+            ((o.type = 'text/javascript'), (o.async = !0), (o.src = n + '?sdkid=' + e + '&lib=' + t));
+            var a = document.getElementsByTagName('script')[0];
+            a.parentNode.insertBefore(o, a);
+          };
+          ttq.load(tiktok);
+          ttq.page();
+        })(window, document, 'ttq');
+      }
+      queue.splice(0).forEach(function (x) {
+        send(x[0], x[1]);
+      });
+    }
+
+    if (!meta && !tiktok) return;
+    var c = null;
+    try {
+      c = localStorage.getItem('sn_consent');
+    } catch (e) {}
+    if (c === 'granted') load();
+    window.addEventListener('sn:consent', function (e) {
+      if (e.detail === 'granted') load();
+    });
+  })();
+</script>

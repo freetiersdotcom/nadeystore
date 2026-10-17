@@ -1,0 +1,247 @@
+---
+// Renders one landing page from a JSON content object (see src/content/landing).
+// Every block is optional: leave it out of the JSON and it disappears.
+import Layout from '~/layouts/Layout.astro';
+import { page, offerPath, getLocale, alternatePath, type Locale } from '~/utils/i18n';
+
+export interface Props {
+  content: any;
+  locale: Locale;
+  slug: string;
+}
+const { content, locale, slug } = Astro.props;
+const { hero, benefits, steps, products, faq, final } = content;
+
+const WA = (import.meta.env.PUBLIC_WHATSAPP_NUMBER || '2290194458956').replace(/\D/g, '');
+const waHref = `https://wa.me/${WA}?text=${encodeURIComponent(content.whatsapp_message || '')}`;
+const shopHref = page('shop', locale);
+const L =
+  locale === 'en'
+    ? {
+        whatsapp: 'Order or ask on WhatsApp',
+        shop: 'See the shop',
+        terms: 'Terms',
+        privacy: 'Privacy',
+        refund: 'Refunds',
+        from: 'From',
+        view: 'View',
+        loading: 'Loading…',
+        unavailable: 'Products are unavailable right now. Write to us on WhatsApp.',
+      }
+    : {
+        whatsapp: 'Commander ou poser une question sur WhatsApp',
+        shop: 'Voir la boutique',
+        terms: 'Conditions',
+        privacy: 'Confidentialité',
+        refund: 'Remboursement',
+        from: 'À partir de',
+        view: 'Voir',
+        loading: 'Chargement…',
+        unavailable: 'Les produits sont indisponibles pour le moment. Écrivez-nous sur WhatsApp.',
+      };
+const other: Locale = locale === 'en' ? 'fr' : 'en';
+const otherHref = offerPath(slug, other);
+const metadata = {
+  title: content.meta?.title,
+  description: content.meta?.description,
+  openGraph: hero?.image ? { images: [{ url: hero.image }] } : undefined,
+  // Ad landing pages should not compete with the main site in search.
+  robots: { index: false, follow: true },
+};
+---
+
+<Layout metadata={metadata}>
+  <header class="border-b border-gray-200 dark:border-slate-800">
+    <div class="mx-auto max-w-5xl px-4 h-14 flex items-center justify-between">
+      <a href={page('home', locale)} class="font-bold text-lg">Santé Natur’</a>
+      <a href={otherHref} data-astro-reload class="text-sm underline" hreflang={other}>{other.toUpperCase()}</a>
+    </div>
+  </header>
+
+  <main>
+    {
+      hero && (
+        <section class="mx-auto max-w-5xl px-4 py-10 md:py-16 grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            {hero.eyebrow && <p class="text-sm uppercase tracking-wide text-muted mb-2">{hero.eyebrow}</p>}
+            <h1 class="text-3xl md:text-5xl font-bold leading-tight mb-4">{hero.title}</h1>
+            {hero.subtitle && <p class="text-lg text-muted mb-6">{hero.subtitle}</p>}
+            <div class="flex flex-col sm:flex-row gap-3">
+              <a
+                href={waHref}
+                target="_blank"
+                rel="noopener"
+                data-track="Lead"
+                class="btn-primary px-5 py-3 rounded-md text-center font-medium"
+              >
+                {hero.cta_label || L.whatsapp}
+              </a>
+              <a
+                href={shopHref}
+                data-track="ViewContent"
+                class="px-5 py-3 rounded-md text-center border border-gray-300 dark:border-slate-600"
+              >
+                {L.shop}
+              </a>
+            </div>
+          </div>
+          {hero.image && (
+            <img
+              src={hero.image}
+              alt={hero.image_alt || ''}
+              class="w-full rounded-xl object-cover aspect-[4/3]"
+              fetchpriority="high"
+            />
+          )}
+        </section>
+      )
+    }
+
+    {
+      benefits?.items?.length > 0 && (
+        <section class="bg-gray-50 dark:bg-slate-900/50 py-10">
+          <div class="mx-auto max-w-5xl px-4">
+            {benefits.title && <h2 class="text-2xl font-bold mb-6">{benefits.title}</h2>}
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
+              {benefits.items.map((b: any) => (
+                <div class="rounded-xl bg-white dark:bg-slate-900 p-5 border border-gray-200 dark:border-slate-800">
+                  <h3 class="font-semibold mb-1">{b.title}</h3>
+                  <p class="text-muted text-sm">{b.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    {
+      products?.slugs?.length > 0 && (
+        <section class="mx-auto max-w-5xl px-4 py-10">
+          {products.title && <h2 class="text-2xl font-bold mb-6">{products.title}</h2>}
+          <div
+            id="lp-products"
+            data-slugs={products.slugs.join(',')}
+            data-locale={locale}
+            data-from={L.from}
+            data-view={L.view}
+            data-fail={L.unavailable}
+            class="grid sm:grid-cols-2 md:grid-cols-3 gap-5"
+          >
+            <p class="text-muted text-sm">{L.loading}</p>
+          </div>
+        </section>
+      )
+    }
+
+    {
+      steps?.items?.length > 0 && (
+        <section class="bg-gray-50 dark:bg-slate-900/50 py-10">
+          <div class="mx-auto max-w-5xl px-4">
+            {steps.title && <h2 class="text-2xl font-bold mb-6">{steps.title}</h2>}
+            <ol class="grid md:grid-cols-3 gap-5">
+              {steps.items.map((s: any, i: number) => (
+                <li class="flex gap-3">
+                  <span class="shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <h3 class="font-semibold">{s.title}</h3>
+                    <p class="text-muted text-sm">{s.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )
+    }
+
+    {
+      faq?.items?.length > 0 && (
+        <section class="mx-auto max-w-3xl px-4 py-10">
+          {faq.title && <h2 class="text-2xl font-bold mb-6">{faq.title}</h2>}
+          <div class="divide-y divide-gray-200 dark:divide-slate-800">
+            {faq.items.map((f: any) => (
+              <details class="py-3">
+                <summary class="cursor-pointer font-medium">{f.q}</summary>
+                <p class="text-muted mt-2">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      final && (
+        <section class="bg-primary text-white py-12 text-center px-4">
+          <h2 class="text-2xl md:text-3xl font-bold mb-2">{final.title}</h2>
+          {final.text && <p class="mb-6 opacity-90">{final.text}</p>}
+          <a
+            href={waHref}
+            target="_blank"
+            rel="noopener"
+            data-track="Lead"
+            class="inline-block bg-white text-gray-900 px-6 py-3 rounded-md font-medium"
+          >
+            {final.cta_label || L.whatsapp}
+          </a>
+        </section>
+      )
+    }
+  </main>
+
+  <footer class="border-t border-gray-200 dark:border-slate-800 py-6 text-sm text-muted">
+    <div class="mx-auto max-w-5xl px-4 flex flex-wrap gap-x-5 gap-y-2 justify-center">
+      <a href={page('terms', locale)}>{L.terms}</a>
+      <a href={page('privacy', locale)}>{L.privacy}</a>
+      <a href={page('refund', locale)}>{L.refund}</a>
+      <a href={page('contact', locale)}>Contact</a>
+    </div>
+  </footer>
+</Layout>
+
+<script>
+  import { getProducts, currency as getCurrency } from '~/scripts/api';
+  import { formatPrice } from '~/scripts/cart';
+
+  const track = (n: string, p?: any) => (window as any).snTrack?.(n, p);
+
+  // Fire ViewContent once per landing page
+  track('ViewContent', { content_type: 'landing', content_name: document.title });
+
+  document.addEventListener('click', (e) => {
+    const el = (e.target as HTMLElement).closest('[data-track]') as HTMLElement | null;
+    if (el) track(el.dataset.track!, { content_name: document.title });
+  });
+
+  const box = document.getElementById('lp-products');
+  if (box) {
+    const slugs = (box.dataset.slugs || '').split(',').filter(Boolean);
+    const loc = box.dataset.locale === 'en' ? 'en' : 'fr';
+    const base = loc === 'en' ? '/en/products/' : '/fr/produits/';
+    const esc = (s: string) =>
+      s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+    getProducts()
+      .then((all) => {
+        const list = slugs.map((s) => all.find((p) => p.slug === s)).filter(Boolean) as typeof all;
+        if (!list.length) throw new Error('none');
+        const cur = getCurrency();
+        box.innerHTML = list
+          .map((p) => {
+            const min = Math.min(...p.variants.map((v) => v.price_cents));
+            const img = p.image_url || p.variants.find((v) => v.image_url)?.image_url || '';
+            return `<a href="${base}${esc(p.slug!)}" class="block rounded-xl overflow-hidden border border-gray-200 dark:border-slate-800 hover:shadow-md transition">
+              ${img ? `<img src="${esc(img)}" alt="" loading="lazy" class="w-full aspect-square object-cover">` : ''}
+              <div class="p-4"><h3 class="font-semibold mb-1">${esc(p.title)}</h3>
+              <p class="text-muted text-sm mb-3">${box.dataset.from} ${formatPrice(min, cur)}</p>
+              <span class="btn-primary inline-block px-4 py-2 rounded-md text-sm">${box.dataset.view}</span></div></a>`;
+          })
+          .join('');
+      })
+      .catch(() => {
+        box.innerHTML = `<p class="text-muted">${box.dataset.fail}</p>`;
+      });
+  }
+</script>

@@ -1,7 +1,7 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import HeroText from '~/components/widgets/HeroText.astro';
-import ContactWidget from '~/components/widgets/Contact.astro';
+import ContactForm from '~/components/store/ContactForm.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 
 const metadata = {
@@ -43,34 +43,5 @@ const metadata = {
     ]}
   />
 
-  <!-- ── Contact form ────────────────────────────────────────── -->
-  <ContactWidget
-    id="form"
-    title="Send us a message"
-    subtitle="Fill in this form and we will reply as soon as possible."
-    inputs={[
-      {
-        type: 'text',
-        name: 'name',
-        label: 'Full name',
-        placeholder: 'Your name',
-        autocomplete: 'name',
-      },
-      {
-        type: 'email',
-        name: 'email',
-        label: 'Email address',
-        placeholder: 'you@example.com',
-        autocomplete: 'email',
-      },
-    ]}
-    textarea={{
-      name: 'message',
-      label: 'Message',
-      placeholder: 'Describe your question or request...',
-      rows: 6,
-    }}
-    button="Send message"
-    description="Your information will never be shared with third parties. See our privacy policy."
-  />
+  <ContactForm locale="en" />
 </Layout>

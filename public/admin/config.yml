@@ -1,0 +1,88 @@
+# DRAFT — untested. Check field names against the current Sveltia CMS docs.
+backend:
+  name: github
+  repo: YOUR-GITHUB-USER/YOUR-FRONTSTORE-REPO
+  branch: main
+  # base_url: https://YOUR-OAUTH-WORKER   # needed for GitHub login (Sveltia's auth worker)
+  # Safer for a non-technical editor: enable editorial workflow so edits become
+  # a branch/PR you approve instead of going live directly.
+publish_mode: editorial_workflow
+media_folder: public/uploads
+public_folder: /uploads
+locale: fr
+
+collections:
+  - name: landing
+    label: Pages d'annonce
+    folder: src/content/landing
+    extension: json
+    format: json
+    create: true
+    slug: '{{slug}}'
+    fields:
+      - name: fr
+        label: Français
+        widget: object
+        fields: &page_fields
+          - { name: meta, label: Référencement, widget: object, fields: [ { name: title, label: Titre }, { name: description, label: Description, widget: text } ] }
+          - { name: whatsapp_message, label: Message WhatsApp pré-rempli, widget: string }
+          - name: hero
+            label: En-tête
+            widget: object
+            fields:
+              - { name: eyebrow, label: Sur-titre, widget: string, required: false }
+              - { name: title, label: Titre }
+              - { name: subtitle, label: Sous-titre, widget: text, required: false }
+              - { name: image, label: Image, widget: image, required: false }
+              - { name: image_alt, label: Texte alternatif, required: false }
+              - { name: cta_label, label: Texte du bouton, required: false }
+          - name: benefits
+            label: Avantages
+            widget: object
+            required: false
+            fields:
+              - { name: title, label: Titre, required: false }
+              - name: items
+                label: Éléments
+                widget: list
+                fields: [ { name: title, label: Titre }, { name: text, label: Texte, widget: text } ]
+          - name: products
+            label: Produits (slugs)
+            widget: object
+            required: false
+            fields:
+              - { name: title, label: Titre, required: false }
+              - { name: slugs, label: Slugs des produits, widget: list, field: { name: slug, label: Slug } }
+          - name: steps
+            label: Étapes
+            widget: object
+            required: false
+            fields:
+              - { name: title, label: Titre, required: false }
+              - name: items
+                label: Étapes
+                widget: list
+                fields: [ { name: title, label: Titre }, { name: text, label: Texte, widget: text } ]
+          - name: faq
+            label: Questions fréquentes
+            widget: object
+            required: false
+            fields:
+              - { name: title, label: Titre, required: false }
+              - name: items
+                label: Questions
+                widget: list
+                fields: [ { name: q, label: Question }, { name: a, label: Réponse, widget: text } ]
+          - name: final
+            label: Appel final
+            widget: object
+            required: false
+            fields:
+              - { name: title, label: Titre }
+              - { name: text, label: Texte, widget: text, required: false }
+              - { name: cta_label, label: Texte du bouton, required: false }
+      - name: en
+        label: English
+        widget: object
+        required: false
+        fields: *page_fields

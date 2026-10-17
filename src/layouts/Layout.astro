@@ -12,6 +12,8 @@ import Metadata from '~/components/common/Metadata.astro';
 import SiteVerification from '~/components/common/SiteVerification.astro';
 import Analytics from '~/components/common/Analytics.astro';
 import BasicScripts from '~/components/common/BasicScripts.astro';
+import Tracking from '~/components/common/Tracking.astro';
+import ConsentBanner from '~/components/common/ConsentBanner.astro';
 
 // Comment the line below to disable View Transitions
 import { ClientRouter } from 'astro:transitions';
@@ -52,6 +54,8 @@ const enHref = site + alternatePath(Astro.url.pathname, 'en');
   <body class="antialiased text-default bg-page tracking-tight">
     <slot />
 
+    <ConsentBanner />
+    <Tracking />
     <BasicScripts />
   </body>
 </html>

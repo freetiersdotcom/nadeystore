@@ -1,7 +1,7 @@
 ---
 import Layout from '~/layouts/PageLayout.astro';
 import HeroText from '~/components/widgets/HeroText.astro';
-import ContactWidget from '~/components/widgets/Contact.astro';
+import ContactForm from '~/components/store/ContactForm.astro';
 import Features2 from '~/components/widgets/Features2.astro';
 
 const metadata = {
@@ -37,42 +37,13 @@ const metadata = {
       {
         title: 'Adresse',
         description:
-          'Santé Natur’<br/>Fidjrossè Fiyegnon Jacquot, C/1755<br/>Maison Alassane<br/>Cotonou, Bénin<br/><span class="text-muted text-xs">Retrait sur place non disponible pour le moment.</span>',
+          'Santé Natur’<br/>Cotonou, Bénin<br/><span class="text-muted text-xs">Retrait sur place non disponible pour le moment.</span>',
         icon: 'tabler:map-pin',
       },
     ]}
   />
 
-  <!-- ── Contact form ────────────────────────────────────────── -->
-  <ContactWidget
-    id="formulaire"
-    title="Envoyez-nous un message"
-    subtitle="Remplissez ce formulaire et nous vous répondrons dans les plus brefs délais."
-    inputs={[
-      {
-        type: 'text',
-        name: 'name',
-        label: 'Nom complet',
-        placeholder: 'Votre nom',
-        autocomplete: 'name',
-      },
-      {
-        type: 'email',
-        name: 'email',
-        label: 'Adresse e-mail',
-        placeholder: 'vous@exemple.com',
-        autocomplete: 'email',
-      },
-    ]}
-    textarea={{
-      name: 'message',
-      label: 'Message',
-      placeholder: 'Décrivez votre question ou votre demande...',
-      rows: 6,
-    }}
-    button="Envoyer le message"
-    description="Vos informations ne seront jamais partagées avec des tiers. Consultez notre politique de confidentialité."
-  />
+  <ContactForm locale="fr" />
 
   <!-- <a href='/confidentialite' class='text-primary hover:underline'>politique de confidentialité</a> -->
 </Layout>
