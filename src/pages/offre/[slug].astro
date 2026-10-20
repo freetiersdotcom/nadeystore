@@ -1,6 +1,0 @@
----
-// Old ad URL kept alive: permanent redirect to /fr/offre/<slug>.
-export const prerender = false;
-const { slug } = Astro.params;
-return Astro.redirect('/fr/offre/' + slug + Astro.url.search, 301);
----
