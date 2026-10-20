@@ -1,0 +1,114 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+
+const metadata = {
+  title: 'Politique de confidentialité — Santé Natur’',
+  robots: { index: false, follow: true },
+};
+
+const lastUpdated = 'octobre 2026';
+---
+
+<Layout metadata={metadata}>
+  <HeroText tagline="Légal" title="Politique de confidentialité" subtitle={`Dernière mise à jour : ${lastUpdated}`} />
+
+  <div
+    class="max-w-3xl mx-auto px-6 pb-16 prose dark:prose-invert prose-headings:font-heading prose-headings:font-bold prose-a:text-primary"
+  >
+    <h2>1. Qui sommes-nous ?</h2>
+    <p>
+      Santé Natur’ est une entreprise basée à Cotonou, Bénin, spécialisée dans la vente de produits naturels et de
+      bien-être. Pour toute question relative à vos données personnelles, vous pouvez nous contacter à l'adresse : <a
+        href="mailto:agroalafia@gmail.com">agroalafia@gmail.com</a
+      >.
+    </p>
+
+    <h2>2. Données collectées</h2>
+    <p>
+      Nous collectons uniquement les données nécessaires au traitement de vos commandes et à la communication avec vous
+      :
+    </p>
+    <ul>
+      <li><strong>Données de contact :</strong> nom, adresse e-mail, numéro de téléphone (si fourni).</li>
+      <li><strong>Adresse de livraison :</strong> adresse postale complète pour l'expédition de vos commandes.</li>
+      <li>
+        <strong>Données de paiement :</strong> le paiement est traité par FedaPay ou Stripe. Nous ne stockons jamais vos
+        informations de carte bancaire.
+      </li>
+      <li>
+        <strong>Données de navigation :</strong> adresse IP, pages visitées, durée de la session — collectées via des outils
+        d'analyse anonymisés.
+      </li>
+    </ul>
+
+    <h2>3. Utilisation de vos données</h2>
+    <p>Vos données personnelles sont utilisées exclusivement pour :</p>
+    <ul>
+      <li>Traiter et expédier vos commandes.</li>
+      <li>Vous envoyer des confirmations de commande et des informations de suivi.</li>
+      <li>Répondre à vos demandes de service client.</li>
+      <li>Améliorer notre boutique et notre service (données de navigation anonymisées).</li>
+    </ul>
+    <p>
+      Nous ne vendons, ne louons et ne partageons jamais vos données personnelles avec des tiers à des fins
+      commerciales.
+    </p>
+
+    <h2>4. Durée de conservation</h2>
+    <p>
+      Vos données de commande sont conservées pendant 3 ans à compter de la date d'achat, conformément aux obligations
+      légales comptables. Vos données de contact sont supprimées sur simple demande, sauf si leur conservation est
+      requise par la loi.
+    </p>
+
+    <h2>5. Vos droits</h2>
+    <p>
+      Conformément au RGPD (pour les résidents de l'Union Européenne) et aux lois applicables, vous disposez des droits
+      suivants :
+    </p>
+    <ul>
+      <li><strong>Droit d'accès :</strong> obtenir une copie des données que nous détenons sur vous.</li>
+      <li><strong>Droit de rectification :</strong> corriger des données inexactes.</li>
+      <li><strong>Droit à l'effacement :</strong> demander la suppression de vos données.</li>
+      <li><strong>Droit d'opposition :</strong> vous opposer à certains traitements de vos données.</li>
+    </ul>
+    <p>Pour exercer ces droits, contactez-nous à <a href="mailto:agroalafia@gmail.com">agroalafia@gmail.com</a>.</p>
+
+    <h2>6. Cookies</h2>
+    <p>
+      Notre boutique utilise des cookies techniques nécessaires à son fonctionnement (panier d'achat, préférences de
+      langue). Ils ne nécessitent pas de consentement.
+    </p>
+    <p>
+      Si vous arrivez depuis l'une de nos publicités, nous enregistrons aussi, pour la durée de votre session
+      uniquement, la source de l'annonce (paramètres UTM) afin de savoir de quelle campagne provient votre commande.
+      Avec votre consentement uniquement (bandeau affiché à la première visite), nous chargeons les pixels publicitaires
+      Meta (Facebook/Instagram) et TikTok, qui mesurent l'efficacité de nos annonces et peuvent déposer des cookies. Ces
+      prestataires agissent selon leur propre politique de confidentialité. Vous pouvez refuser, ou changer d'avis à
+      tout moment en effaçant les données du site dans votre navigateur ; la boutique fonctionne de la même façon. Vous
+      pouvez aussi désactiver les cookies dans les paramètres de votre navigateur, mais certaines fonctionnalités de la
+      boutique pourraient en être affectées.
+    </p>
+
+    <h2>7. Sécurité</h2>
+    <p>
+      Nous mettons en œuvre des mesures techniques appropriées pour protéger vos données contre tout accès non autorisé,
+      perte ou divulgation. Les paiements sont traités par des prestataires certifiés PCI-DSS.
+    </p>
+
+    <h2>8. Modifications</h2>
+    <p>
+      Cette politique peut être mise à jour occasionnellement. La date de dernière modification est indiquée en haut de
+      cette page. En continuant à utiliser notre boutique après une modification, vous acceptez la politique mise à
+      jour.
+    </p>
+
+    <h2>9. Contact</h2>
+    <p>
+      Pour toute question relative à cette politique ou à vos données personnelles :<br />
+      <a href="mailto:agroalafia@gmail.com">agroalafia@gmail.com</a><br />
+      Santé Natur’, Fidjrossè Fiyegnon Jacquot, C/1755, Maison Alassane, Cotonou, Bénin
+    </p>
+  </div>
+</Layout>

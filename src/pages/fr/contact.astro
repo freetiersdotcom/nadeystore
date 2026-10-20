@@ -1,0 +1,49 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import HeroText from '~/components/widgets/HeroText.astro';
+import ContactForm from '~/components/store/ContactForm.astro';
+import Features2 from '~/components/widgets/Features2.astro';
+
+const metadata = {
+  title: 'Contact — Santé Natur’',
+  description: "Une question sur nos produits, une commande, ou un partenariat ? Contactez l'équipe Santé Natur’.",
+};
+---
+
+<Layout metadata={metadata}>
+  <HeroText
+    tagline="Nous contacter"
+    title="Une question ? Nous sommes là."
+    subtitle="Que ce soit pour une question sur un produit, un problème de livraison ou une opportunité de partenariat — notre équipe vous répond en général sous 24 à 48 heures ouvrées."
+  />
+
+  <!-- ── Contact channels ────────────────────────────────────── -->
+  <Features2
+    title="Comment nous joindre"
+    columns={3}
+    items={[
+      {
+        title: 'E-mail',
+        description:
+          'Pour toute question générale, commande ou réclamation :<br/><a href="mailto:agroalafia@gmail.com" class="text-primary hover:underline font-medium">agroalafia@gmail.com</a>',
+        icon: 'tabler:mail',
+      },
+      {
+        title: 'WhatsApp',
+        description:
+          'Pour un suivi rapide de commande ou une question urgente :<br/><a href="https://wa.me/2290194458956" class="text-primary hover:underline font-medium">+229 01 94 45 89 56</a>',
+        icon: 'tabler:brand-whatsapp',
+      },
+      {
+        title: 'Adresse',
+        description:
+          'Santé Natur’<br/>Cotonou, Bénin<br/><span class="text-muted text-xs">Retrait sur place non disponible pour le moment.</span>',
+        icon: 'tabler:map-pin',
+      },
+    ]}
+  />
+
+  <ContactForm locale="fr" />
+
+  <!-- <a href='/fr/confidentialite' class='text-primary hover:underline'>politique de confidentialité</a> -->
+</Layout>

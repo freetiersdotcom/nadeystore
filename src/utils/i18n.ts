@@ -1,21 +1,21 @@
 // src/utils/i18n.ts
-// Tiny path-based locale layer. French keeps its current URLs (/, /a-propos,
-// /fr/boutique, ...) so nothing existing moves; English lives under /en/.
+// Tiny path-based locale layer. Every page lives under a language prefix:
+// French under /fr/, English under /en/. The root '/' only redirects to /fr/.
 
 export type Locale = 'fr' | 'en';
 export const LOCALES: Locale[] = ['fr', 'en'];
 export const DEFAULT_LOCALE: Locale = 'fr';
 
 // French path -> English path. Keep both sides without trailing slash
-// (except the home page, which is '/' and '/en/').
+// (except the home pages, '/fr/' and '/en/').
 const PAGE_MAP: Array<[fr: string, en: string]> = [
-  ['/', '/en/'],
-  ['/a-propos', '/en/about'],
-  ['/contact', '/en/contact'],
-  ['/faq', '/en/faq'],
-  ['/conditions', '/en/terms'],
-  ['/confidentialite', '/en/privacy'],
-  ['/remboursement', '/en/refund-policy'],
+  ['/fr/', '/en/'],
+  ['/fr/a-propos', '/en/about'],
+  ['/fr/contact', '/en/contact'],
+  ['/fr/faq', '/en/faq'],
+  ['/fr/conditions', '/en/terms'],
+  ['/fr/confidentialite', '/en/privacy'],
+  ['/fr/remboursement', '/en/refund-policy'],
   ['/fr/boutique', '/en/shop'],
   ['/fr/panier', '/en/cart'],
   ['/fr/confirmation', '/en/confirmation'],
@@ -24,12 +24,13 @@ const PAGE_MAP: Array<[fr: string, en: string]> = [
 
 const PRODUCT_FR = '/fr/produits/';
 const PRODUCT_EN = '/en/products/';
-const OFFER_FR = '/offre/';
+const OFFER_FR = '/fr/offre/';
 const OFFER_EN = '/en/offer/';
 
 function normalize(pathname: string): string {
-  if (pathname === '/' || pathname === '/en' || pathname === '/en/') return pathname === '/' ? '/' : '/en/';
-  return pathname.replace(/\/+$/, '');
+  if (pathname === '/') return '/';
+  const p = pathname.replace(/\/+$/, '');
+  return p === '/fr' || p === '/en' ? p + '/' : p;
 }
 
 export function getLocale(pathname: string): Locale {
@@ -39,6 +40,7 @@ export function getLocale(pathname: string): Locale {
 /** Path of the same page in another locale, or the target home page if unknown. */
 export function alternatePath(pathname: string, target: Locale): string {
   const path = normalize(pathname);
+  if (path === '/') return target === 'fr' ? '/fr/' : '/en/';
   const from = getLocale(path);
   if (from === target) return path;
 
@@ -51,18 +53,18 @@ export function alternatePath(pathname: string, target: Locale): string {
   for (const [fr, en] of PAGE_MAP) {
     if ((from === 'fr' ? fr : en) === path) return target === 'fr' ? fr : en;
   }
-  return target === 'fr' ? '/' : '/en/';
+  return target === 'fr' ? '/fr/' : '/en/';
 }
 
 /** Localised path for a named page, e.g. page('shop', 'en') -> '/en/shop'. */
 const NAMED: Record<string, [string, string]> = {
-  home: ['/', '/en/'],
-  about: ['/a-propos', '/en/about'],
-  contact: ['/contact', '/en/contact'],
-  faq: ['/faq', '/en/faq'],
-  terms: ['/conditions', '/en/terms'],
-  privacy: ['/confidentialite', '/en/privacy'],
-  refund: ['/remboursement', '/en/refund-policy'],
+  home: ['/fr/', '/en/'],
+  about: ['/fr/a-propos', '/en/about'],
+  contact: ['/fr/contact', '/en/contact'],
+  faq: ['/fr/faq', '/en/faq'],
+  terms: ['/fr/conditions', '/en/terms'],
+  privacy: ['/fr/confidentialite', '/en/privacy'],
+  refund: ['/fr/remboursement', '/en/refund-policy'],
   shop: ['/fr/boutique', '/en/shop'],
   cart: ['/fr/panier', '/en/cart'],
   confirmation: ['/fr/confirmation', '/en/confirmation'],

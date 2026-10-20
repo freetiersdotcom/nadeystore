@@ -44,7 +44,7 @@ export const headerData = {
         },
         {
           text: 'Contact',
-          href: getPermalink('/contact'),
+          href: getPermalink('/fr/contact'),
         },
         {
           text: 'Terms',

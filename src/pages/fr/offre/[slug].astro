@@ -1,0 +1,11 @@
+---
+import LandingPage from '~/components/landing/LandingPage.astro';
+import { landingSlugs, landingContent } from '~/utils/landing';
+
+export function getStaticPaths() {
+  return landingSlugs().map((slug) => ({ params: { slug } }));
+}
+const { slug } = Astro.params;
+---
+
+<LandingPage content={landingContent(slug!, 'fr')} locale="fr" slug={slug!} />

@@ -103,7 +103,7 @@ const groups: Group[] = [
       {
         q: 'Can I get a refund?',
         a: 'Yes, in the cases covered by our policy: damaged or defective product, product not matching its description, or order not received. Contact us with your order number within the stated time limits.',
-        link: { href: '/remboursement', label: 'Read the refund policy' },
+        link: { href: '/en/refund-policy', label: 'Read the refund policy' },
       },
       {
         q: 'How do I contact customer service?',
@@ -138,53 +138,44 @@ const jsonLd = {
   />
 
   <div class="max-w-3xl mx-auto px-6 pb-16 space-y-10">
-    {
-      groups.map((group) => (
-        <section>
-          <h2 class="font-heading font-bold text-xl mb-4">{group.title}</h2>
-          <div class="space-y-3">
-            {group.items.map((item) => (
-              <details class="group rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 open:shadow-sm">
-                <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-medium text-default [&::-webkit-details-marker]:hidden">
-                  <span>{item.q}</span>
-                  <svg
-                    class="h-5 w-5 shrink-0 text-primary transition-transform group-open:rotate-180"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </summary>
-                <div class="px-5 pb-5 text-sm text-muted leading-relaxed">
-                  <p>{item.a}</p>
-                  {item.link && (
-                    <p class="mt-3">
-                      <a
-                        href={item.link.href}
-                        class="font-medium text-primary hover:underline"
-                        {...(item.link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                      >
-                        {item.link.label} →
-                      </a>
-                    </p>
-                  )}
-                </div>
-              </details>
-            ))}
-          </div>
-        </section>
-      ))
-    }
+    {groups.map((group) => (
+      <section>
+        <h2 class="font-heading font-bold text-xl mb-4">{group.title}</h2>
+        <div class="space-y-3">
+          {group.items.map((item) => (
+            <details class="group rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 open:shadow-sm">
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-medium text-default [&::-webkit-details-marker]:hidden">
+                <span>{item.q}</span>
+                <svg class="h-5 w-5 shrink-0 text-primary transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                </svg>
+              </summary>
+              <div class="px-5 pb-5 text-sm text-muted leading-relaxed">
+                <p>{item.a}</p>
+                {item.link && (
+                  <p class="mt-3">
+                    <a
+                      href={item.link.href}
+                      class="font-medium text-primary hover:underline"
+                      {...(item.link.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    >
+                      {item.link.label} →
+                    </a>
+                  </p>
+                )}
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+    ))}
   </div>
 
   <CallToAction
     title="Can’t find your answer?"
     subtitle="Write to us by email or on WhatsApp: we reply quickly."
-    actions={[{ variant: 'primary', text: 'Contact us', href: '/en/contact', icon: 'tabler:message' }]}
+    actions={[
+      { variant: 'primary', text: 'Contact us', href: '/en/contact', icon: 'tabler:message' },
+    ]}
   />
 </Layout>

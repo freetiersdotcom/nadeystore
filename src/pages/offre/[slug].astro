@@ -1,11 +1,6 @@
 ---
-import LandingPage from '~/components/landing/LandingPage.astro';
-import { landingSlugs, landingContent } from '~/utils/landing';
-
-export function getStaticPaths() {
-  return landingSlugs().map((slug) => ({ params: { slug } }));
-}
+// Old ad URL kept alive: permanent redirect to /fr/offre/<slug>.
+export const prerender = false;
 const { slug } = Astro.params;
+return Astro.redirect('/fr/offre/' + slug + Astro.url.search, 301);
 ---
-
-<LandingPage content={landingContent(slug!, 'fr')} locale="fr" slug={slug!} />
