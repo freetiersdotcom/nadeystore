@@ -1,0 +1,60 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Layout from '~/layouts/PageLayout.astro';
+import BlogArticle from '~/components/blog/BlogArticle.astro';
+import { SITE } from 'astrowind:config';
+import { getPosts } from '~/utils/posts';
+
+export const prerender = true;
+
+const lang = 'fr';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPosts('fr');
+  return posts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await render(post.entry);
+
+const site = Astro.site ? String(Astro.site).replace(/\/$/, '') : '';
+const imageUrl = post.image ? (post.image.startsWith('http') ? post.image : site + post.image) : undefined;
+
+// The article photo is added as plain <meta> tags through the layout's "head" slot (see below), not via
+// metadata.openGraph.images: that path makes the build optimise the image and it would fail on a missing file.
+const metadata = {
+  title: post.title,
+  description: post.excerpt,
+  ...post.metadata,
+  openGraph: { type: 'article', ...(post.metadata?.openGraph ?? {}) },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.title,
+  description: post.excerpt,
+  inLanguage: lang,
+  datePublished: post.publishDate.toISOString(),
+  ...(post.updateDate ? { dateModified: post.updateDate.toISOString() } : {}),
+  ...(imageUrl ? { image: imageUrl } : {}),
+  author: { '@type': post.author ? 'Person' : 'Organization', name: post.author ?? SITE.name },
+  mainEntityOfPage: site + post.path,
+};
+---
+
+<Layout metadata={metadata}>
+  {
+    imageUrl && (
+      <Fragment slot="head">
+        <meta property="og:image" content={imageUrl} />
+        <meta name="twitter:image" content={imageUrl} />
+      </Fragment>
+    )
+  }
+  <BlogArticle {lang} {post} readingTime={remarkPluginFrontmatter?.readingTime}>
+    <Content />
+  </BlogArticle>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</Layout>

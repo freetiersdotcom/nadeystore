@@ -1,0 +1,63 @@
+---
+// One article. The body (rendered markdown) comes in through the slot.
+import type { Locale } from '~/utils/i18n';
+import { page } from '~/utils/i18n';
+import { BLOG_UI, blogIndexPath, formatDate, type BlogPost } from '~/utils/posts';
+
+export interface Props {
+  lang: Locale;
+  post: BlogPost;
+  readingTime?: number;
+}
+
+const { lang, post, readingTime } = Astro.props;
+const t = BLOG_UI[lang];
+---
+
+<article class="px-4 py-12 sm:px-6 mx-auto max-w-3xl lg:py-16">
+  <p class="text-sm text-muted">
+    <a href={blogIndexPath(lang)} class="hover:underline">{t.back}</a>
+  </p>
+
+  <header class="mt-6 mb-8">
+    <p class="text-sm text-muted">
+      <time datetime={post.publishDate.toISOString()}>{formatDate(post.publishDate, lang)}</time>
+      {post.author && <span> · {post.author}</span>}
+      {post.category && <span> · {post.category}</span>}
+      {readingTime && <span> · {readingTime} {t.minRead}</span>}
+    </p>
+    <h1 class="mt-3 text-4xl md:text-5xl font-bold leading-tighter tracking-tighter font-heading">{post.title}</h1>
+    {post.excerpt && <p class="mt-4 text-xl text-muted">{post.excerpt}</p>}
+  </header>
+
+  {
+    post.image && (
+      <img
+        src={post.image}
+        alt=""
+        width="1200"
+        height="675"
+        loading="eager"
+        decoding="async"
+        class="w-full rounded-md shadow-lg mb-8 aspect-video object-cover bg-gray-200 dark:bg-slate-800"
+      />
+    )
+  }
+
+  <div
+    class="prose prose-lg dark:prose-invert prose-headings:font-heading prose-headings:tracking-tighter prose-a:text-primary prose-img:rounded-md max-w-none"
+  >
+    <slot />
+  </div>
+
+  {
+    post.updateDate && (
+      <p class="mt-8 text-sm text-muted">{t.updated} {formatDate(post.updateDate, lang)}</p>
+    )
+  }
+
+  <aside class="mt-12 rounded-lg bg-gray-100 dark:bg-slate-800 p-6 text-center">
+    <p class="text-lg font-semibold font-heading">{t.ctaTitle}</p>
+    <a href={page('shop', lang)} class="btn-primary inline-block mt-4 px-6 py-3 rounded-lg text-sm font-medium">{t.ctaButton}</a>
+  </aside>
+</article>

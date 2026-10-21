@@ -48,11 +48,11 @@ const metadataDefinition = () =>
     .optional();
 
 const postCollection = defineCollection({
-  loader: glob({ pattern: ['*.md', '*.mdx'], base: 'src/data/post' }),
+  loader: glob({ pattern: ['fr/*.{md,mdx}', 'en/*.{md,mdx}'], base: 'src/data/post' }),   // was ['*.md', '*.mdx']
   schema: z.object({
-    publishDate: z.date().optional(),
-    updateDate: z.date().optional(),
-    draft: z.boolean().optional(),
+    publishDate: z.coerce.date().optional(),   // was z.date()
+    updateDate: z.coerce.date().optional(),    // was z.date()
+    draft: z.boolean().default(false),         // was z.boolean().optional()
 
     title: z.string(),
     excerpt: z.string().optional(),

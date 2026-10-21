@@ -23,6 +23,7 @@ const footerData = getFooterData(locale);
   <!-- <slot name="announcement">
     <Announcement />
   </slot> -->
+  <slot name="head" slot="head" />
   <slot name="header">
     <!-- Add showRssFeed beside showToggleTheme to get the RSS icon in the header-->
     <Header {...headerData} isSticky showToggleTheme />

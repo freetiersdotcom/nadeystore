@@ -1,0 +1,54 @@
+# Append these two collections at the end of the `collections:` list in public/admin/config.yml
+# (same indentation: two spaces before each '- name').
+
+  - name: blog_fr
+    label: Blog (français)
+    label_singular: article
+    folder: src/data/post/fr
+    extension: md
+    format: frontmatter
+    create: true
+    slug: '{{fields.key}}'
+    summary: '{{title}}'
+    sortable_fields: [publishDate, title]
+    fields:
+      - { name: title, label: Titre, widget: string }
+      - name: key
+        label: Identifiant d'URL (lettres minuscules, chiffres et tirets)
+        hint: "Devient l'adresse de l'article : /fr/blog/<identifiant>. Utilisez le MÊME identifiant que la version anglaise pour relier les deux traductions."
+        widget: string
+        pattern: ['^[a-z0-9]+(-[a-z0-9]+)*$', "Lettres minuscules, chiffres et tirets uniquement"]
+      - { name: excerpt, label: Résumé (affiché dans la liste et sur Google), widget: text }
+      - { name: image, label: Image principale, widget: image, required: false }
+      - { name: category, label: Catégorie, widget: string, required: false }
+      - { name: tags, label: Mots-clés, widget: list, required: false }
+      - { name: author, label: Auteur, widget: string, required: false }
+      - { name: publishDate, label: Date de publication, widget: datetime }
+      - { name: draft, label: Brouillon (non publié), widget: boolean, default: true }
+      - { name: body, label: Texte, widget: markdown }
+
+  - name: blog_en
+    label: Blog (English)
+    label_singular: article
+    folder: src/data/post/en
+    extension: md
+    format: frontmatter
+    create: true
+    slug: '{{fields.key}}'
+    summary: '{{title}}'
+    sortable_fields: [publishDate, title]
+    fields:
+      - { name: title, label: Title, widget: string }
+      - name: key
+        label: URL identifier (lowercase letters, digits and hyphens)
+        hint: "Becomes the article address: /en/blog/<identifier>. Use the SAME identifier as the French version to link the two translations."
+        widget: string
+        pattern: ['^[a-z0-9]+(-[a-z0-9]+)*$', "Lowercase letters, digits and hyphens only"]
+      - { name: excerpt, label: Summary (shown in the list and on Google), widget: text }
+      - { name: image, label: Main image, widget: image, required: false }
+      - { name: category, label: Category, widget: string, required: false }
+      - { name: tags, label: Tags, widget: list, required: false }
+      - { name: author, label: Author, widget: string, required: false }
+      - { name: publishDate, label: Publication date, widget: datetime }
+      - { name: draft, label: Draft (not published), widget: boolean, default: true }
+      - { name: body, label: Text, widget: markdown }

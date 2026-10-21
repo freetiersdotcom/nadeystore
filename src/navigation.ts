@@ -51,6 +51,7 @@ export function getHeaderData(locale: Locale = 'fr') {
       { text: c.nav.shop, href: page('shop', locale) },
       { text: c.nav.about, href: page('about', locale) },
       { text: c.nav.contact, href: page('contact', locale) },
+      (locale === 'fr' ? [{ text: 'Blog', href: '/fr/blog' }] : []),
     ],
     actions: [{ text: c.cta, href: page('shop', locale), variant: 'primary' }],
   };
@@ -65,6 +66,7 @@ export function getFooterData(locale: Locale = 'fr') {
         links: [
           { text: c.allProducts, href: page('shop', locale) },
           { text: c.cart, href: page('cart', locale) },
+          (locale === 'fr' ? [{ text: 'Blog', href: '/fr/blog' }] : []),
         ],
       },
       {

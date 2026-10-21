@@ -1,0 +1,22 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import BlogList from '~/components/blog/BlogList.astro';
+import { getPosts, paginate, BLOG_UI } from '~/utils/posts';
+
+export const prerender = true;
+
+const lang = 'fr';
+const { items, page, totalPages } = paginate(await getPosts(lang), 1);
+const t = BLOG_UI[lang];
+
+const metadata = {
+  title: t.pageTitle(1),
+  description: t.description,
+  // A blog without articles in this language is not worth indexing.
+  robots: { index: items.length > 0, follow: true },
+};
+---
+
+<Layout metadata={metadata}>
+  <BlogList {lang} posts={items} {page} {totalPages} />
+</Layout>

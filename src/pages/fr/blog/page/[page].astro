@@ -1,0 +1,30 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Layout from '~/layouts/PageLayout.astro';
+import BlogList from '~/components/blog/BlogList.astro';
+import { getPosts, paginate, BLOG_UI } from '~/utils/posts';
+
+export const prerender = true;
+
+const lang = 'fr';
+
+export const getStaticPaths = (async () => {
+  const { totalPages } = paginate(await getPosts('fr'), 1);
+  // Page 1 is /fr/blog itself, so only pages 2..N are generated here.
+  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, i) => ({ params: { page: String(i + 2) } }));
+}) satisfies GetStaticPaths;
+
+const pageNumber = Number(Astro.params.page);
+const { items, page, totalPages } = paginate(await getPosts(lang), pageNumber);
+const t = BLOG_UI[lang];
+
+const metadata = {
+  title: t.pageTitle(page),
+  description: t.description,
+  robots: { index: true, follow: true },
+};
+---
+
+<Layout metadata={metadata}>
+  <BlogList {lang} posts={items} {page} {totalPages} />
+</Layout>

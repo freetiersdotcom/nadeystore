@@ -2,13 +2,14 @@
 // src/components/common/LanguageSwitcher.astro
 // FR | EN toggle. Links to the same page in the other language.
 // Plain <a> links (no JS) so it also works with SSR product pages.
-import { getLocale, alternatePath, UI } from '~/utils/i18n';
+import { getLocale, UI } from '~/utils/i18n'; // remove alternatePath here
+import { alternatePathFor } from '~/utils/locale-paths';
 
 const { class: className = '' } = Astro.props;
 const pathname = Astro.url.pathname;
 const current = getLocale(pathname);
 const other = current === 'fr' ? 'en' : 'fr';
-const href = alternatePath(pathname, other) + (Astro.url.search || '');
+const href = (await alternatePathFor(pathname, other)) + (Astro.url.search || '');
 ---
 
 <a
