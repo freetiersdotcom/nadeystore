@@ -8,6 +8,7 @@ const ADDRESS_EN = 'Fidjrossè Fiyegnon Jacquot, C/1755, Maison Alassane, Cotono
 const copy = {
   fr: {
     nav: { shop: 'Boutique', about: 'À propos', contact: 'Contact' },
+    blog: 'Blog',
     cta: 'Voir la boutique',
     shopTitle: 'Boutique',
     allProducts: 'Tous les produits',
@@ -26,6 +27,7 @@ const copy = {
   },
   en: {
     nav: { shop: 'Shop', about: 'About', contact: 'Contact' },
+    blog: 'Blog',
     cta: 'Visit the shop',
     shopTitle: 'Shop',
     allProducts: 'All products',
@@ -51,7 +53,7 @@ export function getHeaderData(locale: Locale = 'fr') {
       { text: c.nav.shop, href: page('shop', locale) },
       { text: c.nav.about, href: page('about', locale) },
       { text: c.nav.contact, href: page('contact', locale) },
-      (locale === 'fr' ? [{ text: 'Blog', href: '/fr/blog' }] : []),
+      ...(locale === 'fr' ? [{ text: c.blog, href: '/fr/blog' }] : []),
     ],
     actions: [{ text: c.cta, href: page('shop', locale), variant: 'primary' }],
   };
@@ -66,7 +68,7 @@ export function getFooterData(locale: Locale = 'fr') {
         links: [
           { text: c.allProducts, href: page('shop', locale) },
           { text: c.cart, href: page('cart', locale) },
-          (locale === 'fr' ? [{ text: 'Blog', href: '/fr/blog' }] : []),
+          ...(locale === 'fr' ? [{ text: c.blog, href: '/fr/blog' }] : []),
         ],
       },
       {
