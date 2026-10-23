@@ -1,7 +1,7 @@
 # DRAFT — untested. Check field names against the current Sveltia CMS docs.
 backend:
   name: github
-  repo: YOUR-GITHUB-USER/YOUR-FRONTSTORE-REPO
+  repo: freetiersdotcom/nadeystore
   branch: main
   # base_url: https://YOUR-OAUTH-WORKER   # needed for GitHub login (Sveltia's auth worker)
   # Safer for a non-technical editor: enable editorial workflow so edits become
