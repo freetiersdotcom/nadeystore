@@ -241,7 +241,7 @@ export interface DepositQuote {
 export async function depositPreview(items: { sku: string; qty: number }[]): Promise<DepositQuote> {
   return request<DepositQuote>('/v1/carts/deposit-preview', {
     method: 'POST',
-    body: JSON.stringify({ items }),
+    body: JSON.stringify({ items, currency: currency() }),
   });
 }
 
