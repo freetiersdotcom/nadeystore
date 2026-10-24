@@ -170,17 +170,37 @@ const metadata = {
 
           <div id="payment-method-section" class="mb-4" style="display:none">
             <p class="text-xs font-medium text-muted mb-2">Mode de paiement</p>
-            <label class="flex items-start gap-2 p-3 rounded-lg border border-gray-200 dark:border-slate-700 cursor-pointer mb-2">
+            <label
+              class="flex items-start gap-2 p-3 rounded-lg border border-gray-200 dark:border-slate-700 cursor-pointer mb-2"
+            >
               <input type="radio" name="payment-method" value="online" checked class="mt-1" />
-              <span class="text-sm"><span class="font-medium">Payer en ligne</span><span class="block text-xs text-muted">Carte bancaire ou Mobile Money</span></span>
+              <span class="text-sm"
+                ><span class="font-medium">Payer en ligne</span><span class="block text-xs text-muted"
+                  >Carte bancaire ou Mobile Money</span
+                ></span
+              >
             </label>
-            <label class="flex items-start gap-2 p-3 rounded-lg border border-gray-200 dark:border-slate-700 cursor-pointer">
+            <label
+              class="flex items-start gap-2 p-3 rounded-lg border border-gray-200 dark:border-slate-700 cursor-pointer"
+            >
               <input type="radio" name="payment-method" value="cod" class="mt-1" />
-              <span class="text-sm"><span class="font-medium">Payer à la livraison</span><span class="block text-xs text-muted">Vous réglez en espèces à la réception de votre commande.</span></span>
+              <span class="text-sm"
+                ><span class="font-medium">Payer à la livraison</span><span class="block text-xs text-muted"
+                  >Vous réglez en espèces à la réception de votre commande.</span
+                ></span
+              >
             </label>
-            <label id="deposit-option" class="flex items-start gap-2 p-3 rounded-lg border border-gray-200 dark:border-slate-700 cursor-pointer mt-2" style="display:none">
+            <label
+              id="deposit-option"
+              class="flex items-start gap-2 p-3 rounded-lg border border-gray-200 dark:border-slate-700 cursor-pointer mt-2"
+              style="display:none"
+            >
               <input type="radio" name="payment-method" value="deposit" class="mt-1" />
-              <span class="text-sm"><span id="deposit-title" class="font-medium">Payer un acompte</span><span id="deposit-sub" class="block text-xs text-muted"></span></span>
+              <span class="text-sm"
+                ><span id="deposit-title" class="font-medium">Payer un acompte</span><span
+                  id="deposit-sub"
+                  class="block text-xs text-muted"></span></span
+              >
             </label>
           </div>
 
@@ -244,7 +264,7 @@ const metadata = {
     getCart,
     updateQty,
     removeFromCart,
-    clearCart,
+    clearCart as clearCartBase,
     cartSubtotal,
     cartHasPhysical,
     updateCartBadge,
@@ -259,6 +279,7 @@ const metadata = {
     currency as getCurrency,
     provider as getProvider,
   } from '~/scripts/api';
+  import { getBookingSlots, holdBookingSlot } from '~/scripts/api';
   import { depositPreview, depositCheckout } from '~/scripts/api';
   import { codCheckout, codCountries } from '~/scripts/api';
 
@@ -285,6 +306,7 @@ const metadata = {
     contentEl.style.display = 'grid';
 
     renderItems(cart);
+    renderPickers(cart);
     renderSummary(cart);
     renderShippingSection(cart);
     updatePaymentSection(cart);
@@ -294,7 +316,7 @@ const metadata = {
   const COD_COUNTRIES = codCountries();
   const LABEL_DEFAULT = 'Passer la commande';
   const LABEL_COD = 'Confirmer la commande';
-  const LABEL_DEPOSIT = 'Payer l\'acompte';
+  const LABEL_DEPOSIT = "Payer l'acompte";
 
   // Deposit offer: asked to the API once per cart content (the cart itself is local until checkout).
   let depositQuote: { eligible: boolean; deposit_cents: number; balance_cents: number; due_days: number } | null = null;
@@ -306,8 +328,15 @@ const metadata = {
     depositQuote = null;
     if (cart.length === 0 || cart.some((i) => i.product_type === 'digital')) return;
     depositPreview(cart.map((i) => ({ sku: i.sku, qty: i.qty })))
-      .then((q) => { if (depositKey === key) { depositQuote = q; updatePaymentSection(getCart()); } })
-      .catch(() => { /* no deposit offer if the preview fails */ });
+      .then((q) => {
+        if (depositKey === key) {
+          depositQuote = q;
+          updatePaymentSection(getCart());
+        }
+      })
+      .catch(() => {
+        /* no deposit offer if the preview fails */
+      });
   }
 
   function codEligible(cart: CartLineItem[]): boolean {
@@ -315,7 +344,8 @@ const metadata = {
     if (cart.some((i) => i.product_type === 'digital')) return false;
     if (!cartHasPhysical(cart)) return true; // services only: nothing to deliver, pay on the day
     const country = ((document.getElementById('ship-country') as HTMLInputElement | null)?.value ?? '')
-      .trim().toUpperCase();
+      .trim()
+      .toUpperCase();
     return COD_COUNTRIES.includes(country);
   }
 
@@ -337,13 +367,21 @@ const metadata = {
     const codOk = codEligible(cart);
     const depOk = !!depositQuote?.eligible;
     const eligible = codOk || depOk;
-    const codLabel = document.querySelector<HTMLInputElement>('input[name="payment-method"][value="cod"]')?.closest('label') as HTMLElement | null;
+    const codLabel = document
+      .querySelector<HTMLInputElement>('input[name="payment-method"][value="cod"]')
+      ?.closest('label') as HTMLElement | null;
     if (codLabel) codLabel.style.display = codOk ? 'flex' : 'none';
     const depLabel = document.getElementById('deposit-option');
     if (depLabel) depLabel.style.display = depOk ? 'flex' : 'none';
     if (depOk) {
-      document.getElementById('deposit-title')!.textContent = 'Payer un acompte de ' + formatPrice(depositQuote!.deposit_cents, CURRENCY);
-      document.getElementById('deposit-sub')!.textContent = 'Le solde de ' + formatPrice(depositQuote!.balance_cents, CURRENCY) + ' est à régler sous ' + depositQuote!.due_days + ' jours, en ligne ou à la livraison.';
+      document.getElementById('deposit-title')!.textContent =
+        'Payer un acompte de ' + formatPrice(depositQuote!.deposit_cents, CURRENCY);
+      document.getElementById('deposit-sub')!.textContent =
+        'Le solde de ' +
+        formatPrice(depositQuote!.balance_cents, CURRENCY) +
+        ' est à régler sous ' +
+        depositQuote!.due_days +
+        ' jours, en ligne ou à la livraison.';
     }
     const picked = document.querySelector<HTMLInputElement>('input[name="payment-method"]:checked')?.value;
     if ((picked === 'deposit' && !depOk) || (picked === 'cod' && !codOk)) {
@@ -356,6 +394,203 @@ const metadata = {
       if (online) online.checked = true;
     }
     syncPaymentLabels();
+  }
+
+  // ── Appointment slots (services with online booking) ─────────
+  // The picked slot is kept locally until checkout, where it is held on the server
+  // (see holdAll) right before payment starts.
+  const BOOKING_KEY = 'santenatur_bookings';
+  const SLOT_LOCALE = 'fr-FR';
+  const CUSTOMER_TZ = (() => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    } catch {
+      return '';
+    }
+  })();
+  type Slot = { start: string; end: string; available: boolean };
+  type SlotInfo = { bookable: boolean; duration_min?: number; tz?: string; slots: Slot[] };
+  const slotInfo: Record<string, SlotInfo | 'loading' | undefined> = {};
+  const pickedDay: Record<string, string> = {};
+
+  function readBookings(): Record<string, string> {
+    try {
+      return JSON.parse(localStorage.getItem(BOOKING_KEY) || '{}') || {};
+    } catch {
+      return {};
+    }
+  }
+  function writeBookings(b: Record<string, string>) {
+    try {
+      localStorage.setItem(BOOKING_KEY, JSON.stringify(b));
+    } catch {
+      /* private mode: selection lives for this page only */ memoryBookings = b;
+    }
+  }
+  let memoryBookings: Record<string, string> | null = null;
+  function currentBookings(): Record<string, string> {
+    return memoryBookings ?? readBookings();
+  }
+  function clearBookings() {
+    memoryBookings = null;
+    try {
+      localStorage.removeItem(BOOKING_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+  // The cart is emptied right after a successful checkout: forget the slot with it.
+  function clearCart() {
+    clearCartBase();
+    clearBookings();
+  }
+
+  const dayKey = (iso: string) => new Date(iso).toLocaleDateString('en-CA');
+  const fmtDayBtn = (key: string) =>
+    new Intl.DateTimeFormat(SLOT_LOCALE, { weekday: 'short', day: 'numeric', month: 'short' }).format(
+      new Date(key + 'T12:00:00')
+    );
+  const fmtTimeBtn = (iso: string) =>
+    new Intl.DateTimeFormat(SLOT_LOCALE, { hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+  const fmtFull = (iso: string) =>
+    new Intl.DateTimeFormat(SLOT_LOCALE, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(iso));
+  const escHtml = (s: string) =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  function loadSlots(sku: string): Promise<void> {
+    if (slotInfo[sku] !== undefined) return Promise.resolve();
+    slotInfo[sku] = 'loading';
+    return getBookingSlots(sku)
+      .then((r) => {
+        slotInfo[sku] = r;
+      })
+      .catch(() => {
+        slotInfo[sku] = undefined;
+      });
+  }
+
+  function validSelection(sku: string): string | null {
+    const info = slotInfo[sku];
+    const start = currentBookings()[sku];
+    if (!start || !info || info === 'loading' || !info.bookable) return null;
+    return info.slots.some((s) => s.start === start && s.available) ? start : null;
+  }
+
+  function renderPickers(cart: CartLineItem[]) {
+    for (const item of cart) {
+      if (item.product_type !== 'service') continue;
+      const box = document.querySelector<HTMLElement>(`[data-slot-sku="${item.sku}"]`);
+      if (!box) continue;
+      const info = slotInfo[item.sku];
+      if (info === undefined) {
+        loadSlots(item.sku).then(() => renderPickers(getCart()));
+        continue;
+      }
+      if (info === 'loading') {
+        box.style.display = 'block';
+        box.innerHTML = `<p class="text-xs text-muted">Chargement des créneaux…</p>`;
+        continue;
+      }
+      if (!info.bookable) {
+        box.style.display = 'none';
+        continue;
+      }
+      if (item.qty !== 1) {
+        updateQty(item.sku, 1);
+        render();
+        return;
+      }
+
+      box.style.display = 'block';
+      const byDay = new Map<string, Slot[]>();
+      for (const s of info.slots) byDay.set(dayKey(s.start), [...(byDay.get(dayKey(s.start)) ?? []), s]);
+      const days = [...byDay.keys()];
+      const picked = validSelection(item.sku);
+      if (!byDay.size || !days.some((d) => byDay.get(d)!.some((s) => s.available))) {
+        box.innerHTML = `<p class="text-sm text-muted">Aucun créneau disponible pour le moment. Écrivez-nous pour convenir d'une date.</p>`;
+        continue;
+      }
+      let day = pickedDay[item.sku];
+      if (!day || !byDay.has(day))
+        day = picked ? dayKey(picked) : days.find((d) => byDay.get(d)!.some((s) => s.available))!;
+      pickedDay[item.sku] = day;
+      const d = info.duration_min ?? 60,
+        tz = escHtml(CUSTOMER_TZ || info.tz || '');
+      const dayBtns = days
+        .map((k) => {
+          const free = byDay.get(k)!.some((s) => s.available);
+          return `<button type="button" data-slot-day="${k}" data-sku="${item.sku}" class="shrink-0 rounded-lg border px-3 py-1.5 text-sm ${k === day ? 'btn-primary border-transparent' : 'border-gray-200 dark:border-slate-700'} ${free ? '' : 'opacity-40'}">${fmtDayBtn(k)}</button>`;
+        })
+        .join('');
+      const timeBtns = byDay
+        .get(day)!
+        .map((s) =>
+          s.available
+            ? `<button type="button" data-slot-start="${s.start}" data-sku="${item.sku}" class="rounded-lg border px-3 py-1.5 text-sm ${s.start === picked ? 'btn-primary border-transparent' : 'border-gray-200 dark:border-slate-700 hover:border-primary'}">${fmtTimeBtn(s.start)}</button>`
+            : `<button type="button" disabled title="Créneau indisponible" class="rounded-lg border border-gray-100 dark:border-slate-800 px-3 py-1.5 text-sm text-muted line-through opacity-50 cursor-not-allowed">${fmtTimeBtn(s.start)}</button>`
+        )
+        .join('');
+      box.innerHTML = `
+        <div class="rounded-lg border border-gray-200 dark:border-slate-700 p-3">
+          <p class="text-sm font-medium mb-0.5">Choisissez votre créneau</p>
+          <p class="text-xs text-muted mb-3">${`Séance de ${d} min · heures affichées dans votre fuseau (${tz})`}</p>
+          <div class="flex gap-2 overflow-x-auto pb-2">${dayBtns}</div>
+          <div class="flex flex-wrap gap-2 mt-2">${timeBtns}</div>
+          ${picked ? `<p class="text-sm mt-3"><span class="text-muted">Votre créneau :</span> <strong>${escHtml(fmtFull(picked))}</strong></p>` : ''}
+        </div>`;
+      box.querySelectorAll<HTMLElement>('[data-slot-day]').forEach((b) =>
+        b.addEventListener('click', () => {
+          pickedDay[b.dataset.sku!] = b.dataset.slotDay!;
+          renderPickers(getCart());
+        })
+      );
+      box.querySelectorAll<HTMLElement>('[data-slot-start]').forEach((b) =>
+        b.addEventListener('click', () => {
+          writeBookings({ ...currentBookings(), [b.dataset.sku!]: b.dataset.slotStart! });
+          clearError();
+          renderPickers(getCart());
+        })
+      );
+    }
+  }
+
+  /** Waits for the availability of every service in the cart, then returns the first one that still needs a slot. */
+  async function firstMissingSlot(cart: CartLineItem[]): Promise<CartLineItem | null> {
+    const services = cart.filter((i) => i.product_type === 'service');
+    await Promise.all(services.map((i) => loadSlots(i.sku)));
+    for (const i of services) {
+      const info = slotInfo[i.sku];
+      if (info && info !== 'loading' && info.bookable && !validSelection(i.sku)) return i;
+    }
+    return null;
+  }
+
+  /** Holds the chosen slots on the server for this (backend) cart, right before payment starts. */
+  async function holdAll(cartId: string, cart: CartLineItem[]) {
+    const sel = currentBookings();
+    for (const i of cart) {
+      const info = slotInfo[i.sku];
+      if (!info || info === 'loading' || !info.bookable) continue;
+      try {
+        await holdBookingSlot(cartId, i.sku, sel[i.sku], CUSTOMER_TZ || undefined);
+      } catch (e: any) {
+        if (e?.code === 'slot_taken' || e?.code === 'slot_unavailable' || e?.status === 409) {
+          const rest = { ...currentBookings() };
+          delete rest[i.sku];
+          writeBookings(rest);
+          slotInfo[i.sku] = undefined; // reload fresh availability
+          renderPickers(getCart());
+          throw new Error("Ce créneau vient d'être pris. Choisissez-en un autre.");
+        }
+        throw e;
+      }
+    }
   }
 
   function renderItems(cart: CartLineItem[]) {
@@ -396,6 +631,7 @@ const metadata = {
           <button class="remove-btn text-xs text-red-400 hover:text-red-600 transition-colors" data-sku="${item.sku}">Supprimer</button>
         </div>
       </div>
+      <div data-slot-sku="${item.sku}" class="pb-4 border-b border-gray-100 dark:border-slate-800" style="display:none"></div>
     `
       )
       .join('');
@@ -506,6 +742,16 @@ const metadata = {
       }
     }
 
+    // Services with online booking need a chosen time slot.
+    const missing = await firstMissingSlot(cart);
+    if (missing) {
+      showError(`Choisissez un créneau pour « ${missing.title} » avant de commander.`);
+      document
+        .querySelector(`[data-slot-sku="${missing.sku}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     // Collect email
     const email = await window.promptEmail();
     if (!email) return;
@@ -557,6 +803,9 @@ const metadata = {
         }
       }
 
+      // 4b. Hold the chosen appointment slots before anything is charged.
+      await holdAll(cartId, cart);
+
       // 5a. Pay on delivery: the order is created right away, no payment page.
       if (payment === 'cod') {
         await codCheckout(cartId);
@@ -567,7 +816,12 @@ const metadata = {
 
       // 5b. Deposit: only the deposit goes through the payment page; the order is created when it is confirmed.
       if (payment === 'deposit') {
-        const result = await depositCheckout(cartId, `${window.location.origin}/fr/confirmation?cart_id=${cartId}&pm=deposit`, `${window.location.origin}/fr/panier`, PROVIDER);
+        const result = await depositCheckout(
+          cartId,
+          `${window.location.origin}/fr/confirmation?cart_id=${cartId}&pm=deposit`,
+          `${window.location.origin}/fr/panier`,
+          PROVIDER
+        );
         clearCart();
         window.location.href = result.checkout_url;
         return;

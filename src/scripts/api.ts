@@ -289,3 +289,35 @@ export async function payBalance(
     body: JSON.stringify({ success_url: successUrl, amount_cents: amountCents, cancel_url: cancelUrl, provider: preferredProvider }),
   });
 }
+
+// ── Appointments (services with online booking) ───────────────
+
+export interface BookingSlot { start: string; end: string; available: boolean }
+export interface BookingSlots {
+  bookable: boolean;
+  duration_min?: number;
+  tz?: string;
+  slots: BookingSlot[];
+}
+
+/** Candidate time slots of a service, each flagged available or busy. Not bookable → { bookable: false }. */
+export async function getBookingSlots(sku: string, days = 45): Promise<BookingSlots> {
+  return request<BookingSlots>(`/v1/bookings/slots?sku=${encodeURIComponent(sku)}&days=${days}`);
+}
+
+/** Holds a slot for a cart (a few minutes, extended once payment starts). Errors carry `.code` ('slot_taken'…) and `.status`. */
+export async function holdBookingSlot(cartId: string, sku: string, start: string, customerTz?: string): Promise<{ id: string; start: string; end: string }> {
+  const res = await fetch(`${apiUrl()}/v1/bookings/hold`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${publicKey()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cart_id: cartId, sku, start, customer_tz: customerTz }),
+  });
+  const data: any = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err: any = new Error(data?.error?.message || `API error ${res.status}`);
+    err.code = data?.error?.code;
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
