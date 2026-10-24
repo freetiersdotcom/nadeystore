@@ -178,6 +178,10 @@ const metadata = {
               <input type="radio" name="payment-method" value="cod" class="mt-1" />
               <span class="text-sm"><span class="font-medium">Payer à la livraison</span><span class="block text-xs text-muted">Vous réglez en espèces à la réception de votre commande.</span></span>
             </label>
+            <label id="deposit-option" class="flex items-start gap-2 p-3 rounded-lg border border-gray-200 dark:border-slate-700 cursor-pointer mt-2" style="display:none">
+              <input type="radio" name="payment-method" value="deposit" class="mt-1" />
+              <span class="text-sm"><span id="deposit-title" class="font-medium">Payer un acompte</span><span id="deposit-sub" class="block text-xs text-muted"></span></span>
+            </label>
           </div>
 
           <button
@@ -255,6 +259,7 @@ const metadata = {
     currency as getCurrency,
     provider as getProvider,
   } from '~/scripts/api';
+  import { depositPreview, depositCheckout } from '~/scripts/api';
   import { codCheckout, codCountries } from '~/scripts/api';
 
   const CURRENCY = getCurrency();
@@ -289,6 +294,21 @@ const metadata = {
   const COD_COUNTRIES = codCountries();
   const LABEL_DEFAULT = 'Passer la commande';
   const LABEL_COD = 'Confirmer la commande';
+  const LABEL_DEPOSIT = 'Payer l\'acompte';
+
+  // Deposit offer: asked to the API once per cart content (the cart itself is local until checkout).
+  let depositQuote: { eligible: boolean; deposit_cents: number; balance_cents: number; due_days: number } | null = null;
+  let depositKey = '';
+  function refreshDeposit(cart: CartLineItem[]) {
+    const key = cart.map((i) => `${i.sku}:${i.qty}`).join(',');
+    if (key === depositKey) return;
+    depositKey = key;
+    depositQuote = null;
+    if (cart.length === 0 || cart.some((i) => i.product_type === 'digital')) return;
+    depositPreview(cart.map((i) => ({ sku: i.sku, qty: i.qty })))
+      .then((q) => { if (depositKey === key) { depositQuote = q; updatePaymentSection(getCart()); } })
+      .catch(() => { /* no deposit offer if the preview fails */ });
+  }
 
   function codEligible(cart: CartLineItem[]): boolean {
     if (COD_COUNTRIES.length === 0 || cart.length === 0) return false;
@@ -299,19 +319,37 @@ const metadata = {
     return COD_COUNTRIES.includes(country);
   }
 
-  function selectedPayment(cart: CartLineItem[]): 'online' | 'cod' {
+  function selectedPayment(cart: CartLineItem[]): 'online' | 'cod' | 'deposit' {
     const checked = document.querySelector<HTMLInputElement>('input[name="payment-method"]:checked');
+    if (checked?.value === 'deposit' && depositQuote?.eligible) return 'deposit';
     return checked?.value === 'cod' && codEligible(cart) ? 'cod' : 'online';
   }
 
   function syncPaymentLabels() {
-    setCheckoutButtons(selectedPayment(getCart()) === 'cod' ? LABEL_COD : LABEL_DEFAULT, false);
+    const method = selectedPayment(getCart());
+    setCheckoutButtons(method === 'cod' ? LABEL_COD : method === 'deposit' ? LABEL_DEPOSIT : LABEL_DEFAULT, false);
   }
 
   function updatePaymentSection(cart: CartLineItem[]) {
     const section = document.getElementById('payment-method-section');
     if (!section) return;
-    const eligible = codEligible(cart);
+    refreshDeposit(cart);
+    const codOk = codEligible(cart);
+    const depOk = !!depositQuote?.eligible;
+    const eligible = codOk || depOk;
+    const codLabel = document.querySelector<HTMLInputElement>('input[name="payment-method"][value="cod"]')?.closest('label') as HTMLElement | null;
+    if (codLabel) codLabel.style.display = codOk ? 'flex' : 'none';
+    const depLabel = document.getElementById('deposit-option');
+    if (depLabel) depLabel.style.display = depOk ? 'flex' : 'none';
+    if (depOk) {
+      document.getElementById('deposit-title')!.textContent = 'Payer un acompte de ' + formatPrice(depositQuote!.deposit_cents, CURRENCY);
+      document.getElementById('deposit-sub')!.textContent = 'Le solde de ' + formatPrice(depositQuote!.balance_cents, CURRENCY) + ' est à régler sous ' + depositQuote!.due_days + ' jours, en ligne ou à la livraison.';
+    }
+    const picked = document.querySelector<HTMLInputElement>('input[name="payment-method"]:checked')?.value;
+    if ((picked === 'deposit' && !depOk) || (picked === 'cod' && !codOk)) {
+      const online = document.querySelector<HTMLInputElement>('input[name="payment-method"][value="online"]');
+      if (online) online.checked = true;
+    }
     section.style.display = eligible ? 'block' : 'none';
     if (!eligible) {
       const online = document.querySelector<HTMLInputElement>('input[name="payment-method"][value="online"]');
@@ -459,7 +497,7 @@ const metadata = {
 
     // Pay on delivery needs a phone number the courier can call.
     const payment = selectedPayment(cart);
-    if (payment === 'cod' && hasPhysical) {
+    if (payment !== 'online' && hasPhysical) {
       const phone = (document.getElementById('ship-postal') as HTMLInputElement).value.replace(/\D/g, '');
       if (phone.length < 8) {
         showError('Indiquez un numéro de téléphone (WhatsApp) pour organiser la livraison.');
@@ -524,6 +562,14 @@ const metadata = {
         await codCheckout(cartId);
         clearCart();
         window.location.href = `${window.location.origin}/fr/confirmation?cart_id=${cartId}&pm=cod`;
+        return;
+      }
+
+      // 5b. Deposit: only the deposit goes through the payment page; the order is created when it is confirmed.
+      if (payment === 'deposit') {
+        const result = await depositCheckout(cartId, `${window.location.origin}/fr/confirmation?cart_id=${cartId}&pm=deposit`, `${window.location.origin}/fr/panier`, PROVIDER);
+        clearCart();
+        window.location.href = result.checkout_url;
         return;
       }
 

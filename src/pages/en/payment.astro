@@ -1,0 +1,212 @@
+---
+// src/pages/en/payment.astro
+// Customer page to pay the balance of an order (deposit / installments).
+// Link: /en/payment?token=<pay token> (sent by e-mail, also shown on the order confirmation e-mail).
+import StoreLayout from '~/layouts/StoreLayout.astro';
+
+const metadata = {
+  title: 'Pay your balance',
+  robots: { index: false, follow: false },
+};
+---
+
+<StoreLayout metadata={metadata} cartUrl="/en/cart">
+  <div class="max-w-xl mx-auto px-6 py-16">
+
+    <div id="loading-state" class="text-center py-12">
+      <div class="inline-block w-8 h-8 border-2 border-gray-200 dark:border-slate-700 border-t-primary rounded-full animate-spin mb-4"></div>
+      <p class="text-muted text-sm" data-i18n="loading"></p>
+    </div>
+
+    <div id="pay-state" style="display:none">
+      <h1 class="font-bold font-heading text-2xl mb-1" data-i18n="title"></h1>
+      <p class="text-muted text-sm mb-6"><span data-i18n="order"></span> <strong class="text-default" data-dynamic="number"></strong></p>
+
+      <p id="notice" class="text-sm rounded-lg p-3 mb-5" style="display:none"></p>
+
+      <div class="bg-gray-50 dark:bg-slate-800 rounded-xl p-5 mb-5 text-sm">
+        <ul id="items" class="mb-4 space-y-1 text-muted"></ul>
+        <div class="flex justify-between py-1"><span class="text-muted" data-i18n="total"></span><span data-dynamic="total"></span></div>
+        <div class="flex justify-between py-1"><span class="text-muted" data-i18n="paid"></span><span data-dynamic="paid"></span></div>
+        <div class="flex justify-between py-1 border-t border-gray-200 dark:border-slate-700 mt-2 pt-2 font-semibold"><span data-i18n="balance"></span><span data-dynamic="balance"></span></div>
+        <p id="due" class="text-xs text-muted mt-2" style="display:none"></p>
+      </div>
+
+      <div id="pay-form">
+        <label class="block text-xs font-medium text-muted mb-1" for="amount" data-i18n="amountLabel"></label>
+        <input id="amount" type="number" inputmode="numeric" min="1" step="1"
+          class="w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-transparent px-3 py-2 text-sm mb-1" />
+        <p id="amount-hint" class="text-xs text-muted mb-4"></p>
+        <button id="pay-btn" type="button" class="w-full btn-primary py-3 text-sm rounded-lg font-semibold" data-i18n="payBtn"></button>
+        <p id="pay-error" class="text-red-500 text-xs mt-3 text-center" style="display:none"></p>
+      </div>
+
+      <details id="history" class="mt-6 text-sm" style="display:none">
+        <summary class="cursor-pointer text-muted" data-i18n="history"></summary>
+        <ul id="payments" class="mt-2 space-y-1 text-muted"></ul>
+      </details>
+    </div>
+
+    <div id="done-state" class="text-center py-8" style="display:none">
+      <h1 class="font-bold font-heading text-2xl mb-2" data-i18n="doneTitle"></h1>
+      <p class="text-muted text-sm mb-6" data-i18n="doneText"></p>
+      <a href="/en/shop" class="btn-primary px-6 py-3 rounded-lg text-sm font-medium" data-i18n="shop"></a>
+    </div>
+
+    <div id="closed-state" class="text-center py-8" style="display:none">
+      <h1 class="font-bold font-heading text-2xl mb-2" data-i18n="closedTitle"></h1>
+      <p class="text-muted text-sm mb-6" data-i18n="closedText"></p>
+      <a href="/en/contact" class="btn-primary px-6 py-3 rounded-lg text-sm font-medium" data-i18n="contact"></a>
+    </div>
+
+    <div id="error-state" class="text-center py-8" style="display:none">
+      <h1 class="font-bold font-heading text-2xl mb-2" data-i18n="errorTitle"></h1>
+      <p class="text-muted text-sm mb-6" data-i18n="errorText"></p>
+      <a href="/en/contact" class="btn-primary px-6 py-3 rounded-lg text-sm font-medium" data-i18n="contact"></a>
+    </div>
+
+  </div>
+</StoreLayout>
+
+<script>
+  import { getPayInfo, payBalance, currency as getCurrency, provider as getProvider } from '~/scripts/api';
+  import { formatPrice } from '~/scripts/cart';
+
+  let CURRENCY = getCurrency();   // replaced by the order's own currency once loaded
+  let FACTOR = 1;                 // minor units per major unit (1 for XOF, 100 for EUR)
+  const locale = window.location.pathname.startsWith('/en/') ? 'en' : 'fr';
+
+  const i18n = {
+    fr: {
+      loading: 'Chargement...', title: 'Régler le solde', order: 'Commande', total: 'Total', paid: 'Déjà payé', balance: 'Reste à payer',
+      amountLabel: 'Montant à payer maintenant', payBtn: 'Payer en ligne', history: 'Paiements reçus',
+      hint: (min: number, max: number) => min > 0 && min < max ? `Entre ${formatPrice(min, CURRENCY)} et ${formatPrice(max, CURRENCY)}. Vous pouvez payer en plusieurs fois.` : `Jusqu'à ${formatPrice(max, CURRENCY)}. Vous pouvez payer en plusieurs fois.`,
+      due: (d: string) => `À régler avant le ${d}.`, overdue: (d: string) => `Le solde devait être réglé le ${d}. Merci de le régler rapidement.`,
+      confirming: 'Merci ! Nous confirmons votre paiement, cela peut prendre quelques instants…',
+      confirmed: 'Paiement reçu, merci !', waiting: 'Votre paiement n\'est pas encore confirmé. Si vous avez été débité, il apparaîtra ici sous peu.',
+      doneTitle: 'Commande entièrement réglée ✓', doneText: 'Merci ! Nous avons bien reçu la totalité du paiement.', shop: 'Continuer les achats',
+      closedTitle: 'Commande non payable', closedText: 'Cette commande a été annulée ou ne peut plus être réglée en ligne. Contactez-nous si besoin.', contact: 'Nous contacter',
+      errorTitle: 'Lien invalide', errorText: 'Ce lien de paiement est invalide. Vérifiez votre e-mail ou contactez-nous.',
+      badAmount: 'Montant invalide.', processing: 'Redirection…',
+    },
+    en: {
+      loading: 'Loading...', title: 'Pay your balance', order: 'Order', total: 'Total', paid: 'Already paid', balance: 'Remaining',
+      amountLabel: 'Amount to pay now', payBtn: 'Pay online', history: 'Payments received',
+      hint: (min: number, max: number) => min > 0 && min < max ? `Between ${formatPrice(min, CURRENCY)} and ${formatPrice(max, CURRENCY)}. You can pay in several instalments.` : `Up to ${formatPrice(max, CURRENCY)}. You can pay in several instalments.`,
+      due: (d: string) => `Due by ${d}.`, overdue: (d: string) => `The balance was due on ${d}. Please pay it soon.`,
+      confirming: 'Thank you! We are confirming your payment, this may take a moment…',
+      confirmed: 'Payment received, thank you!', waiting: 'Your payment is not confirmed yet. If you were charged, it will show here shortly.',
+      doneTitle: 'Order fully paid ✓', doneText: 'Thank you! We received the full payment.', shop: 'Continue shopping',
+      closedTitle: 'Order cannot be paid', closedText: 'This order was canceled or can no longer be paid online. Contact us if needed.', contact: 'Contact us',
+      errorTitle: 'Invalid link', errorText: 'This payment link is invalid. Check your email or contact us.',
+      badAmount: 'Invalid amount.', processing: 'Redirecting…',
+    },
+  };
+  const t = i18n[locale] as any;
+
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+
+  function applyI18n() {
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const v = t[(el as HTMLElement).dataset.i18n as string];
+      if (typeof v === 'string') el.textContent = v;
+    });
+  }
+  function show(id: string) {
+    ['loading-state', 'pay-state', 'done-state', 'closed-state', 'error-state'].forEach((s) => { $(s).style.display = s === id ? 'block' : 'none'; });
+  }
+  function dyn(key: string, v: string) { document.querySelectorAll(`[data-dynamic="${key}"]`).forEach((el) => { el.textContent = v; }); }
+  const fmtDate = (iso: string) => new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'fr-FR', { dateStyle: 'long' }).format(new Date(iso));
+  const prevKey = `pay_prev_${token}`;
+
+  function setNotice(text: string | null, tone: 'info' | 'ok' | 'warn' = 'info') {
+    const el = $('notice');
+    if (!text) { el.style.display = 'none'; return; }
+    el.textContent = text;
+    el.className = 'text-sm rounded-lg p-3 mb-5 ' + (tone === 'ok' ? 'bg-green-50 text-green-800' : tone === 'warn' ? 'bg-amber-50 text-amber-900' : 'bg-sky-50 text-sky-900');
+    el.style.display = 'block';
+  }
+
+  function render(info: any) {
+    CURRENCY = info.currency;
+    FACTOR = info.minor_factor || 1;
+    if (info.balance_cents <= 0) { show('done-state'); return; }
+    if (!info.can_pay) { show('closed-state'); return; }
+
+    dyn('number', info.order_number);
+    dyn('total', formatPrice(info.total_cents, CURRENCY));
+    dyn('paid', formatPrice(info.paid_cents, CURRENCY));
+    dyn('balance', formatPrice(info.balance_cents, CURRENCY));
+    $('items').innerHTML = info.items.map((i: any) => `<li>${i.qty} × ${String(i.title).replace(/</g, '&lt;')}</li>`).join('');
+
+    const due = $('due');
+    if (info.due_at) { due.textContent = (info.overdue ? t.overdue : t.due)(fmtDate(info.due_at)); due.style.display = 'block'; }
+    else due.style.display = 'none';
+
+    const amount = $('amount') as HTMLInputElement;
+    amount.step = FACTOR === 1 ? '1' : '0.01';
+    amount.min = String(1 / FACTOR);
+    amount.max = String(info.balance_cents / FACTOR);
+    amount.value = String(info.balance_cents / FACTOR);
+    $('amount-hint').textContent = t.hint(info.min_payment_cents, info.balance_cents);
+
+    if (info.payments.length) {
+      $('payments').innerHTML = info.payments.map((p: any) => `<li>${fmtDate(p.created_at)} — ${formatPrice(p.amount_cents, CURRENCY)}</li>`).join('');
+      $('history').style.display = 'block';
+    }
+    show('pay-state');
+  }
+
+  async function load(): Promise<any> {
+    return getPayInfo(token!);
+  }
+
+  async function init() {
+    applyI18n();
+    if (!token) { show('error-state'); return; }
+    let info: any;
+    try { info = await load(); } catch { show('error-state'); return; }
+
+    // Back from the payment page: the confirmation arrives through a webhook, so wait for it.
+    if (params.get('paid') === '1') {
+      let before = -1;
+      try { before = Number(sessionStorage.getItem(prevKey) ?? -1); } catch { /* storage unavailable */ }
+      if (before >= 0 && info.paid_cents <= before && info.balance_cents > 0) {
+        render(info); setNotice(t.confirming, 'info');
+        for (let i = 0; i < 10; i++) {
+          await new Promise((r) => setTimeout(r, 3000));
+          try { info = await load(); } catch { break; }
+          if (info.paid_cents > before) break;
+        }
+        render(info);
+        setNotice(info.paid_cents > before ? t.confirmed : t.waiting, info.paid_cents > before ? 'ok' : 'warn');
+        return;
+      }
+      render(info);
+      if (info.balance_cents > 0) setNotice(t.confirmed, 'ok');
+      return;
+    }
+    render(info);
+
+    $('pay-btn').addEventListener('click', async () => {
+      const btn = $('pay-btn') as HTMLButtonElement;
+      const err = $('pay-error');
+      err.style.display = 'none';
+      const amount = Math.round(Number(($('amount') as HTMLInputElement).value) * FACTOR);
+      if (!Number.isFinite(amount) || amount < 1 || amount > info.balance_cents) { err.textContent = t.badAmount; err.style.display = 'block'; return; }
+      btn.disabled = true; btn.textContent = t.processing;
+      try {
+        try { sessionStorage.setItem(prevKey, String(info.paid_cents)); } catch { /* ignore */ }
+        const back = `${window.location.origin}${window.location.pathname}?token=${encodeURIComponent(token!)}&paid=1`;
+        const res = await payBalance(token!, back, amount, window.location.href, getProvider());
+        window.location.href = res.checkout_url;
+      } catch (e: any) {
+        err.textContent = e.message || t.badAmount; err.style.display = 'block';
+        btn.disabled = false; btn.textContent = t.payBtn;
+      }
+    });
+  }
+  init();
+</script>

@@ -89,6 +89,12 @@ const metadata = {
         <p class="text-muted">You will pay when your order is delivered. We will contact you shortly to arrange delivery.</p>
       </div>
 
+      <!-- Deposit notice -->
+      <div id="deposit-notice" class="bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-xl p-4 text-left mb-8 text-sm" style="display:none">
+        <p class="font-medium text-default mb-1">Deposit received</p>
+        <p class="text-muted">Your order is reserved. The balance is due by the date in your confirmation email, which also contains your payment link.</p>
+      </div>
+
       <!-- Needs-review notice (payment confirmed late, stock being double-checked) -->
       <div
         id="review-notice"
@@ -220,6 +226,14 @@ const metadata = {
       const intro = document.querySelector('#success-state p');
       if (intro) intro.textContent = 'Thank you for your order.';
       document.getElementById('cod-notice')!.style.display = 'block';
+    }
+
+    if (new URLSearchParams(window.location.search).get('pm') === 'deposit') {
+      const h1 = document.querySelector('#success-state h1');
+      if (h1) h1.textContent = 'Deposit received!';
+      const intro = document.querySelector('#success-state p');
+      if (intro) intro.textContent = 'Thank you for your order.';
+      document.getElementById('deposit-notice')!.style.display = 'block';
     }
 
     if (order.needs_review) {

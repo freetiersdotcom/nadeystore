@@ -224,3 +224,68 @@ export async function codCheckout(cartId: string): Promise<CodCheckoutResult> {
     body: JSON.stringify({}),
   });
 }
+
+// ── Deposits & installments ───────────────────────────────────
+
+export interface DepositQuote {
+  eligible: boolean;
+  reason?: string;
+  total_cents: number;
+  deposit_cents: number;
+  balance_cents: number;
+  currency: string;
+  due_days: number;
+}
+
+/** What the customer would pay now for these items (cart is local until checkout). */
+export async function depositPreview(items: { sku: string; qty: number }[]): Promise<DepositQuote> {
+  return request<DepositQuote>('/v1/carts/deposit-preview', {
+    method: 'POST',
+    body: JSON.stringify({ items }),
+  });
+}
+
+export async function depositCheckout(
+  cartId: string,
+  successUrl: string,
+  cancelUrl?: string,
+  preferredProvider?: string
+): Promise<{ checkout_url: string; provider: string; ref: string; cart_id: string; deposit_cents: number; balance_cents: number }> {
+  return request(`/v1/carts/${cartId}/checkout/deposit`, {
+    method: 'POST',
+    body: JSON.stringify({ success_url: successUrl, cancel_url: cancelUrl, provider: preferredProvider }),
+  });
+}
+
+export interface PayInfo {
+  order_number: string;
+  status: string;
+  currency: string;
+  minor_factor: number;
+  total_cents: number;
+  paid_cents: number;
+  balance_cents: number;
+  due_at: string | null;
+  overdue: boolean;
+  can_pay: boolean;
+  min_payment_cents: number;
+  items: { title: string; qty: number; unit_price_cents: number }[];
+  payments: { amount_cents: number; method: string; created_at: string }[];
+}
+
+export async function getPayInfo(token: string): Promise<PayInfo> {
+  return request<PayInfo>(`/v1/pay/${encodeURIComponent(token)}`);
+}
+
+export async function payBalance(
+  token: string,
+  successUrl: string,
+  amountCents?: number,
+  cancelUrl?: string,
+  preferredProvider?: string
+): Promise<{ checkout_url: string; provider: string; ref: string; amount_cents: number }> {
+  return request(`/v1/pay/${encodeURIComponent(token)}/checkout`, {
+    method: 'POST',
+    body: JSON.stringify({ success_url: successUrl, amount_cents: amountCents, cancel_url: cancelUrl, provider: preferredProvider }),
+  });
+}

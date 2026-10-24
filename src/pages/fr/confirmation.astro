@@ -89,6 +89,12 @@ const metadata = {
         <p class="text-muted">Vous réglerez votre commande à la réception. Nous vous contacterons très prochainement pour organiser la livraison.</p>
       </div>
 
+      <!-- Deposit notice -->
+      <div id="deposit-notice" class="bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-xl p-4 text-left mb-8 text-sm" style="display:none">
+        <p class="font-medium text-default mb-1">Acompte reçu</p>
+        <p class="text-muted">Votre commande est réservée. Le solde est à régler avant la date indiquée dans l'e-mail de confirmation, où vous trouverez aussi votre lien de paiement.</p>
+      </div>
+
       <!-- Needs-review notice (payment confirmed late, stock being double-checked) -->
       <div
         id="review-notice"
@@ -222,6 +228,14 @@ const metadata = {
       const intro = document.querySelector('#success-state p');
       if (intro) intro.textContent = 'Merci pour votre commande.';
       document.getElementById('cod-notice')!.style.display = 'block';
+    }
+
+    if (new URLSearchParams(window.location.search).get('pm') === 'deposit') {
+      const h1 = document.querySelector('#success-state h1');
+      if (h1) h1.textContent = 'Acompte reçu !';
+      const intro = document.querySelector('#success-state p');
+      if (intro) intro.textContent = 'Merci pour votre commande.';
+      document.getElementById('deposit-notice')!.style.display = 'block';
     }
 
     if (order.needs_review) {
