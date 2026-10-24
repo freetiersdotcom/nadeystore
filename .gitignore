@@ -28,3 +28,6 @@ pnpm-lock.yaml
 .dev.vars*
 !.dev.vars.example
 !.env.example
+
+# backups
+*.bak

@@ -83,6 +83,12 @@ const metadata = {
         </p>
       </div>
 
+      <!-- Pay on delivery notice -->
+      <div id="cod-notice" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 text-left mb-8 text-sm" style="display:none">
+        <p class="font-medium text-default mb-1">Paiement à la livraison</p>
+        <p class="text-muted">Vous réglerez votre commande à la réception. Nous vous contacterons très prochainement pour organiser la livraison.</p>
+      </div>
+
       <!-- Needs-review notice (payment confirmed late, stock being double-checked) -->
       <div
         id="review-notice"
@@ -208,6 +214,14 @@ const metadata = {
       if (hasService) {
         document.getElementById('service-notice')!.style.display = 'block';
       }
+    }
+
+    if (new URLSearchParams(window.location.search).get('pm') === 'cod') {
+      const h1 = document.querySelector('#success-state h1');
+      if (h1) h1.textContent = 'Commande reçue !';
+      const intro = document.querySelector('#success-state p');
+      if (intro) intro.textContent = 'Merci pour votre commande.';
+      document.getElementById('cod-notice')!.style.display = 'block';
     }
 
     if (order.needs_review) {

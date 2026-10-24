@@ -113,6 +113,7 @@ export async function createCart(customerEmail: string): Promise<Cart> {
     method: 'POST',
     body: JSON.stringify({
       customer_email: customerEmail,
+      locale: typeof window !== 'undefined' && window.location.pathname.startsWith('/en') ? 'en' : 'fr',
       currency: currency(),   // ← was missing; caused FedaPay currency mismatch
     }),
   });
@@ -199,5 +200,27 @@ export async function stripeCheckout(
       collect_shipping: options.collectShipping ?? false,
       shipping_countries: options.shippingCountries ?? ['BJ', 'FR', 'GB', 'BE', 'CA'],
     }),
+  });
+}
+
+// ── Pay on delivery ───────────────────────────────────────────
+
+/** ISO country codes where pay-on-delivery is offered (PUBLIC_COD_COUNTRIES, default "BJ"; empty = off). */
+export function codCountries(): string[] {
+  const raw = (import.meta.env.PUBLIC_COD_COUNTRIES as string | undefined) ?? 'BJ';
+  return raw.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean);
+}
+
+export interface CodCheckoutResult {
+  order_number: string;
+  cart_id: string;
+  status: 'pending';
+  payment_method: 'cod';
+}
+
+export async function codCheckout(cartId: string): Promise<CodCheckoutResult> {
+  return request<CodCheckoutResult>(`/v1/carts/${cartId}/checkout/cod`, {
+    method: 'POST',
+    body: JSON.stringify({}),
   });
 }

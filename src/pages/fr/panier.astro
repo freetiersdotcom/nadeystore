@@ -168,6 +168,18 @@ const metadata = {
             </div>
           </div>
 
+          <div id="payment-method-section" class="mb-4" style="display:none">
+            <p class="text-xs font-medium text-muted mb-2">Mode de paiement</p>
+            <label class="flex items-start gap-2 p-3 rounded-lg border border-gray-200 dark:border-slate-700 cursor-pointer mb-2">
+              <input type="radio" name="payment-method" value="online" checked class="mt-1" />
+              <span class="text-sm"><span class="font-medium">Payer en ligne</span><span class="block text-xs text-muted">Carte bancaire ou Mobile Money</span></span>
+            </label>
+            <label class="flex items-start gap-2 p-3 rounded-lg border border-gray-200 dark:border-slate-700 cursor-pointer">
+              <input type="radio" name="payment-method" value="cod" class="mt-1" />
+              <span class="text-sm"><span class="font-medium">Payer à la livraison</span><span class="block text-xs text-muted">Vous réglez en espèces à la réception de votre commande.</span></span>
+            </label>
+          </div>
+
           <button
             id="checkout-btn"
             data-checkout-btn
@@ -243,6 +255,7 @@ const metadata = {
     currency as getCurrency,
     provider as getProvider,
   } from '~/scripts/api';
+  import { codCheckout, codCountries } from '~/scripts/api';
 
   const CURRENCY = getCurrency();
   const PROVIDER = getProvider();
@@ -269,6 +282,42 @@ const metadata = {
     renderItems(cart);
     renderSummary(cart);
     renderShippingSection(cart);
+    updatePaymentSection(cart);
+  }
+
+  // ── Payment method (online / pay on delivery) ────────────────
+  const COD_COUNTRIES = codCountries();
+  const LABEL_DEFAULT = 'Passer la commande';
+  const LABEL_COD = 'Confirmer la commande';
+
+  function codEligible(cart: CartLineItem[]): boolean {
+    if (COD_COUNTRIES.length === 0 || cart.length === 0) return false;
+    if (cart.some((i) => i.product_type === 'digital')) return false;
+    if (!cartHasPhysical(cart)) return true; // services only: nothing to deliver, pay on the day
+    const country = ((document.getElementById('ship-country') as HTMLInputElement | null)?.value ?? '')
+      .trim().toUpperCase();
+    return COD_COUNTRIES.includes(country);
+  }
+
+  function selectedPayment(cart: CartLineItem[]): 'online' | 'cod' {
+    const checked = document.querySelector<HTMLInputElement>('input[name="payment-method"]:checked');
+    return checked?.value === 'cod' && codEligible(cart) ? 'cod' : 'online';
+  }
+
+  function syncPaymentLabels() {
+    setCheckoutButtons(selectedPayment(getCart()) === 'cod' ? LABEL_COD : LABEL_DEFAULT, false);
+  }
+
+  function updatePaymentSection(cart: CartLineItem[]) {
+    const section = document.getElementById('payment-method-section');
+    if (!section) return;
+    const eligible = codEligible(cart);
+    section.style.display = eligible ? 'block' : 'none';
+    if (!eligible) {
+      const online = document.querySelector<HTMLInputElement>('input[name="payment-method"][value="online"]');
+      if (online) online.checked = true;
+    }
+    syncPaymentLabels();
   }
 
   function renderItems(cart: CartLineItem[]) {
@@ -408,6 +457,17 @@ const metadata = {
       }
     }
 
+    // Pay on delivery needs a phone number the courier can call.
+    const payment = selectedPayment(cart);
+    if (payment === 'cod' && hasPhysical) {
+      const phone = (document.getElementById('ship-postal') as HTMLInputElement).value.replace(/\D/g, '');
+      if (phone.length < 8) {
+        showError('Indiquez un numéro de téléphone (WhatsApp) pour organiser la livraison.');
+        document.getElementById('shipping-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+    }
+
     // Collect email
     const email = await window.promptEmail();
     if (!email) return;
@@ -459,6 +519,14 @@ const metadata = {
         }
       }
 
+      // 5a. Pay on delivery: the order is created right away, no payment page.
+      if (payment === 'cod') {
+        await codCheckout(cartId);
+        clearCart();
+        window.location.href = `${window.location.origin}/fr/confirmation?cart_id=${cartId}&pm=cod`;
+        return;
+      }
+
       // 5. Redirect to payment
       const origin = window.location.origin;
       const successUrl = `${origin}/fr/confirmation?cart_id=${cartId}`;
@@ -483,7 +551,7 @@ const metadata = {
     } catch (err: any) {
       console.error('Checkout failed:', err);
       showError(err.message || 'Une erreur est survenue. Veuillez réessayer.');
-      setCheckoutButtons('Passer la commande', false);
+      syncPaymentLabels();
     }
   }
 
@@ -520,6 +588,15 @@ const metadata = {
   function initCartPage() {
     bindOnce(document.getElementById('discount-btn'), handleApplyDiscount);
     checkoutButtons().forEach((b) => bindOnce(b, handleCheckout));
+    if (!(window as any).__payBound) {
+      (window as any).__payBound = true;
+      document.addEventListener('change', (e) => {
+        if ((e.target as HTMLElement | null)?.getAttribute?.('name') === 'payment-method') syncPaymentLabels();
+      });
+      document.addEventListener('input', (e) => {
+        if ((e.target as HTMLElement | null)?.id === 'ship-country') updatePaymentSection(getCart());
+      });
+    }
     render();
   }
 
