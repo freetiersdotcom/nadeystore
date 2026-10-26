@@ -138,6 +138,7 @@ export async function setCartShipping(
     city: string;
     state?: string;
     postal_code?: string;
+    phone?: string;   // international format, e.g. +22901610000000
     country: string;
   }
 ): Promise<{ ok: true }> {
@@ -147,6 +148,14 @@ export async function setCartShipping(
       ...address,
       postal_code: address.postal_code ?? '',
     }),
+  });
+}
+
+/** Services only (no delivery address): keeps a phone number on the cart for the appointment. */
+export async function setCartContact(cartId: string, phone: string): Promise<{ ok: true }> {
+  return request<{ ok: true }>(`/v1/carts/${cartId}/contact`, {
+    method: 'PATCH',
+    body: JSON.stringify({ phone }),
   });
 }
 

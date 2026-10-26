@@ -88,16 +88,15 @@ const metadata = {
                     class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 </div>
-                <div>
-                  <label class="block text-xs font-medium text-muted mb-1">Phone / Postal code</label>
+                <div id="ship-postal-wrap">
+                  <label class="block text-xs font-medium text-muted mb-1">Postal code<span id="ship-postal-star"></span></label>
                   <input
                     id="ship-postal"
                     type="text"
-                    placeholder="+229 61 XX XX XX or 75001"
-                    autocomplete="tel"
+                    placeholder="75001"
+                    autocomplete="postal-code"
                     class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
-                  <p class="text-xs text-muted mt-1">WhatsApp number or postal code depending on your country.</p>
                 </div>
               </div>
               <div class="grid grid-cols-2 gap-3">
@@ -113,16 +112,33 @@ const metadata = {
                 </div>
                 <div>
                   <label class="block text-xs font-medium text-muted mb-1">Country *</label>
-                  <input
-                    id="ship-country"
-                    type="text"
-                    placeholder="BJ"
-                    autocomplete="country"
-                    class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                  />
+                  <select id="ship-country" autocomplete="country" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"><option value="">Select a country…</option></select>
                 </div>
               </div>
+              <div id="ship-phone-home"><div>
+                <label class="block text-xs font-medium text-muted mb-1">Phone / WhatsApp *</label>
+                <div class="flex gap-2">
+                  <select id="ship-dial" aria-label="Country code" class="w-28 shrink-0 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"></select>
+                  <input
+                    id="ship-phone"
+                    type="tel"
+                    inputmode="tel"
+                    placeholder="01 61 00 00 00"
+                    autocomplete="tel-national"
+                    class="flex-1 min-w-0 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <p id="ship-phone-hint" class="text-xs text-muted mt-1">The courier will call this number.</p>
+              </div></div>
             </div>
+          </div>
+        </div>
+
+        <!-- Contact: services only (no address, but we keep a phone number) -->
+        <div id="contact-section" class="mb-8" style="display:none">
+          <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-5">
+            <h2 class="text-base font-semibold mb-4">Contact</h2>
+            <div id="contact-phone-slot"></div>
           </div>
         </div>
 
@@ -239,6 +255,8 @@ const metadata = {
 
 <script>
   import type { CartLineItem } from '~/scripts/cart';
+  import { countryList, postalRule, buildPhone } from '~/scripts/geo';
+  import { setCartContact } from '~/scripts/api';
   import {
     getCart,
     updateQty,
@@ -572,6 +590,98 @@ const metadata = {
   function renderShippingSection(cart: CartLineItem[]) {
     const section = document.getElementById('shipping-section')!;
     section.style.display = cartHasPhysical(cart) ? 'block' : 'none';
+    placePhoneRow(cart);
+  }
+
+  // ── Country, phone and postal code ───────────────────────────
+  // Country and country-code lists come from ~/scripts/geo (same data as the API and the admin).
+  const GEO_LOCALE = 'en';
+  const GEO_TXT = {
+    pick: "Select a country…",
+    optional: "optional",
+    hint: "The courier will call this number.",
+    hintBJ: "Benin numbers have 10 digits and start with 01 (e.g. 01 61 00 00 00).",
+    errCountry: "Please choose a country.",
+    errPostal: "Please enter a postal code for this country.",
+    errPhone: "Please enter a valid phone (WhatsApp) number.",
+  };
+
+  function geoEl<T extends HTMLElement>(id: string): T | null {
+    return document.getElementById(id) as T | null;
+  }
+
+  function updateGeoHints() {
+    const country = geoEl<HTMLSelectElement>('ship-country');
+    const dial = geoEl<HTMLSelectElement>('ship-dial');
+    if (!country || !dial) return;
+    const rule = country.value ? postalRule(country.value) : 'optional';
+    const wrap = geoEl('ship-postal-wrap');
+    if (wrap) wrap.style.display = rule === 'none' ? 'none' : '';
+    const star = geoEl('ship-postal-star');
+    if (star) star.textContent = rule === 'required' ? ' *' : ' (' + GEO_TXT.optional + ')';
+    const hint = geoEl('ship-phone-hint');
+    if (hint) hint.textContent = dial.value === 'BJ' ? GEO_TXT.hintBJ : GEO_TXT.hint;
+  }
+
+  function initGeoFields() {
+    // The country list is long: without this the grid column that holds the form is as wide as the longest
+    // country name and pushes the page sideways on phones.
+    document.getElementById('cart-items')?.parentElement?.classList.add('min-w-0');
+    const country = geoEl<HTMLSelectElement>('ship-country');
+    const dial = geoEl<HTMLSelectElement>('ship-dial');
+    if (!country || !dial) return;
+    if (!country.dataset.filled) {
+      country.dataset.filled = '1';
+      const list = countryList(GEO_LOCALE);
+      const SEP = '<option disabled>──────────</option>';
+      const opts = (label: (c: (typeof list)[number]) => string) =>
+        list.map((c, i) => `<option value="${c.iso}">${label(c)}</option>` + (i === 4 ? SEP : '')).join('');
+      country.innerHTML = `<option value="">${GEO_TXT.pick}</option>` + opts((c) => c.name);
+      dial.innerHTML = opts((c) => `${c.iso} +${c.dial}`);
+      dial.value = 'BJ';
+      // The country code next to the phone follows the delivery country until the customer changes it.
+      dial.addEventListener('change', () => { dial.dataset.touched = '1'; updateGeoHints(); });
+      country.addEventListener('change', () => {
+        if (!dial.dataset.touched && country.value) dial.value = country.value;
+        updateGeoHints();
+      });
+    }
+    updateGeoHints();
+  }
+
+  // International form of what the customer typed ("+22901610000000"), or '' when empty.
+  function phoneValue(): string {
+    const dial = geoEl<HTMLSelectElement>('ship-dial');
+    const raw = geoEl<HTMLInputElement>('ship-phone')?.value ?? '';
+    return dial ? buildPhone(dial.value, raw) : '';
+  }
+
+  // Delivery carts keep the phone in the address block. Service-only carts have no address,
+  // so the same field moves into its own "Contact" box.
+  function placePhoneRow(cart: CartLineItem[]) {
+    const row = geoEl('ship-phone')?.parentElement?.parentElement;   // label + [code | number] + hint
+    const home = geoEl('ship-phone-home');
+    const slot = geoEl('contact-phone-slot');
+    const box = geoEl('contact-section');
+    if (!row || !home || !slot || !box) return;
+    const servicesOnly = !cartHasPhysical(cart) && cart.some((i) => i.product_type === 'service');
+    const target = servicesOnly ? slot : home;
+    if (row.parentElement !== target) target.appendChild(row);
+    box.style.display = servicesOnly ? 'block' : 'none';
+  }
+
+  // First problem with country / postal code / phone, in the page language (the API checks again).
+  // `delivery` is false for service-only carts: no address, only the phone.
+  function contactError(delivery: boolean): string | null {
+    if (delivery) {
+      const country = geoEl<HTMLSelectElement>('ship-country')?.value ?? '';
+      if (!country) return GEO_TXT.errCountry;
+      const postal = (geoEl<HTMLInputElement>('ship-postal')?.value ?? '').trim();
+      if (postalRule(country) === 'required' && !postal) return GEO_TXT.errPostal;
+    }
+    const digits = phoneValue().replace(/\D/g, '');
+    if (digits.length < 8 || digits.length > 15) return GEO_TXT.errPhone;
+    return null;
   }
 
   // ── Discount ──────────────────────────────────────────────
@@ -627,13 +737,15 @@ const metadata = {
       }
     }
 
-    // Pay on delivery needs a phone number the courier can call.
     const payment = selectedPayment(cart);
-    if (payment !== 'online' && hasPhysical) {
-      const phone = (document.getElementById('ship-postal') as HTMLInputElement).value.replace(/\D/g, '');
-      if (phone.length < 8) {
-        showError('Please enter a phone (WhatsApp) number so we can arrange delivery.');
-        document.getElementById('shipping-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Delivery needs a phone the courier can call (and a postal code where the country uses one);
+    // a service needs one too, so the appointment can be confirmed or moved by phone / WhatsApp.
+    const hasService = cart.some((i) => i.product_type === 'service');
+    if (hasPhysical || hasService) {
+      const problem = contactError(hasPhysical);
+      if (problem) {
+        showError(problem);
+        document.getElementById(hasPhysical ? 'shipping-section' : 'contact-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
     }
@@ -681,8 +793,14 @@ const metadata = {
           city,
           state: state || undefined,
           postal_code: postal || '',
+          phone: phoneValue() || undefined,
           country: country || 'BJ',
         });
+      }
+
+      // 3b. Services only: no address to send, but the phone is kept for the appointment.
+      if (!hasPhysical && cart.some((i) => i.product_type === 'service')) {
+        await setCartContact(cartId, phoneValue());
       }
 
       // 4. Apply discount if one was entered
@@ -775,6 +893,7 @@ const metadata = {
   }
 
   function initCartPage() {
+    initGeoFields();
     bindOnce(document.getElementById('discount-btn'), handleApplyDiscount);
     checkoutButtons().forEach((b) => bindOnce(b, handleCheckout));
     if (!(window as any).__payBound) {
