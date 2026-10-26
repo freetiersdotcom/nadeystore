@@ -134,6 +134,15 @@ const metadata = {
           </div>
         </div>
 
+        <!-- Delivery method: filled by the script once the destination is known -->
+        <div id="shipping-methods-section" class="mb-8" style="display:none">
+          <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-5">
+            <h2 class="text-base font-semibold mb-4">Mode de livraison</h2>
+            <div id="ship-methods-list"></div>
+            <p id="ship-methods-msg" class="text-sm text-red-500"></p>
+          </div>
+        </div>
+
         <!-- Contact: services only (no address, but we keep a phone number) -->
         <div id="contact-section" class="mb-8" style="display:none">
           <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-5">
@@ -174,7 +183,7 @@ const metadata = {
             </div>
             <div class="flex justify-between">
               <span class="text-muted">Livraison</span>
-              <span class="font-medium text-default">Calculée à la commande</span>
+              <span id="summary-shipping" class="font-medium text-default">Calculée à la commande</span>
             </div>
             <div
               class="border-t border-gray-200 dark:border-slate-700 pt-2 flex justify-between text-base font-semibold"
@@ -278,6 +287,7 @@ const metadata = {
   import type { CartLineItem } from '~/scripts/cart';
   import { countryList, postalRule, buildPhone } from '~/scripts/geo';
   import { setCartContact } from '~/scripts/api';
+  import { shippingQuote, setCartShippingMethod, type ShippingQuote, type ShippingOption } from '~/scripts/api';
   import {
     getCart,
     updateQty,
@@ -328,6 +338,7 @@ const metadata = {
     renderSummary(cart);
     renderShippingSection(cart);
     updatePaymentSection(cart);
+    refreshShipping(cart);
   }
 
   // ── Payment method (online / pay on delivery) ────────────────
@@ -340,12 +351,12 @@ const metadata = {
   let depositQuote: { eligible: boolean; deposit_cents: number; balance_cents: number; due_days: number } | null = null;
   let depositKey = '';
   function refreshDeposit(cart: CartLineItem[]) {
-    const key = cart.map((i) => `${i.sku}:${i.qty}`).join(',');
+    const key = cart.map((i) => `${i.sku}:${i.qty}`).join(',') + '|' + currentShipping().cents;
     if (key === depositKey) return;
     depositKey = key;
     depositQuote = null;
     if (cart.length === 0 || cart.some((i) => i.product_type === 'digital')) return;
-    depositPreview(cart.map((i) => ({ sku: i.sku, qty: i.qty })))
+    depositPreview(cart.map((i) => ({ sku: i.sku, qty: i.qty })), currentShipping().cents)
       .then((q) => {
         if (depositKey === key) {
           depositQuote = q;
@@ -676,11 +687,15 @@ const metadata = {
   function renderSummary(cart: CartLineItem[]) {
     const subtotal = cartSubtotal(cart);
     const discount = appliedDiscount?.amount_cents ?? 0;
-    const total = subtotal - discount;
+    const ship = currentShipping();
+    const total = subtotal - discount + ship.cents;
 
     document.getElementById('summary-subtotal')!.textContent = formatPrice(subtotal, CURRENCY);
     document.getElementById('summary-total')!.textContent = formatPrice(total, CURRENCY);
     document.getElementById('mobile-total')!.textContent = formatPrice(total, CURRENCY);
+
+    const shipEl = document.getElementById('summary-shipping');
+    if (shipEl) shipEl.textContent = ship.known ? (ship.cents === 0 ? SHIP_TXT.free : formatPrice(ship.cents, CURRENCY)) : SHIP_TXT.calc;
 
     const discountRow = document.getElementById('summary-discount-row')!;
     if (discount > 0) {
@@ -788,6 +803,125 @@ const metadata = {
     return null;
   }
 
+  // ── Delivery options ─────────────────────────────────────────
+  // Priced by the API from the destination and the weight of the items (zones and rates are edited in the admin).
+  // While shipping is switched off in the admin, nothing here shows and the cart works as before.
+  const SHIP_LOCALE = 'fr';
+  const SHIP_TXT = {
+    calc: "Calculée à la commande",
+    free: "Gratuit",
+    noZone: "Désolé, nous ne livrons pas encore à cette adresse. Contactez-nous.",
+    heavy: "Cette commande est trop lourde pour les modes de livraison disponibles. Contactez-nous.",
+    pickupAt: "Retrait :",
+    days: (min: number | null, max: number | null) =>
+      min !== null && max !== null && min !== max
+        ? `${min}–${max} jours`
+        : max !== null ? `${max} jours` : min !== null ? `${min} jours` : '',
+  };
+  let shipQuote: ShippingQuote | null = null;
+  let shipChoice: string | null = null;
+  let shipKey = '';
+  let shipTimer: number | undefined;
+
+  function shipName(o: ShippingOption): string {
+    return (SHIP_LOCALE === 'fr' ? o.name_fr : o.name_en) || o.name_fr || o.name_en;
+  }
+
+  // What the customer pays for delivery with the option currently selected.
+  function currentShipping(): { cents: number; known: boolean } {
+    if (!shipQuote?.enabled || !shipQuote.needed || !shipQuote.deliverable) return { cents: 0, known: false };
+    const o = shipQuote.options.find((x) => x.id === shipChoice) ?? shipQuote.options[0];
+    return o ? { cents: o.cents, known: true } : { cents: 0, known: false };
+  }
+
+  function shipProblem(): string | null {
+    if (!shipQuote?.enabled || !shipQuote.needed || shipQuote.deliverable) return null;
+    return shipQuote.reason === 'too_heavy' ? SHIP_TXT.heavy : SHIP_TXT.noZone;
+  }
+
+  function renderShippingOptions() {
+    const section = document.getElementById('shipping-methods-section');
+    const list = document.getElementById('ship-methods-list');
+    const msg = document.getElementById('ship-methods-msg');
+    if (!section || !list || !msg) return;
+    list.replaceChildren();
+    msg.textContent = '';
+    if (!shipQuote?.enabled || !shipQuote.needed) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    const problem = shipProblem();
+    if (problem) { msg.textContent = problem; return; }
+    const options = shipQuote.options;
+    if (!options.some((o) => o.id === shipChoice)) {
+      // Delivery first: the free pick-up option is listed but not preselected.
+      shipChoice = (options.find((o) => o.kind !== 'pickup') ?? options[0]).id;
+    }
+    for (const o of options) {
+      const label = document.createElement('label');
+      label.className = 'flex items-start gap-2 p-3 rounded-lg border border-gray-200 dark:border-slate-700 cursor-pointer mb-2';
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'ship-method';
+      radio.value = o.id;
+      radio.checked = o.id === shipChoice;
+      radio.className = 'mt-1';
+      const body = document.createElement('span');
+      body.className = 'text-sm flex-1 min-w-0';
+      const top = document.createElement('span');
+      top.className = 'flex justify-between gap-3';
+      const name = document.createElement('span');
+      name.className = 'font-medium';
+      name.textContent = shipName(o);
+      const price = document.createElement('span');
+      price.className = 'font-medium shrink-0';
+      price.textContent = o.cents === 0 ? SHIP_TXT.free : formatPrice(o.cents, CURRENCY);
+      top.append(name, price);
+      body.append(top);
+      const eta = SHIP_TXT.days(o.min_days, o.max_days);
+      const detail = [eta, o.kind === 'pickup' && o.pickup_address ? `${SHIP_TXT.pickupAt} ${o.pickup_address}` : ''].filter(Boolean).join(' · ');
+      if (detail) {
+        const d = document.createElement('span');
+        d.className = 'block text-xs text-muted';
+        d.textContent = detail;
+        body.append(d);
+      }
+      label.append(radio, body);
+      list.append(label);
+    }
+  }
+
+  // Asks the API for the options of the current destination (once per change, after a short pause while typing).
+  function refreshShipping(cart: CartLineItem[]) {
+    const country = (geoEl<HTMLSelectElement>('ship-country')?.value ?? '').trim();
+    const city = (geoEl<HTMLInputElement>('ship-city')?.value ?? '').trim();
+    const state = (geoEl<HTMLInputElement>('ship-state')?.value ?? '').trim();
+    if (!cartHasPhysical(cart) || !country) {
+      if (shipQuote || shipKey) { shipQuote = null; shipKey = ''; renderShippingOptions(); renderSummary(cart); }
+      return;
+    }
+    const discount = appliedDiscount?.amount_cents ?? 0;
+    const key = [cart.map((i) => `${i.sku}:${i.qty}`).join(','), country, city.toLowerCase(), state.toLowerCase(), discount].join('|');
+    if (key === shipKey) return;
+    shipKey = key;
+    window.clearTimeout(shipTimer);
+    shipTimer = window.setTimeout(() => {
+      shippingQuote(cart.map((i) => ({ sku: i.sku, qty: i.qty })), { country, city: city || undefined, state: state || undefined }, discount)
+        .then((q) => {
+          if (shipKey !== key) return;
+          shipQuote = q;
+          renderShippingOptions();
+          renderSummary(getCart());
+          updatePaymentSection(getCart());
+        })
+        .catch(() => {
+          // Quote unavailable: keep the page usable, the API still prices delivery at checkout.
+          if (shipKey !== key) return;
+          shipQuote = null;
+          renderShippingOptions();
+          renderSummary(getCart());
+        });
+    }, 350);
+  }
+
   // ── Discount ──────────────────────────────────────────────
   // Discount is validated on the backend after cart creation.
   // For now we store the code and apply it after createCart().
@@ -854,6 +988,14 @@ const metadata = {
       }
     }
 
+    // Delivery must be possible for this address (the API checks again).
+    const shipIssue = hasPhysical ? shipProblem() : null;
+    if (shipIssue) {
+      showError(shipIssue);
+      document.getElementById('shipping-methods-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     // Services with online booking need a chosen time slot.
     const missing = await firstMissingSlot(cart);
     if (missing) {
@@ -902,6 +1044,11 @@ const metadata = {
           phone: phoneValue() || undefined,
           country: country || 'BJ',
         });
+      }
+
+      // 3a. Delivery option chosen on the page (the API re-prices it before charging).
+      if (hasPhysical && shipQuote?.deliverable && shipChoice) {
+        await setCartShippingMethod(cartId, shipChoice);
       }
 
       // 3b. Services only: no address to send, but the phone is kept for the appointment.
@@ -1007,6 +1154,20 @@ const metadata = {
     initGeoFields();
     bindOnce(document.getElementById('discount-btn'), handleApplyDiscount);
     checkoutButtons().forEach((b) => bindOnce(b, handleCheckout));
+    if (!(window as any).__shipBound) {
+      (window as any).__shipBound = true;
+      const onAddr = (e: Event) => {
+        const id = (e.target as HTMLElement | null)?.id;
+        if (id === 'ship-country' || id === 'ship-city' || id === 'ship-state') refreshShipping(getCart());
+        if ((e.target as HTMLInputElement | null)?.name === 'ship-method') {
+          shipChoice = (e.target as HTMLInputElement).value;
+          renderSummary(getCart());
+          updatePaymentSection(getCart());
+        }
+      };
+      document.addEventListener('input', onAddr);
+      document.addEventListener('change', onAddr);
+    }
     if (!(window as any).__payBound) {
       (window as any).__payBound = true;
       document.addEventListener('change', (e) => {

@@ -247,10 +247,10 @@ export interface DepositQuote {
 }
 
 /** What the customer would pay now for these items (cart is local until checkout). */
-export async function depositPreview(items: { sku: string; qty: number }[]): Promise<DepositQuote> {
+export async function depositPreview(items: { sku: string; qty: number }[], shippingCents = 0): Promise<DepositQuote> {
   return request<DepositQuote>('/v1/carts/deposit-preview', {
     method: 'POST',
-    body: JSON.stringify({ items, currency: currency() }),
+    body: JSON.stringify({ items, currency: currency(), shipping_cents: shippingCents > 0 ? shippingCents : undefined }),
   });
 }
 
@@ -329,4 +329,49 @@ export async function holdBookingSlot(cartId: string, sku: string, start: string
     throw err;
   }
   return data;
+}
+
+// ── Shipping ──────────────────────────────────────────────────
+
+export interface ShippingOption {
+  id: string;
+  kind: 'flat' | 'weight' | 'pickup';
+  name_fr: string;
+  name_en: string;
+  cents: number;
+  free: boolean;
+  min_days: number | null;
+  max_days: number | null;
+  pickup_address: string | null;
+}
+
+export interface ShippingQuote {
+  enabled: boolean;
+  needed: boolean;
+  deliverable: boolean;
+  reason?: 'no_zone' | 'too_heavy' | 'currency' | 'no_address';
+  currency: string;
+  weight_g: number;
+  estimated: boolean;
+  options: ShippingOption[];
+}
+
+/** Delivery options and prices for these items and this destination (the cart is local until checkout). */
+export async function shippingQuote(
+  items: { sku: string; qty: number }[],
+  dest: { country: string; city?: string; state?: string },
+  discountCents = 0
+): Promise<ShippingQuote> {
+  return request<ShippingQuote>('/v1/carts/shipping-quote', {
+    method: 'POST',
+    body: JSON.stringify({ items, currency: currency(), ...dest, discount_cents: discountCents > 0 ? discountCents : undefined }),
+  });
+}
+
+/** Chooses one of the quoted delivery options for the server-side cart (after the address is set). */
+export async function setCartShippingMethod(cartId: string, rateId: string): Promise<{ rate_id: string | null; label: string | null; shipping_cents: number }> {
+  return request(`/v1/carts/${cartId}/shipping-method`, {
+    method: 'PATCH',
+    body: JSON.stringify({ rate_id: rateId }),
+  });
 }
