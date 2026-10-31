@@ -1,6 +1,9 @@
 {
   "fr": {
-    "meta": { "title": "Santé Natur’ — Produits naturels du Bénin", "description": "Découvrez notre sélection de produits naturels. Commande simple, paiement mobile money ou carte." },
+    "meta": {
+      "title": "Santé Natur’ — Produits naturels du Bénin",
+      "description": "Découvrez notre sélection de produits naturels. Commande simple, paiement mobile money ou carte."
+    },
     "whatsapp_message": "Bonjour, je viens de votre annonce et j'aimerais en savoir plus.",
     "hero": {
       "eyebrow": "Bien-être au naturel",
@@ -13,30 +16,63 @@
     "benefits": {
       "title": "Pourquoi commander chez nous",
       "items": [
-        { "title": "Paiement simple", "text": "Mobile money ou carte bancaire, directement sur le site." },
-        { "title": "Réponse humaine", "text": "Une question avant d'acheter ? Écrivez-nous sur WhatsApp." },
-        { "title": "Livraison", "text": "Nous vous indiquons les délais de livraison avant que vous ne payiez." }
+        {
+          "title": "Paiement simple",
+          "text": "Mobile money ou carte bancaire, directement sur le site."
+        },
+        {
+          "title": "Réponse humaine",
+          "text": "Une question avant d'acheter ? Écrivez-nous sur WhatsApp."
+        },
+        {
+          "title": "Livraison",
+          "text": "Nous vous indiquons les délais de livraison avant que vous ne payiez."
+        }
       ]
     },
-    "products": { "title": "Notre sélection", "slugs": ["remplacer-par-un-slug-produit"] },
+    "products": {
+      "title": "Notre sélection",
+      "slugs": [
+        "programme-detox-7-jours"
+      ]
+    },
     "steps": {
       "title": "Comment ça marche",
       "items": [
-        { "title": "Choisissez", "text": "Ouvrez la fiche du produit et ajoutez-le au panier." },
-        { "title": "Payez", "text": "Mobile money ou carte, en toute sécurité." },
-        { "title": "Recevez", "text": "Vous recevez une confirmation par e-mail et nous vous contactons pour la livraison." }
+        {
+          "title": "Choisissez",
+          "text": "Ouvrez la fiche du produit et ajoutez-le au panier."
+        },
+        {
+          "title": "Payez",
+          "text": "Mobile money ou carte, en toute sécurité."
+        },
+        {
+          "title": "Recevez",
+          "text": "Vous recevez une confirmation par e-mail et nous vous contactons pour la livraison."
+        }
       ]
     },
     "faq": {
       "title": "Questions fréquentes",
       "items": [
-        { "q": "Puis-je poser une question avant d'acheter ?", "a": "Oui, écrivez-nous sur WhatsApp. Le paiement, lui, se fait toujours sur le site." }
+        {
+          "q": "Puis-je poser une question avant d'acheter ?",
+          "a": "Oui, écrivez-nous sur WhatsApp. Le paiement, lui, se fait toujours sur le site."
+        }
       ]
     },
-    "final": { "title": "Prêt à commander ?", "text": "Parcourez la boutique ou écrivez-nous.", "cta_label": "Écrire sur WhatsApp" }
+    "final": {
+      "title": "Prêt à commander ?",
+      "text": "Parcourez la boutique ou écrivez-nous.",
+      "cta_label": "Écrire sur WhatsApp"
+    }
   },
   "en": {
-    "meta": { "title": "Santé Natur’ — Natural products from Benin", "description": "Discover our selection of natural products. Simple ordering, pay by mobile money or card." },
+    "meta": {
+      "title": "Santé Natur’ — Natural products from Benin",
+      "description": "Discover our selection of natural products. Simple ordering, pay by mobile money or card."
+    },
     "whatsapp_message": "Hello, I saw your ad and I would like to know more.",
     "hero": {
       "eyebrow": "Natural wellness",
@@ -49,26 +85,56 @@
     "benefits": {
       "title": "Why order from us",
       "items": [
-        { "title": "Simple payment", "text": "Mobile money or bank card, right on the site." },
-        { "title": "A real person", "text": "Question before buying? Message us on WhatsApp." },
-        { "title": "Delivery", "text": "We tell you the delivery time before you pay." }
+        {
+          "title": "Simple payment",
+          "text": "Mobile money or bank card, right on the site."
+        },
+        {
+          "title": "A real person",
+          "text": "Question before buying? Message us on WhatsApp."
+        },
+        {
+          "title": "Delivery",
+          "text": "We tell you the delivery time before you pay."
+        }
       ]
     },
-    "products": { "title": "Our selection", "slugs": ["remplacer-par-un-slug-produit"] },
+    "products": {
+      "title": "Our selection",
+      "slugs": [
+        "remplacer-par-un-slug-produit"
+      ]
+    },
     "steps": {
       "title": "How it works",
       "items": [
-        { "title": "Choose", "text": "Open the product page and add it to your cart." },
-        { "title": "Pay", "text": "Mobile money or card, securely." },
-        { "title": "Receive", "text": "You get an email confirmation and we contact you about delivery." }
+        {
+          "title": "Choose",
+          "text": "Open the product page and add it to your cart."
+        },
+        {
+          "title": "Pay",
+          "text": "Mobile money or card, securely."
+        },
+        {
+          "title": "Receive",
+          "text": "You get an email confirmation and we contact you about delivery."
+        }
       ]
     },
     "faq": {
       "title": "Frequently asked questions",
       "items": [
-        { "q": "Can I ask a question before buying?", "a": "Yes, write to us on WhatsApp. Payment is always made on the website." }
+        {
+          "q": "Can I ask a question before buying?",
+          "a": "Yes, write to us on WhatsApp. Payment is always made on the website."
+        }
       ]
     },
-    "final": { "title": "Ready to order?", "text": "Browse the shop or write to us.", "cta_label": "Message us on WhatsApp" }
+    "final": {
+      "title": "Ready to order?",
+      "text": "Browse the shop or write to us.",
+      "cta_label": "Message us on WhatsApp"
+    }
   }
 }
