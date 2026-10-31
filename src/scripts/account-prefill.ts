@@ -52,15 +52,21 @@ async function run() {
   const hint = readHint();
 
   // The email box opens pre-filled with the account's address (still editable).
-  const original = window.promptEmail;
-  if (original && hint?.email) {
-    window.promptEmail = () => {
+  // (The email modal is re-created on page changes, so wrap whichever copy is current, once.)
+  const original = window.promptEmail as (Window['promptEmail'] & { __acct?: boolean }) | undefined;
+  if (original && !original.__acct && hint?.email) {
+    const wrapped = (() => {
       const p = original();
       const input = $<HTMLInputElement>('modal-email');
       if (input && empty(input)) input.value = hint.email;
       return p;
-    };
+    }) as NonNullable<Window['promptEmail']> & { __acct?: boolean };
+    wrapped.__acct = true;
+    window.promptEmail = wrapped;
   }
+
+  // Only the cart page has these fields; anywhere else there is nothing to fill.
+  if (!$('ship-name') && !$('ship-line1')) return;
 
   try {
     const [me, addresses] = await Promise.all([account.me(), account.addresses()]);
@@ -91,7 +97,11 @@ async function run() {
 }
 
 if (typeof window !== 'undefined') {
+  // The site uses Astro's ClientRouter: this module is only evaluated once, but the cart page
+  // is swapped in on every visit. 'astro:page-load' fires on the first load and after every
+  // navigation, so the form is filled however the visitor arrived.
   const start = () => { void run(); };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
-  else start();
+  document.addEventListener('astro:page-load', start);
+  // Loaded after the first page-load event already fired? Fill now too (filling twice is harmless).
+  if (document.readyState !== 'loading') start();
 }
