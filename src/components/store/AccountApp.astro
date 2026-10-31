@@ -1,0 +1,732 @@
+---
+// src/components/store/AccountApp.astro
+// The customer's account page, shared by /fr/compte and /en/account:
+// sign in with an email link or 6-digit code, then orders, addresses and profile.
+// Optional env: PUBLIC_TURNSTILE_SITEKEY (same widget as the contact form),
+//               PUBLIC_ACCOUNT_AUTH_MODE=cookie (production, see scripts/account.ts).
+import type { Locale } from '~/utils/i18n';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITEKEY || '';
+const inputCls =
+  'w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary';
+---
+
+<div id="account-root" data-locale={locale} data-sitekey={sitekey} class="max-w-3xl mx-auto px-6 py-12 md:py-16">
+  <!-- Loading -->
+  <div id="v-loading" class="text-center py-16">
+    <div class="inline-block w-8 h-8 border-2 border-gray-200 dark:border-slate-700 border-t-primary rounded-full animate-spin"></div>
+  </div>
+
+  <!-- Sign in: email -->
+  <section id="v-signin" class="max-w-md mx-auto" style="display:none">
+    <h1 class="font-bold font-heading text-3xl mb-2" data-t="signinTitle"></h1>
+    <p class="text-muted text-sm mb-6" data-t="signinIntro"></p>
+    <form id="f-email" novalidate>
+      <label for="in-email" class="block text-xs font-medium text-muted mb-1" data-t="emailLabel"></label>
+      <input id="in-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" required class={inputCls} style="font-size:16px" />
+      {sitekey && <div id="cf-turnstile" class="mt-4"></div>}
+      <p id="e-signin" class="text-red-500 text-xs mt-2" role="alert" style="display:none"></p>
+      <button id="b-send" type="submit" class="btn-primary w-full py-3 text-sm rounded-xl font-semibold mt-4" data-t="sendLink"></button>
+    </form>
+    <p class="text-muted text-xs mt-4" data-t="noPassword"></p>
+  </section>
+
+  <!-- Sign in: code -->
+  <section id="v-code" class="max-w-md mx-auto" style="display:none">
+    <h1 class="font-bold font-heading text-3xl mb-2" data-t="codeTitle"></h1>
+    <p class="text-muted text-sm mb-1"><span data-t="codeSent"></span> <strong id="code-email"></strong></p>
+    <p class="text-muted text-sm mb-6" data-t="codeHelp"></p>
+    <form id="f-code" novalidate>
+      <label for="in-code" class="block text-xs font-medium text-muted mb-1" data-t="codeLabel"></label>
+      <input id="in-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" class={inputCls + ' tracking-[0.4em] text-center text-xl'} style="font-size:20px" />
+      <p id="e-code" class="text-red-500 text-xs mt-2" role="alert" style="display:none"></p>
+      <button id="b-verify" type="submit" class="btn-primary w-full py-3 text-sm rounded-xl font-semibold mt-4" data-t="verify"></button>
+    </form>
+    <div class="flex justify-between mt-4 text-sm">
+      <button id="b-resend" type="button" class="text-primary underline disabled:opacity-50 disabled:no-underline" data-t="resend"></button>
+      <button id="b-other" type="button" class="text-muted underline" data-t="otherEmail"></button>
+    </div>
+  </section>
+
+  <!-- Sign in: arrived by the link -->
+  <section id="v-confirm" class="max-w-md mx-auto text-center" style="display:none">
+    <h1 class="font-bold font-heading text-3xl mb-2" data-t="confirmTitle"></h1>
+    <p class="text-muted text-sm mb-6" data-t="confirmText"></p>
+    <p id="e-confirm" class="text-red-500 text-sm mb-4" role="alert" style="display:none"></p>
+    <button id="b-confirm" type="button" class="btn-primary w-full py-3 text-sm rounded-xl font-semibold" data-t="confirmBtn"></button>
+  </section>
+
+  <!-- Signed in -->
+  <section id="v-account" style="display:none">
+    <div class="flex flex-wrap items-start justify-between gap-3 mb-6">
+      <div>
+        <h1 class="font-bold font-heading text-3xl" data-t="accountTitle"></h1>
+        <p id="who" class="text-muted text-sm mt-1 break-all"></p>
+      </div>
+      <button id="b-logout" type="button" class="btn px-4 py-2 text-sm rounded-lg" data-t="logout"></button>
+    </div>
+
+    <div class="flex gap-1 border-b border-gray-200 dark:border-slate-700 mb-6" role="tablist">
+      <button type="button" role="tab" data-tab="orders" class="tab px-4 py-2.5 text-sm font-medium -mb-px border-b-2" data-t="tabOrders"></button>
+      <button type="button" role="tab" data-tab="addresses" class="tab px-4 py-2.5 text-sm font-medium -mb-px border-b-2" data-t="tabAddresses"></button>
+      <button type="button" role="tab" data-tab="profile" class="tab px-4 py-2.5 text-sm font-medium -mb-px border-b-2" data-t="tabProfile"></button>
+    </div>
+
+    <div id="p-orders"></div>
+    <div id="p-addresses" style="display:none"></div>
+    <div id="p-profile" style="display:none"></div>
+  </section>
+</div>
+
+<style is:global>
+  #account-root .tab { border-color: transparent; color: var(--aw-color-text-muted, #6b7280); }
+  #account-root .tab[aria-selected='true'] { border-color: var(--aw-color-primary, #0f6b4b); color: var(--aw-color-primary, #0f6b4b); }
+  #account-root .card { border: 1px solid rgb(229 231 235); border-radius: 0.75rem; padding: 1rem 1.25rem; }
+  .dark #account-root .card { border-color: rgb(51 65 85); }
+</style>
+
+<script>
+  import { account, AccountError, AUTH_MODE, mayBeSignedIn, type Address, type Customer, type OrderDetail, type OrderSummary } from '~/scripts/account';
+  import { formatPrice } from '~/scripts/cart';
+  import { countryList, postalRule } from '~/scripts/geo';
+
+  declare global {
+    interface Window { turnstile?: any; __snTsLoading?: boolean }
+  }
+
+  const root = document.getElementById('account-root') as HTMLElement | null;
+  if (root) boot(root);
+
+  function boot(root: HTMLElement) {
+    const L = (root.dataset.locale === 'en' ? 'en' : 'fr') as 'fr' | 'en';
+    const sitekey = root.dataset.sitekey || '';
+
+    const T = {
+      fr: {
+        signinTitle: 'Mon compte',
+        signinIntro: 'Entrez votre e-mail : nous vous envoyons un lien de connexion et un code. Pas de mot de passe à retenir.',
+        emailLabel: 'Adresse e-mail',
+        sendLink: 'Recevoir mon lien',
+        noPassword: 'Vos commandes passées avec cette adresse apparaîtront automatiquement.',
+        codeTitle: 'Vérifiez votre boîte mail',
+        codeSent: 'Nous avons envoyé un lien et un code à',
+        codeHelp: 'Cliquez sur le lien dans l’e-mail, ou saisissez le code ici. Il expire dans 10 minutes.',
+        codeLabel: 'Code à 6 chiffres',
+        verify: 'Me connecter',
+        resend: 'Renvoyer le lien',
+        resendIn: (s: number) => `Renvoyer dans ${s} s`,
+        otherEmail: 'Autre adresse',
+        confirmTitle: 'Confirmer la connexion',
+        confirmText: 'Appuyez sur le bouton pour accéder à votre compte.',
+        confirmBtn: 'Accéder à mon compte',
+        accountTitle: 'Mon compte',
+        logout: 'Se déconnecter',
+        tabOrders: 'Commandes',
+        tabAddresses: 'Adresses',
+        tabProfile: 'Profil',
+        badEmail: 'Veuillez entrer une adresse e-mail valide.',
+        badCode: 'Ce code est incorrect ou a expiré. Demandez-en un nouveau.',
+        badLink: 'Ce lien est invalide ou a expiré. Demandez-en un nouveau.',
+        needCode: 'Saisissez les 6 chiffres reçus par e-mail.',
+        tooMany: (m: number) => `Trop de tentatives. Réessayez dans ${m} minute${m > 1 ? 's' : ''}.`,
+        captcha: 'Vérification impossible. Veuillez réessayer.',
+        network: 'Connexion impossible. Vérifiez votre réseau et réessayez.',
+        generic: 'Une erreur est survenue. Réessayez.',
+        noOrders: 'Aucune commande pour le moment.',
+        shop: 'Voir la boutique',
+        order: 'Commande',
+        more: 'Voir plus de commandes',
+        back: '← Mes commandes',
+        total: 'Total',
+        paid: 'Payé',
+        balance: 'Reste à payer',
+        payBalance: 'Payer le solde',
+        subtotal: 'Sous-total',
+        shipping: 'Livraison',
+        discount: 'Réduction',
+        items: 'Articles',
+        delivery: 'Livraison',
+        tracking: 'Suivi du colis',
+        track: 'Suivre',
+        download: 'Télécharger',
+        downloading: '…',
+        dueBy: (d: string) => `À régler avant le ${d}`,
+        status: { pending: 'En attente de paiement', paid: 'Payée', processing: 'En préparation', shipped: 'Expédiée', delivered: 'Livrée', refunded: 'Remboursée', canceled: 'Annulée' } as Record<string, string>,
+        addrNone: 'Aucune adresse enregistrée.',
+        addrAdd: 'Ajouter une adresse',
+        addrEdit: 'Modifier',
+        addrDelete: 'Supprimer',
+        addrDeleteAsk: 'Supprimer cette adresse ?',
+        addrDefault: 'Par défaut',
+        addrMakeDefault: 'Définir par défaut',
+        addrSave: 'Enregistrer',
+        addrCancel: 'Annuler',
+        fName: 'Nom complet',
+        fLabel: 'Nom de l’adresse (ex. Maison)',
+        fLine1: 'Adresse',
+        fLine2: 'Complément d’adresse',
+        fCity: 'Ville',
+        fState: 'Région / État',
+        fPostal: 'Code postal',
+        fCountry: 'Pays',
+        fCountryPick: 'Choisir un pays…',
+        fPhone: 'Téléphone (avec indicatif, ex. +229 01 61 00 00 00)',
+        profName: 'Nom',
+        profPhone: 'Téléphone',
+        profLang: 'Langue des e-mails',
+        profMarketing: 'Je souhaite recevoir les nouveautés et offres par e-mail',
+        profSave: 'Enregistrer',
+        saved: 'Enregistré.',
+        profEmailNote: 'Votre adresse e-mail est votre identifiant et ne peut pas être modifiée ici.',
+        logoutAll: 'Se déconnecter partout',
+        logoutAllNote: 'Ferme votre session sur tous vos appareils.',
+        contact: 'Une question sur une commande ? Contactez-nous.',
+        contactHref: '/fr/contact',
+      },
+      en: {
+        signinTitle: 'My account',
+        signinIntro: 'Enter your email: we send you a sign-in link and a code. No password to remember.',
+        emailLabel: 'Email address',
+        sendLink: 'Send me my link',
+        noPassword: 'Orders you placed with this address will show up automatically.',
+        codeTitle: 'Check your inbox',
+        codeSent: 'We sent a link and a code to',
+        codeHelp: 'Click the link in the email, or enter the code here. It expires in 10 minutes.',
+        codeLabel: '6-digit code',
+        verify: 'Sign in',
+        resend: 'Resend the link',
+        resendIn: (s: number) => `Resend in ${s}s`,
+        otherEmail: 'Use another email',
+        confirmTitle: 'Confirm sign-in',
+        confirmText: 'Press the button to open your account.',
+        confirmBtn: 'Open my account',
+        accountTitle: 'My account',
+        logout: 'Sign out',
+        tabOrders: 'Orders',
+        tabAddresses: 'Addresses',
+        tabProfile: 'Profile',
+        badEmail: 'Please enter a valid email address.',
+        badCode: 'That code is wrong or has expired. Request a new one.',
+        badLink: 'This link is invalid or has expired. Request a new one.',
+        needCode: 'Enter the 6 digits from the email.',
+        tooMany: (m: number) => `Too many attempts. Try again in ${m} minute${m > 1 ? 's' : ''}.`,
+        captcha: 'Verification failed. Please try again.',
+        network: 'Could not connect. Check your network and try again.',
+        generic: 'Something went wrong. Please try again.',
+        noOrders: 'No orders yet.',
+        shop: 'Visit the shop',
+        order: 'Order',
+        more: 'Show more orders',
+        back: '← My orders',
+        total: 'Total',
+        paid: 'Paid',
+        balance: 'Balance due',
+        payBalance: 'Pay the balance',
+        subtotal: 'Subtotal',
+        shipping: 'Shipping',
+        discount: 'Discount',
+        items: 'Items',
+        delivery: 'Delivery',
+        tracking: 'Tracking',
+        track: 'Track',
+        download: 'Download',
+        downloading: '…',
+        dueBy: (d: string) => `Due by ${d}`,
+        status: { pending: 'Awaiting payment', paid: 'Paid', processing: 'Preparing', shipped: 'Shipped', delivered: 'Delivered', refunded: 'Refunded', canceled: 'Canceled' } as Record<string, string>,
+        addrNone: 'No saved addresses.',
+        addrAdd: 'Add an address',
+        addrEdit: 'Edit',
+        addrDelete: 'Delete',
+        addrDeleteAsk: 'Delete this address?',
+        addrDefault: 'Default',
+        addrMakeDefault: 'Make default',
+        addrSave: 'Save',
+        addrCancel: 'Cancel',
+        fName: 'Full name',
+        fLabel: 'Address name (e.g. Home)',
+        fLine1: 'Address',
+        fLine2: 'Apartment, suite, etc.',
+        fCity: 'City',
+        fState: 'State / Region',
+        fPostal: 'Postal code',
+        fCountry: 'Country',
+        fCountryPick: 'Choose a country…',
+        fPhone: 'Phone (with country code, e.g. +229 01 61 00 00 00)',
+        profName: 'Name',
+        profPhone: 'Phone',
+        profLang: 'Email language',
+        profMarketing: 'I would like to receive news and offers by email',
+        profSave: 'Save',
+        saved: 'Saved.',
+        profEmailNote: 'Your email is your sign-in and cannot be changed here.',
+        logoutAll: 'Sign out everywhere',
+        logoutAllNote: 'Ends your session on all your devices.',
+        contact: 'A question about an order? Contact us.',
+        contactHref: '/en/contact',
+      },
+    }[L];
+
+    const $ = <E extends HTMLElement>(id: string) => document.getElementById(id) as E;
+    const esc = (s: unknown) =>
+      String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const inputCls =
+      'w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-default focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary';
+    const dateFmt = (iso: string) => new Intl.DateTimeFormat(L, { dateStyle: 'medium' }).format(new Date(iso));
+
+    // Static strings
+    root.querySelectorAll<HTMLElement>('[data-t]').forEach((el) => {
+      const v = (T as any)[el.dataset.t!];
+      if (typeof v === 'string') el.textContent = v;
+    });
+
+    const views = ['v-loading', 'v-signin', 'v-code', 'v-confirm', 'v-account'];
+    const show = (id: string) => views.forEach((v) => ($(v).style.display = v === id ? '' : 'none'));
+    const setErr = (id: string, msg: string | null) => {
+      const el = $(id);
+      el.textContent = msg ?? '';
+      el.style.display = msg ? '' : 'none';
+    };
+    const errorText = (e: unknown, fallback: string) => {
+      if (e instanceof AccountError) {
+        if (e.status === 0) return T.network;
+        if (e.status === 429) return T.tooMany(Math.max(1, Math.ceil((e.retryAfter ?? 60) / 60)));
+        if (/verification failed/i.test(e.message)) return T.captcha;
+      }
+      return fallback;
+    };
+
+    let customer: Customer | null = null;
+    let pendingEmail = '';
+
+    // ── Turnstile (only when a site key is set) ──────────────
+    let tsToken = '';
+    let tsWidget: string | null = null;
+    function mountTurnstile() {
+      const holder = document.getElementById('cf-turnstile');
+      if (!sitekey || !holder) return;
+      const render = () => {
+        if (!window.turnstile || holder.childElementCount) return;
+        tsWidget = window.turnstile.render(holder, {
+          sitekey,
+          callback: (t: string) => (tsToken = t),
+          'expired-callback': () => (tsToken = ''),
+          'error-callback': () => (tsToken = ''),
+        });
+      };
+      if (window.turnstile) return render();
+      if (!window.__snTsLoading) {
+        window.__snTsLoading = true;
+        const s = document.createElement('script');
+        s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        s.async = true;
+        s.onload = render;
+        document.head.appendChild(s);
+      } else {
+        const t = setInterval(() => { if (window.turnstile) { clearInterval(t); render(); } }, 200);
+      }
+    }
+    const resetTurnstile = () => {
+      tsToken = '';
+      if (tsWidget && window.turnstile) { try { window.turnstile.reset(tsWidget); } catch { /* ignore */ } }
+    };
+
+    // ── Sign in ──────────────────────────────────────────────
+    let cooldownTimer: number | undefined;
+    function startCooldown(seconds = 30) {
+      const btn = $<HTMLButtonElement>('b-resend');
+      let left = seconds;
+      btn.disabled = true;
+      clearInterval(cooldownTimer);
+      const tick = () => {
+        if (left <= 0) { clearInterval(cooldownTimer); btn.disabled = false; btn.textContent = T.resend; return; }
+        btn.textContent = T.resendIn(left--);
+      };
+      tick();
+      cooldownTimer = window.setInterval(tick, 1000);
+    }
+
+    async function sendLink(email: string, errId: string): Promise<boolean> {
+      setErr(errId, null);
+      try {
+        await account.requestLink(email, L, tsToken || undefined);
+        pendingEmail = email;
+        return true;
+      } catch (e) {
+        setErr(errId, errorText(e, T.generic));
+        return false;
+      } finally {
+        resetTurnstile();
+      }
+    }
+
+    $('f-email').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const email = $<HTMLInputElement>('in-email').value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErr('e-signin', T.badEmail);
+      const btn = $<HTMLButtonElement>('b-send');
+      btn.disabled = true;
+      const ok = await sendLink(email, 'e-signin');
+      btn.disabled = false;
+      if (ok) {
+        $('code-email').textContent = email;
+        $<HTMLInputElement>('in-code').value = '';
+        setErr('e-code', null);
+        show('v-code');
+        startCooldown();
+        $<HTMLInputElement>('in-code').focus();
+      }
+    });
+
+    async function submitCode() {
+      const code = $<HTMLInputElement>('in-code').value.replace(/\D/g, '');
+      if (code.length !== 6) return setErr('e-code', T.needCode);
+      setErr('e-code', null);
+      const btn = $<HTMLButtonElement>('b-verify');
+      btn.disabled = true;
+      try {
+        customer = await account.verify({ email: pendingEmail, code }, L);
+        await enterAccount();
+      } catch (e) {
+        setErr('e-code', e instanceof AccountError && e.status === 401 ? T.badCode : errorText(e, T.generic));
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    $('f-code').addEventListener('submit', (ev) => { ev.preventDefault(); void submitCode(); });
+    $<HTMLInputElement>('in-code').addEventListener('input', (ev) => {
+      const el = ev.target as HTMLInputElement;
+      el.value = el.value.replace(/\D/g, '').slice(0, 6);
+      if (el.value.length === 6) void submitCode();
+    });
+    $('b-resend').addEventListener('click', async () => {
+      if (await sendLink(pendingEmail, 'e-code')) startCooldown();
+    });
+    $('b-other').addEventListener('click', () => { clearInterval(cooldownTimer); show('v-signin'); $<HTMLInputElement>('in-email').focus(); });
+
+    // The link in the email lands here with #confirm=…; it only signs in when the button is pressed,
+    // so a mail scanner that opens the link cannot use it up.
+    let confirmToken = '';
+    $('b-confirm').addEventListener('click', async () => {
+      const btn = $<HTMLButtonElement>('b-confirm');
+      btn.disabled = true;
+      setErr('e-confirm', null);
+      try {
+        customer = await account.verify({ token: confirmToken }, L);
+        confirmToken = '';
+        await enterAccount();
+      } catch (e) {
+        setErr('e-confirm', e instanceof AccountError && e.status === 401 ? T.badLink : errorText(e, T.generic));
+        btn.disabled = false;
+      }
+    });
+
+    // ── Signed in ────────────────────────────────────────────
+    async function enterAccount() {
+      if (!customer) return show('v-signin');
+      $('who').textContent = customer.email;
+      show('v-account');
+      selectTab(location.hash === '#addresses' ? 'addresses' : location.hash === '#profile' ? 'profile' : 'orders');
+    }
+
+    const panels: Record<string, string> = { orders: 'p-orders', addresses: 'p-addresses', profile: 'p-profile' };
+    const loaded: Record<string, boolean> = {};
+    function selectTab(name: string) {
+      root.querySelectorAll<HTMLElement>('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === name)));
+      Object.entries(panels).forEach(([k, id]) => ($(id).style.display = k === name ? '' : 'none'));
+      if (!loaded[name]) {
+        loaded[name] = true;
+        if (name === 'orders') void renderOrders();
+        if (name === 'addresses') void renderAddresses();
+        if (name === 'profile') renderProfile();
+      } else if (name === 'orders') {
+        void renderOrders();
+      }
+    }
+    root.querySelectorAll<HTMLElement>('.tab').forEach((t) => t.addEventListener('click', () => selectTab(t.dataset.tab!)));
+
+    function signedOut() {
+      customer = null;
+      Object.keys(loaded).forEach((k) => delete loaded[k]);
+      show('v-signin');
+    }
+    $('b-logout').addEventListener('click', async () => { await account.logout(); signedOut(); });
+
+    // A request that finds the session gone sends the visitor back to sign in.
+    const guard = async <R,>(p: Promise<R>): Promise<R | null> => {
+      try { return await p; } catch (e) {
+        if (e instanceof AccountError && e.status === 401) { signedOut(); return null; }
+        throw e;
+      }
+    };
+
+    // ── Orders ───────────────────────────────────────────────
+    const money = (cents: number, cur: string) => formatPrice(cents, cur);
+    const statusBadge = (s: string) =>
+      `<span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-slate-800 text-muted">${esc(T.status[s] ?? s)}</span>`;
+
+    function orderRow(o: OrderSummary) {
+      const names = o.items.slice(0, 2).map((i) => `${esc(i.title)}${i.qty > 1 ? ' ×' + i.qty : ''}`).join(', ') + (o.items.length > 2 ? '…' : '');
+      return `<button type="button" data-order="${esc(o.number)}" class="card w-full text-left hover:border-primary transition-colors mb-3 block">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="font-semibold text-default">${esc(T.order)} ${esc(o.number)}</span>${statusBadge(o.status)}
+        </div>
+        <div class="text-xs text-muted mt-1">${esc(dateFmt(o.created_at))} · ${names}</div>
+        <div class="text-sm mt-2 flex justify-between"><span class="text-muted">${esc(T.total)}</span><span class="font-medium text-default">${esc(money(o.total_cents, o.currency))}</span></div>
+        ${o.balance_cents > 0 && o.status !== 'canceled' && o.status !== 'refunded' ? `<div class="text-xs text-amber-700 dark:text-amber-400 mt-1">${esc(T.balance)} : ${esc(money(o.balance_cents, o.currency))}</div>` : ''}
+      </button>`;
+    }
+
+    async function renderOrders() {
+      const host = $('p-orders');
+      host.innerHTML = '<div class="text-center py-10"><div class="inline-block w-6 h-6 border-2 border-gray-200 dark:border-slate-700 border-t-primary rounded-full animate-spin"></div></div>';
+      try {
+        const first = await guard(account.orders());
+        if (!first) return;
+        if (!first.items.length) {
+          host.innerHTML = `<div class="text-center py-12"><p class="text-muted mb-4">${esc(T.noOrders)}</p><a href="${L === 'en' ? '/en/shop' : '/fr/boutique'}" class="btn-primary px-6 py-3 rounded-lg text-sm font-medium inline-block">${esc(T.shop)}</a></div>`;
+          return;
+        }
+        let cursor = first.pagination.next_cursor;
+        host.innerHTML = `<div id="order-list">${first.items.map(orderRow).join('')}</div>
+          <button id="b-more" type="button" class="btn px-4 py-2 text-sm rounded-lg mt-2" style="display:${first.pagination.has_more ? '' : 'none'}">${esc(T.more)}</button>
+          <p class="text-xs text-muted mt-6"><a class="underline" href="${T.contactHref}">${esc(T.contact)}</a></p>`;
+        $('b-more').addEventListener('click', async () => {
+          if (!cursor) return;
+          const next = await guard(account.orders(cursor));
+          if (!next) return;
+          $('order-list').insertAdjacentHTML('beforeend', next.items.map(orderRow).join(''));
+          cursor = next.pagination.next_cursor;
+          if (!next.pagination.has_more) $('b-more').style.display = 'none';
+        });
+        host.onclick = (ev) => {
+          const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-order]');
+          if (b) void renderOrder(b.dataset.order!);
+        };
+      } catch (e) {
+        host.innerHTML = `<p class="text-red-500 text-sm">${esc(errorText(e, T.generic))}</p>`;
+      }
+    }
+
+    function addressLines(a: Record<string, string> | null) {
+      if (!a) return '';
+      const country = countryList(L).find((c) => c.iso === a.country)?.name ?? a.country ?? '';
+      return [a.line1, a.line2, [a.postal_code, a.city].filter(Boolean).join(' '), a.state, country].filter(Boolean).map(esc).join('<br>');
+    }
+
+    async function renderOrder(number: string) {
+      const host = $('p-orders');
+      host.onclick = null;
+      host.innerHTML = '<div class="text-center py-10"><div class="inline-block w-6 h-6 border-2 border-gray-200 dark:border-slate-700 border-t-primary rounded-full animate-spin"></div></div>';
+      try {
+        const o = await guard(account.order(number));
+        if (!o) return;
+        const cur = o.amounts.currency;
+        const row = (label: string, v: string, strong = false) =>
+          `<div class="flex justify-between text-sm py-1"><span class="text-muted">${esc(label)}</span><span class="${strong ? 'font-semibold text-default' : 'text-default'}">${esc(v)}</span></div>`;
+        host.innerHTML = `
+          <button id="b-back" type="button" class="text-sm text-primary underline mb-4">${esc(T.back)}</button>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+            <h2 class="font-bold font-heading text-xl">${esc(T.order)} ${esc(o.number)}</h2>${statusBadge(o.status)}
+          </div>
+          <p class="text-xs text-muted mb-5">${esc(dateFmt(o.created_at))}</p>
+          <div class="card mb-4">
+            <h3 class="text-sm font-semibold mb-2">${esc(T.items)}</h3>
+            ${o.items.map((i) => `<div class="flex items-center justify-between gap-3 py-1.5 text-sm">
+              <span class="text-default min-w-0">${esc(i.title)}${i.qty > 1 ? ' ×' + i.qty : ''}</span>
+              <span class="flex items-center gap-3 shrink-0"><span class="text-muted">${esc(money(i.unit_price_cents * i.qty, cur))}</span>
+              ${i.can_download ? `<button type="button" data-dl="${esc(i.sku)}" class="btn px-3 py-1 text-xs rounded-lg">${esc(T.download)}</button>` : ''}</span>
+            </div>`).join('')}
+            <div class="border-t border-gray-200 dark:border-slate-700 mt-2 pt-2">
+              ${row(T.subtotal, money(o.amounts.subtotal_cents, cur))}
+              ${o.amounts.discount_cents > 0 ? row(T.discount, '−' + money(o.amounts.discount_cents, cur)) : ''}
+              ${o.amounts.shipping_cents > 0 ? row(T.shipping, money(o.amounts.shipping_cents, cur)) : ''}
+              ${row(T.total, money(o.amounts.total_cents, cur), true)}
+              ${row(T.paid, money(o.amount_paid_cents, cur))}
+              ${o.balance_cents > 0 && o.status !== 'canceled' && o.status !== 'refunded' ? row(T.balance, money(o.balance_cents, cur), true) : ''}
+            </div>
+            ${o.due_at && o.balance_cents > 0 ? `<p class="text-xs text-muted mt-2">${esc(T.dueBy(dateFmt(o.due_at)))}</p>` : ''}
+            ${o.pay_url ? `<a href="${esc(o.pay_url)}" class="btn-primary px-5 py-2.5 rounded-lg text-sm font-medium inline-block mt-3">${esc(T.payBalance)}</a>` : ''}
+          </div>
+          ${o.shipping.address ? `<div class="card mb-4"><h3 class="text-sm font-semibold mb-2">${esc(T.delivery)}</h3>
+            <p class="text-sm text-default">${o.shipping.name ? esc(o.shipping.name) + '<br>' : ''}${addressLines(o.shipping.address)}${o.shipping.phone ? '<br>' + esc(o.shipping.phone) : ''}</p>
+            ${o.shipping.label ? `<p class="text-xs text-muted mt-2">${esc(o.shipping.label)}</p>` : ''}</div>` : ''}
+          ${o.tracking ? `<div class="card mb-4"><h3 class="text-sm font-semibold mb-2">${esc(T.tracking)}</h3>
+            <p class="text-sm text-default">${esc(o.tracking.number)}${o.tracking.url && /^https?:\/\//i.test(o.tracking.url) ? ` · <a class="text-primary underline" target="_blank" rel="noopener noreferrer" href="${esc(o.tracking.url)}">${esc(T.track)}</a>` : ''}</p></div>` : ''}
+          <p class="text-xs text-muted mt-6"><a class="underline" href="${T.contactHref}">${esc(T.contact)}</a></p>`;
+        $('b-back').addEventListener('click', () => void renderOrders());
+        host.onclick = async (ev) => {
+          const b = (ev.target as HTMLElement).closest<HTMLButtonElement>('[data-dl]');
+          if (!b) return;
+          b.disabled = true;
+          const label = b.textContent;
+          b.textContent = T.downloading;
+          try {
+            const r = await guard(account.downloadLink(o.number, b.dataset.dl!));
+            if (r) window.location.assign(r.download_url);
+          } catch (e) {
+            alert(errorText(e, T.generic));
+          } finally {
+            b.disabled = false;
+            b.textContent = label;
+          }
+        };
+      } catch (e) {
+        host.innerHTML = `<button id="b-back" type="button" class="text-sm text-primary underline mb-4">${esc(T.back)}</button><p class="text-red-500 text-sm">${esc(errorText(e, T.generic))}</p>`;
+        $('b-back').addEventListener('click', () => void renderOrders());
+      }
+    }
+
+    // ── Addresses ────────────────────────────────────────────
+    let addresses: Address[] = [];
+
+    function addressForm(a?: Address) {
+      const countries = countryList(L);
+      return `<form id="f-addr" class="card mb-4" novalidate>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div class="sm:col-span-2"><label class="block text-xs font-medium text-muted mb-1">${esc(T.fLabel)}</label><input name="label" maxlength="60" value="${esc(a?.label)}" class="${inputCls}" /></div>
+          <div class="sm:col-span-2"><label class="block text-xs font-medium text-muted mb-1">${esc(T.fName)}</label><input name="name" maxlength="120" autocomplete="name" value="${esc(a?.name)}" class="${inputCls}" /></div>
+          <div class="sm:col-span-2"><label class="block text-xs font-medium text-muted mb-1">${esc(T.fLine1)} *</label><input name="line1" required maxlength="200" autocomplete="address-line1" value="${esc(a?.line1)}" class="${inputCls}" /></div>
+          <div class="sm:col-span-2"><label class="block text-xs font-medium text-muted mb-1">${esc(T.fLine2)}</label><input name="line2" maxlength="200" autocomplete="address-line2" value="${esc(a?.line2)}" class="${inputCls}" /></div>
+          <div><label class="block text-xs font-medium text-muted mb-1">${esc(T.fCity)} *</label><input name="city" required maxlength="120" autocomplete="address-level2" value="${esc(a?.city)}" class="${inputCls}" /></div>
+          <div><label class="block text-xs font-medium text-muted mb-1">${esc(T.fState)}</label><input name="state" maxlength="120" autocomplete="address-level1" value="${esc(a?.state)}" class="${inputCls}" /></div>
+          <div><label class="block text-xs font-medium text-muted mb-1">${esc(T.fCountry)} *</label>
+            <select name="country" required autocomplete="country" class="${inputCls}"><option value="">${esc(T.fCountryPick)}</option>${countries.map((c, i) => `<option value="${c.iso}"${a?.country === c.iso ? ' selected' : ''}>${esc(c.name)}</option>${i === 4 ? '<option disabled>──────────</option>' : ''}`).join('')}</select></div>
+          <div id="postal-wrap"><label class="block text-xs font-medium text-muted mb-1">${esc(T.fPostal)}</label><input name="postal_code" maxlength="12" autocomplete="postal-code" value="${esc(a?.postal_code)}" class="${inputCls}" /></div>
+          <div class="sm:col-span-2"><label class="block text-xs font-medium text-muted mb-1">${esc(T.fPhone)}</label><input name="phone" type="tel" maxlength="40" autocomplete="tel" value="${esc(a?.phone)}" class="${inputCls}" /></div>
+        </div>
+        <p id="e-addr" class="text-red-500 text-xs mt-3" role="alert" style="display:none"></p>
+        <div class="flex gap-2 mt-4">
+          <button type="submit" class="btn-primary px-5 py-2.5 rounded-lg text-sm font-medium">${esc(T.addrSave)}</button>
+          <button type="button" id="b-addr-cancel" class="btn px-5 py-2.5 rounded-lg text-sm">${esc(T.addrCancel)}</button>
+        </div></form>`;
+    }
+
+    async function renderAddresses(editing?: string | 'new') {
+      const host = $('p-addresses');
+      try {
+        const list = await guard(account.addresses());
+        if (!list) return;
+        addresses = list;
+      } catch (e) {
+        host.innerHTML = `<p class="text-red-500 text-sm">${esc(errorText(e, T.generic))}</p>`;
+        return;
+      }
+      const cards = addresses.map((a) => `<div class="card mb-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="font-semibold text-default">${esc(a.label || a.name || a.line1)}</span>
+          ${a.is_default ? `<span class="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">${esc(T.addrDefault)}</span>` : ''}
+        </div>
+        <p class="text-sm text-muted mt-1">${a.name ? esc(a.name) + '<br>' : ''}${addressLines(a as unknown as Record<string, string>)}${a.phone ? '<br>' + esc(a.phone) : ''}</p>
+        <div class="flex flex-wrap gap-3 mt-3 text-sm">
+          <button type="button" data-edit="${a.id}" class="text-primary underline">${esc(T.addrEdit)}</button>
+          ${a.is_default ? '' : `<button type="button" data-default="${a.id}" class="text-primary underline">${esc(T.addrMakeDefault)}</button>`}
+          <button type="button" data-del="${a.id}" class="text-red-600 underline">${esc(T.addrDelete)}</button>
+        </div></div>`).join('');
+      const editTarget = editing && editing !== 'new' ? addresses.find((a) => a.id === editing) : undefined;
+      host.innerHTML = `${editing ? addressForm(editTarget) : ''}
+        ${editing ? '' : cards || `<p class="text-muted text-sm mb-4">${esc(T.addrNone)}</p>`}
+        ${editing ? '' : `<button type="button" id="b-addr-new" class="btn-primary px-5 py-2.5 rounded-lg text-sm font-medium">${esc(T.addrAdd)}</button>`}`;
+
+      if (editing) {
+        const form = $<HTMLFormElement>('f-addr');
+        const sel = form.elements.namedItem('country') as HTMLSelectElement;
+        const postal = form.elements.namedItem('postal_code') as HTMLInputElement;
+        const syncPostal = () => { $('postal-wrap').style.display = sel.value && postalRule(sel.value) === 'none' ? 'none' : ''; };
+        sel.addEventListener('change', syncPostal);
+        syncPostal();
+        $('b-addr-cancel').addEventListener('click', () => void renderAddresses());
+        form.addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          setErr('e-addr', null);
+          const v = (n: string) => ((form.elements.namedItem(n) as HTMLInputElement).value || '').trim();
+          if (!v('line1') || !v('city') || !v('country')) return setErr('e-addr', T.generic);
+          const body = { label: v('label') || undefined, name: v('name') || undefined, line1: v('line1'), line2: v('line2') || undefined, city: v('city'), state: v('state') || undefined, country: v('country'), postal_code: postalRule(v('country')) === 'none' ? '' : postal.value.trim(), phone: v('phone') || undefined };
+          try {
+            const r = editTarget ? await guard(account.updateAddress(editTarget.id, body)) : await guard(account.addAddress(body));
+            if (r) await renderAddresses();
+          } catch (e) {
+            setErr('e-addr', e instanceof AccountError && e.status === 400 ? e.message : errorText(e, T.generic));
+          }
+        });
+        return;
+      }
+      $('b-addr-new').addEventListener('click', () => void renderAddresses('new'));
+      host.onclick = async (ev) => {
+        const t = ev.target as HTMLElement;
+        const edit = t.closest<HTMLElement>('[data-edit]');
+        const def = t.closest<HTMLElement>('[data-default]');
+        const del = t.closest<HTMLElement>('[data-del]');
+        try {
+          if (edit) await renderAddresses(edit.dataset.edit);
+          else if (def) { if (await guard(account.updateAddress(def.dataset.default!, { is_default: true }))) await renderAddresses(); }
+          else if (del && confirm(T.addrDeleteAsk)) { if (await guard(account.deleteAddress(del.dataset.del!))) await renderAddresses(); }
+        } catch (e) { alert(errorText(e, T.generic)); }
+      };
+    }
+
+    // ── Profile ──────────────────────────────────────────────
+    function renderProfile() {
+      const c = customer!;
+      const host = $('p-profile');
+      host.innerHTML = `<form id="f-prof" class="card mb-6" novalidate>
+        <div class="grid gap-3">
+          <div><label class="block text-xs font-medium text-muted mb-1">${esc(T.profName)}</label><input name="name" maxlength="120" autocomplete="name" value="${esc(c.name)}" class="${inputCls}" /></div>
+          <div><label class="block text-xs font-medium text-muted mb-1">${esc(T.profPhone)}</label><input name="phone" type="tel" maxlength="40" autocomplete="tel" placeholder="+229 01 61 00 00 00" value="${esc(c.phone)}" class="${inputCls}" /></div>
+          <div><label class="block text-xs font-medium text-muted mb-1">${esc(T.profLang)}</label>
+            <select name="locale" class="${inputCls}"><option value="fr"${c.locale === 'fr' ? ' selected' : ''}>Français</option><option value="en"${c.locale === 'en' ? ' selected' : ''}>English</option></select></div>
+          <label class="flex items-start gap-2 text-sm text-default"><input name="marketing" type="checkbox" class="mt-1"${c.accepts_marketing ? ' checked' : ''} /><span>${esc(T.profMarketing)}</span></label>
+        </div>
+        <p class="text-xs text-muted mt-3">${esc(T.profEmailNote)}</p>
+        <p id="e-prof" class="text-red-500 text-xs mt-3" role="alert" style="display:none"></p>
+        <p id="ok-prof" class="text-green-700 text-xs mt-3" role="status" style="display:none"></p>
+        <button type="submit" class="btn-primary px-5 py-2.5 rounded-lg text-sm font-medium mt-4">${esc(T.profSave)}</button></form>
+        <div class="card"><button type="button" id="b-logout-all" class="text-red-600 underline text-sm">${esc(T.logoutAll)}</button>
+        <p class="text-xs text-muted mt-1">${esc(T.logoutAllNote)}</p></div>`;
+      $<HTMLFormElement>('f-prof').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        setErr('e-prof', null);
+        $('ok-prof').style.display = 'none';
+        const f = ev.target as HTMLFormElement;
+        const g = (n: string) => ((f.elements.namedItem(n) as HTMLInputElement).value || '').trim();
+        try {
+          const r = await guard(account.updateMe({
+            name: g('name') || null, phone: g('phone') || null, locale: g('locale') as 'fr' | 'en',
+            accepts_marketing: (f.elements.namedItem('marketing') as HTMLInputElement).checked,
+          }));
+          if (r) { customer = r; $('ok-prof').textContent = T.saved; $('ok-prof').style.display = ''; }
+        } catch (e) {
+          setErr('e-prof', e instanceof AccountError && e.status === 400 ? e.message : errorText(e, T.generic));
+        }
+      });
+      $('b-logout-all').addEventListener('click', async () => { await account.logoutAll(); signedOut(); });
+    }
+
+    // ── Start ────────────────────────────────────────────────
+    mountTurnstile();
+    const m = location.hash.match(/^#confirm=(ct_[A-Za-z0-9_%-]+)/);
+    if (m) {
+      confirmToken = decodeURIComponent(m[1]);
+      // Take the token out of the address bar and history.
+      history.replaceState(null, '', location.pathname + location.search);
+      show('v-confirm');
+    } else if (mayBeSignedIn()) {
+      account.me().then((c) => { customer = c; return enterAccount(); }).catch(() => show('v-signin'));
+    } else {
+      show('v-signin');
+    }
+    // A link opened while this page is already open (same tab).
+    window.addEventListener('hashchange', () => {
+      const h = location.hash.match(/^#confirm=(ct_[A-Za-z0-9_%-]+)/);
+      if (h) {
+        confirmToken = decodeURIComponent(h[1]);
+        history.replaceState(null, '', location.pathname + location.search);
+        show('v-confirm');
+      }
+    });
+    void AUTH_MODE;
+  }
+</script>

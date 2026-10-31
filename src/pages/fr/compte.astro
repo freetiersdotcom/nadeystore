@@ -1,0 +1,15 @@
+---
+// src/pages/fr/compte.astro
+// Espace client : connexion par lien ou code, commandes, adresses, profil.
+import StoreLayout from '~/layouts/StoreLayout.astro';
+import AccountApp from '~/components/store/AccountApp.astro';
+
+const metadata = {
+  title: 'Mon compte',
+  robots: { index: false, follow: false },
+};
+---
+
+<StoreLayout metadata={metadata} cartUrl="/fr/panier">
+  <AccountApp locale="fr" />
+</StoreLayout>

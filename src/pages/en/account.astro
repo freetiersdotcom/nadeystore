@@ -1,0 +1,15 @@
+---
+// src/pages/en/account.astro
+// Customer area: sign in by link or code, orders, addresses, profile.
+import StoreLayout from '~/layouts/StoreLayout.astro';
+import AccountApp from '~/components/store/AccountApp.astro';
+
+const metadata = {
+  title: 'My account',
+  robots: { index: false, follow: false },
+};
+---
+
+<StoreLayout metadata={metadata} cartUrl="/en/cart">
+  <AccountApp locale="en" />
+</StoreLayout>

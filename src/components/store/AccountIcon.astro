@@ -1,0 +1,17 @@
+---
+// src/components/store/AccountIcon.astro
+// Header link to the customer's account page, shown next to the cart icon.
+import { getLocale, page, UI } from '~/utils/i18n';
+
+const locale = getLocale(Astro.url.pathname);
+---
+
+<a
+  href={page('account', locale)}
+  class="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors inline-flex items-center"
+  aria-label={UI[locale].account}
+>
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+  </svg>
+</a>

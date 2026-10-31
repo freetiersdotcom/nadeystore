@@ -21,6 +21,7 @@ const PAGE_MAP: Array<[fr: string, en: string]> = [
   ['/fr/confirmation', '/en/confirmation'],
   ['/fr/paiement', '/en/payment'],
   ['/fr/telechargements', '/en/downloads'],
+  ['/fr/compte', '/en/account'],
 ];
 
 const PRODUCT_FR = '/fr/produits/';
@@ -71,6 +72,7 @@ const NAMED: Record<string, [string, string]> = {
   confirmation: ['/fr/confirmation', '/en/confirmation'],
   downloads: ['/fr/telechargements', '/en/downloads'],
   payment: ['/fr/paiement', '/en/payment'],
+  account: ['/fr/compte', '/en/account'],
 };
 export function page(name: keyof typeof NAMED, locale: Locale): string {
   return NAMED[name][locale === 'en' ? 1 : 0];
@@ -89,6 +91,7 @@ export const OG_LOCALE: Record<Locale, string> = { fr: 'fr_FR', en: 'en_US' };
 export const UI = {
   fr: {
     cart: 'Panier',
+    account: 'Mon compte',
     viewCart: 'Voir le panier',
     addedToCart: 'Ajouté au panier',
     viewShop: 'Voir la boutique',
@@ -106,6 +109,7 @@ export const UI = {
   },
   en: {
     cart: 'Cart',
+    account: 'My account',
     viewCart: 'View cart',
     addedToCart: 'Added to cart',
     viewShop: 'Visit the shop',
