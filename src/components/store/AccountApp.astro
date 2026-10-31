@@ -32,6 +32,11 @@ const inputCls =
       <p id="e-signin" class="text-red-500 text-xs mt-2" role="alert" style="display:none"></p>
       <button id="b-send" type="submit" class="btn-primary w-full py-3 text-sm rounded-xl font-semibold mt-4" data-t="sendLink"></button>
     </form>
+    <div id="passkey-signin" style="display:none">
+      <div class="flex items-center gap-3 my-4 text-xs text-muted"><span class="flex-1 border-t border-gray-200 dark:border-slate-700"></span><span data-t="or"></span><span class="flex-1 border-t border-gray-200 dark:border-slate-700"></span></div>
+      <button id="b-passkey" type="button" class="btn w-full py-3 text-sm rounded-xl font-semibold" data-t="passkeySignin"></button>
+      <p id="e-passkey" class="text-red-500 text-xs mt-2" role="alert" style="display:none"></p>
+    </div>
     <p class="text-muted text-xs mt-4" data-t="noPassword"></p>
   </section>
 
@@ -90,9 +95,10 @@ const inputCls =
 </style>
 
 <script>
-  import { account, AccountError, AUTH_MODE, mayBeSignedIn, type Address, type Customer, type OrderDetail, type OrderSummary } from '~/scripts/account';
+  import { account, AccountError, AUTH_MODE, mayBeSignedIn, type Address, type Customer, type OrderDetail, type OrderSummary, type Passkey } from '~/scripts/account';
   import { formatPrice } from '~/scripts/cart';
   import { countryList, postalRule } from '~/scripts/geo';
+  import { createPasskey, getPasskey, passkeyFailure, passkeysSupported } from '~/scripts/passkeys';
 
   declare global {
     interface Window { turnstile?: any; __snTsLoading?: boolean }
@@ -111,6 +117,27 @@ const inputCls =
         signinIntro: 'Entrez votre e-mail : nous vous envoyons un lien de connexion et un code. Pas de mot de passe à retenir.',
         emailLabel: 'Adresse e-mail',
         sendLink: 'Recevoir mon lien',
+        or: 'ou',
+        passkeySignin: 'Me connecter avec une passkey',
+        passkeyFailed: 'Cette passkey n’a pas pu être utilisée. Utilisez votre e-mail.',
+        passkeyCancelled: 'Connexion annulée.',
+        pkTitle: 'Passkeys',
+        pkHelp: 'Connectez-vous avec votre empreinte, votre visage ou le code de votre appareil, sans e-mail. La connexion par e-mail reste disponible.',
+        pkNone: 'Aucune passkey enregistrée.',
+        pkAdd: 'Ajouter une passkey sur cet appareil',
+        pkAdding: 'En attente de votre appareil…',
+        pkName: 'Nom (facultatif, ex. Mon téléphone)',
+        pkAdded: 'Passkey ajoutée.',
+        pkRemove: 'Supprimer',
+        pkRemoveAsk: 'Supprimer cette passkey ?',
+        pkCreated: 'Ajoutée le',
+        pkLastUsed: 'Dernière utilisation',
+        pkNever: 'jamais',
+        pkSynced: 'synchronisée',
+        pkDevice: 'Mon appareil',
+        pkExists: 'Cet appareil a déjà une passkey pour ce compte.',
+        pkCancelled: 'Annulé.',
+        pkUnsupported: 'Ce navigateur ne gère pas les passkeys.',
         noPassword: 'Vos commandes passées avec cette adresse apparaîtront automatiquement.',
         codeTitle: 'Vérifiez votre boîte mail',
         codeSent: 'Nous avons envoyé un lien et un code à',
@@ -192,6 +219,27 @@ const inputCls =
         signinIntro: 'Enter your email: we send you a sign-in link and a code. No password to remember.',
         emailLabel: 'Email address',
         sendLink: 'Send me my link',
+        or: 'or',
+        passkeySignin: 'Sign in with a passkey',
+        passkeyFailed: 'That passkey could not be used. Use your email instead.',
+        passkeyCancelled: 'Sign-in cancelled.',
+        pkTitle: 'Passkeys',
+        pkHelp: 'Sign in with your fingerprint, face or device PIN, no email needed. Email sign-in keeps working.',
+        pkNone: 'No passkeys saved.',
+        pkAdd: 'Add a passkey on this device',
+        pkAdding: 'Waiting for your device…',
+        pkName: 'Name (optional, e.g. My phone)',
+        pkAdded: 'Passkey added.',
+        pkRemove: 'Remove',
+        pkRemoveAsk: 'Remove this passkey?',
+        pkCreated: 'Added',
+        pkLastUsed: 'Last used',
+        pkNever: 'never',
+        pkSynced: 'synced',
+        pkDevice: 'My device',
+        pkExists: 'This device already has a passkey for this account.',
+        pkCancelled: 'Cancelled.',
+        pkUnsupported: 'This browser does not support passkeys.',
         noPassword: 'Orders you placed with this address will show up automatically.',
         codeTitle: 'Check your inbox',
         codeSent: 'We sent a link and a code to',
@@ -406,6 +454,25 @@ const inputCls =
       if (await sendLink(pendingEmail, 'e-code')) startCooldown();
     });
     $('b-other').addEventListener('click', () => { clearInterval(cooldownTimer); show('v-signin'); $<HTMLInputElement>('in-email').focus(); });
+
+    // ── Passkeys ─────────────────────────────────────────────
+    if (passkeysSupported()) $('passkey-signin').style.display = '';
+    $('b-passkey').addEventListener('click', async () => {
+      const btn = $<HTMLButtonElement>('b-passkey');
+      btn.disabled = true;
+      setErr('e-passkey', null);
+      try {
+        const { challenge_id, options } = await account.passkeyLoginOptions();
+        const response = await getPasskey(options);
+        customer = await account.passkeyLogin(challenge_id, response);
+        await enterAccount();
+      } catch (e) {
+        if (e instanceof AccountError) setErr('e-passkey', e.status === 401 ? T.passkeyFailed : errorText(e, T.generic));
+        else setErr('e-passkey', passkeyFailure(e) === 'cancelled' ? T.passkeyCancelled : T.generic);
+      } finally {
+        btn.disabled = false;
+      }
+    });
 
     // The link in the email lands here with #confirm=…; it only signs in when the button is pressed,
     // so a mail scanner that opens the link cannot use it up.
@@ -684,6 +751,7 @@ const inputCls =
         <p id="e-prof" class="text-red-500 text-xs mt-3" role="alert" style="display:none"></p>
         <p id="ok-prof" class="text-green-700 text-xs mt-3" role="status" style="display:none"></p>
         <button type="submit" class="btn-primary px-5 py-2.5 rounded-lg text-sm font-medium mt-4">${esc(T.profSave)}</button></form>
+        <div class="card mb-6" id="pk-card"></div>
         <div class="card"><button type="button" id="b-logout-all" class="text-red-600 underline text-sm">${esc(T.logoutAll)}</button>
         <p class="text-xs text-muted mt-1">${esc(T.logoutAllNote)}</p></div>`;
       $<HTMLFormElement>('f-prof').addEventListener('submit', async (ev) => {
@@ -703,6 +771,54 @@ const inputCls =
         }
       });
       $('b-logout-all').addEventListener('click', async () => { await account.logoutAll(); signedOut(); });
+      void renderPasskeys();
+    }
+
+    async function renderPasskeys(notice?: { ok?: string; err?: string }) {
+      const host = $('pk-card');
+      let items: Passkey[] = [];
+      try {
+        const r = await guard(account.passkeys());
+        if (!r) return;
+        items = r;
+      } catch { /* leave the list empty; adding still works */ }
+      const supported = passkeysSupported();
+      host.innerHTML = `<h3 class="text-sm font-semibold mb-1">${esc(T.pkTitle)}</h3>
+        <p class="text-xs text-muted mb-3">${esc(T.pkHelp)}</p>
+        ${items.length ? items.map((p) => `<div class="flex items-center justify-between gap-3 py-2 border-t border-gray-100 dark:border-slate-800 first:border-0">
+            <div class="min-w-0"><div class="text-sm text-default truncate">${esc(p.name || T.pkDevice)}${p.backed_up ? ' · ' + esc(T.pkSynced) : ''}</div>
+            <div class="text-xs text-muted">${esc(T.pkCreated)} ${esc(dateFmt(p.created_at))} · ${esc(T.pkLastUsed)} : ${esc(p.last_used_at ? dateFmt(p.last_used_at) : T.pkNever)}</div></div>
+            <button type="button" data-pk-del="${esc(p.id)}" class="text-red-600 underline text-sm shrink-0">${esc(T.pkRemove)}</button></div>`).join('')
+          : `<p class="text-sm text-muted mb-3">${esc(T.pkNone)}</p>`}
+        ${supported ? `<form id="f-pk" class="flex flex-wrap items-end gap-2 mt-3">
+            <input name="name" maxlength="60" placeholder="${esc(T.pkName)}" class="${inputCls} flex-1 min-w-[10rem]" />
+            <button type="submit" class="btn-primary px-4 py-2.5 rounded-lg text-sm font-medium">${esc(T.pkAdd)}</button></form>`
+          : `<p class="text-xs text-muted">${esc(T.pkUnsupported)}</p>`}
+        <p id="pk-ok" class="text-green-700 text-xs mt-2" role="status" style="display:${notice?.ok ? '' : 'none'}">${esc(notice?.ok ?? '')}</p>
+        <p id="pk-err" class="text-red-500 text-xs mt-2" role="alert" style="display:${notice?.err ? '' : 'none'}">${esc(notice?.err ?? '')}</p>`;
+      host.onclick = async (ev) => {
+        const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-pk-del]');
+        if (!b || !confirm(T.pkRemoveAsk)) return;
+        try { if (await guard(account.deletePasskey(b.dataset.pkDel!))) await renderPasskeys(); }
+        catch (e) { await renderPasskeys({ err: errorText(e, T.generic) }); }
+      };
+      const form = document.getElementById('f-pk') as HTMLFormElement | null;
+      form?.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const btn = form.querySelector('button') as HTMLButtonElement;
+        btn.disabled = true; btn.textContent = T.pkAdding;
+        const name = ((form.elements.namedItem('name') as HTMLInputElement).value || '').trim();
+        try {
+          const { challenge_id, options } = await account.passkeyRegisterOptions();
+          const response = await createPasskey(options);
+          await account.passkeyRegister(challenge_id, response, name || undefined);
+          await renderPasskeys({ ok: T.pkAdded });
+        } catch (e) {
+          if (e instanceof AccountError && e.status === 401) return signedOut();
+          const why = e instanceof AccountError ? 'other' : passkeyFailure(e);
+          await renderPasskeys({ err: why === 'cancelled' ? T.pkCancelled : why === 'exists' ? T.pkExists : e instanceof AccountError && e.status === 409 ? e.message : errorText(e, T.generic) });
+        }
+      });
     }
 
     // ── Start ────────────────────────────────────────────────

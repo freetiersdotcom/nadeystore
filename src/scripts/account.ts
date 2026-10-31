@@ -68,6 +68,11 @@ export type Address = {
   phone: string | null;
 };
 
+export type Passkey = {
+  id: string; name: string | null; created_at: string; last_used_at: string | null;
+  device_type: string | null; backed_up: boolean; transports: string[];
+};
+
 export class AccountError extends Error {
   constructor(message: string, public status: number, public retryAfter?: number) {
     super(message);
@@ -137,6 +142,29 @@ export const account = {
     if (AUTH_MODE === 'bearer' && r.session_token) writeToken(r.session_token);
     saveHint(r.customer);
     return r.customer;
+  },
+  passkeyLoginOptions() {
+    return req<{ challenge_id: string; options: Record<string, any> }>('/passkeys/login/options', { method: 'POST', body: '{}' }, false);
+  },
+  async passkeyLogin(challenge_id: string, response: Record<string, any>) {
+    const r = await req<{ ok: true; customer: Customer; session_token?: string }>(
+      '/passkeys/login/verify', { method: 'POST', body: JSON.stringify({ challenge_id, response, mode: AUTH_MODE }) }, false
+    );
+    if (AUTH_MODE === 'bearer' && r.session_token) writeToken(r.session_token);
+    saveHint(r.customer);
+    return r.customer;
+  },
+  passkeys() {
+    return req<{ items: Passkey[] }>('/passkeys').then((r) => r.items);
+  },
+  passkeyRegisterOptions() {
+    return req<{ challenge_id: string; options: Record<string, any> }>('/passkeys/register/options', { method: 'POST', body: '{}' });
+  },
+  passkeyRegister(challenge_id: string, response: Record<string, any>, name?: string) {
+    return req<{ passkey: Passkey }>('/passkeys/register/verify', { method: 'POST', body: JSON.stringify({ challenge_id, response, name }) }).then((r) => r.passkey);
+  },
+  deletePasskey(id: string) {
+    return req<{ ok: true }>(`/passkeys/${encodeURIComponent(id)}`, { method: 'DELETE' });
   },
   async me() {
     const r = await req<{ customer: Customer }>('/me');
