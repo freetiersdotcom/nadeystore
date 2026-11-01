@@ -209,6 +209,29 @@ const inputCls =
         profSave: 'Enregistrer',
         saved: 'Enregistré.',
         profEmailNote: 'Votre adresse e-mail est votre identifiant et ne peut pas être modifiée ici.',
+        emTitle: 'Adresse e-mail',
+        emCurrent: 'Adresse actuelle',
+        emChange: 'Changer d’adresse',
+        emNew: 'Nouvelle adresse e-mail',
+        emSend: 'Envoyer le code',
+        emSent: (e: string) => `Nous avons envoyé un code à ${e}. Saisissez-le ci-dessous.`,
+        emCode: 'Code à 6 chiffres',
+        emConfirm: 'Confirmer',
+        emDone: 'Adresse e-mail modifiée. Vos autres appareils ont été déconnectés.',
+        emSame: 'C’est déjà votre adresse actuelle.',
+        emBadCode: 'Ce code est incorrect ou a expiré.',
+        emConflict: 'Cette adresse ne peut pas être utilisée.',
+        dataTitle: 'Mes données',
+        dataHelp: 'Téléchargez une copie de toutes les informations que nous détenons sur vous, ou supprimez votre compte.',
+        dataExport: 'Télécharger mes données',
+        dataDelete: 'Supprimer mon compte',
+        delIntro: 'Cette action est définitive : votre compte, vos adresses et vos passkeys sont supprimés. Les informations de commande nécessaires à notre comptabilité peuvent être conservées. Nous vous envoyons un code pour confirmer.',
+        delSend: 'Envoyer le code de confirmation',
+        delSent: (e: string) => `Code envoyé à ${e}.`,
+        delConfirm: 'Supprimer définitivement',
+        delOpen: 'Des commandes sont encore en cours. Contactez-nous une fois qu’elles sont livrées.',
+        delDone: 'Votre compte a été supprimé.',
+        exportError: 'Le téléchargement a échoué. Réessayez plus tard.',
         logoutAll: 'Se déconnecter partout',
         logoutAllNote: 'Ferme votre session sur tous vos appareils.',
         contact: 'Une question sur une commande ? Contactez-nous.',
@@ -311,6 +334,29 @@ const inputCls =
         profSave: 'Save',
         saved: 'Saved.',
         profEmailNote: 'Your email is your sign-in and cannot be changed here.',
+        emTitle: 'Email address',
+        emCurrent: 'Current address',
+        emChange: 'Change address',
+        emNew: 'New email address',
+        emSend: 'Send the code',
+        emSent: (e: string) => `We sent a code to ${e}. Enter it below.`,
+        emCode: '6-digit code',
+        emConfirm: 'Confirm',
+        emDone: 'Email address changed. Your other devices were signed out.',
+        emSame: 'That is already your current address.',
+        emBadCode: 'That code is wrong or has expired.',
+        emConflict: 'This address cannot be used.',
+        dataTitle: 'My data',
+        dataHelp: 'Download a copy of everything we hold about you, or delete your account.',
+        dataExport: 'Download my data',
+        dataDelete: 'Delete my account',
+        delIntro: 'This is permanent: your account, addresses and passkeys are deleted. Order information we need for our accounting may be kept. We email you a code to confirm.',
+        delSend: 'Send the confirmation code',
+        delSent: (e: string) => `Code sent to ${e}.`,
+        delConfirm: 'Delete permanently',
+        delOpen: 'Some orders are still in progress. Please contact us once they are delivered.',
+        delDone: 'Your account has been deleted.',
+        exportError: 'The download failed. Please try again later.',
         logoutAll: 'Sign out everywhere',
         logoutAllNote: 'Ends your session on all your devices.',
         contact: 'A question about an order? Contact us.',
@@ -747,11 +793,12 @@ const inputCls =
             <select name="locale" class="${inputCls}"><option value="fr"${c.locale === 'fr' ? ' selected' : ''}>Français</option><option value="en"${c.locale === 'en' ? ' selected' : ''}>English</option></select></div>
           <label class="flex items-start gap-2 text-sm text-default"><input name="marketing" type="checkbox" class="mt-1"${c.accepts_marketing ? ' checked' : ''} /><span>${esc(T.profMarketing)}</span></label>
         </div>
-        <p class="text-xs text-muted mt-3">${esc(T.profEmailNote)}</p>
         <p id="e-prof" class="text-red-500 text-xs mt-3" role="alert" style="display:none"></p>
         <p id="ok-prof" class="text-green-700 text-xs mt-3" role="status" style="display:none"></p>
         <button type="submit" class="btn-primary px-5 py-2.5 rounded-lg text-sm font-medium mt-4">${esc(T.profSave)}</button></form>
+        <div class="card mb-6" id="email-card"></div>
         <div class="card mb-6" id="pk-card"></div>
+        <div class="card mb-6" id="data-card"></div>
         <div class="card"><button type="button" id="b-logout-all" class="text-red-600 underline text-sm">${esc(T.logoutAll)}</button>
         <p class="text-xs text-muted mt-1">${esc(T.logoutAllNote)}</p></div>`;
       $<HTMLFormElement>('f-prof').addEventListener('submit', async (ev) => {
@@ -771,7 +818,105 @@ const inputCls =
         }
       });
       $('b-logout-all').addEventListener('click', async () => { await account.logoutAll(); signedOut(); });
+      renderEmailCard();
+      renderDataCard();
       void renderPasskeys();
+    }
+
+    function renderEmailCard(step: 'view' | 'form' | 'code' = 'view', pending = '', msg?: { ok?: string; err?: string }) {
+      const host = $('email-card');
+      const c = customer!;
+      host.innerHTML = `<h3 class="text-sm font-semibold mb-2">${esc(T.emTitle)}</h3>
+        <p class="text-sm text-default break-all mb-1"><span class="text-muted">${esc(T.emCurrent)} :</span> ${esc(c.email)}</p>
+        ${step === 'view' ? `<button type="button" id="b-em-change" class="text-primary underline text-sm mt-1">${esc(T.emChange)}</button>` : ''}
+        ${step === 'form' ? `<form id="f-em" class="mt-2" novalidate><label class="block text-xs font-medium text-muted mb-1">${esc(T.emNew)}</label>
+            <input name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" class="${inputCls}" style="font-size:16px" />
+            <div class="flex gap-2 mt-3"><button type="submit" class="btn-primary px-4 py-2.5 rounded-lg text-sm font-medium">${esc(T.emSend)}</button>
+            <button type="button" id="b-em-cancel" class="btn px-4 py-2.5 rounded-lg text-sm">${esc(T.addrCancel)}</button></div></form>` : ''}
+        ${step === 'code' ? `<form id="f-emc" class="mt-2" novalidate><p class="text-xs text-muted mb-2">${esc(T.emSent(pending))}</p>
+            <label class="block text-xs font-medium text-muted mb-1">${esc(T.emCode)}</label>
+            <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="${inputCls} tracking-[0.4em] text-center" style="font-size:18px" />
+            <div class="flex gap-2 mt-3"><button type="submit" class="btn-primary px-4 py-2.5 rounded-lg text-sm font-medium">${esc(T.emConfirm)}</button>
+            <button type="button" id="b-em-cancel" class="btn px-4 py-2.5 rounded-lg text-sm">${esc(T.addrCancel)}</button></div></form>` : ''}
+        <p id="em-ok" class="text-green-700 text-xs mt-2" role="status" style="display:${msg?.ok ? '' : 'none'}">${esc(msg?.ok ?? '')}</p>
+        <p id="em-err" class="text-red-500 text-xs mt-2" role="alert" style="display:${msg?.err ? '' : 'none'}">${esc(msg?.err ?? '')}</p>`;
+      document.getElementById('b-em-change')?.addEventListener('click', () => renderEmailCard('form'));
+      document.getElementById('b-em-cancel')?.addEventListener('click', () => renderEmailCard('view'));
+      document.getElementById('f-em')?.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const v = ((ev.target as HTMLFormElement).elements.namedItem('email') as HTMLInputElement).value.trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return renderEmailCard('form', '', { err: T.badEmail });
+        if (v.toLowerCase() === c.email.toLowerCase()) return renderEmailCard('form', '', { err: T.emSame });
+        try {
+          if (await guard(account.requestEmailChange(v))) renderEmailCard('code', v);
+        } catch (e) { renderEmailCard('form', '', { err: e instanceof AccountError && e.status === 400 ? e.message : errorText(e, T.generic) }); }
+      });
+      document.getElementById('f-emc')?.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const code = ((ev.target as HTMLFormElement).elements.namedItem('code') as HTMLInputElement).value.replace(/\D/g, '');
+        if (code.length !== 6) return renderEmailCard('code', pending, { err: T.needCode });
+        try {
+          const r = await guard(account.confirmEmailChange(code));
+          if (r) { customer = r; $('who').textContent = r.email; renderEmailCard('view', '', { ok: T.emDone }); }
+        } catch (e) {
+          renderEmailCard('code', pending, { err: e instanceof AccountError && e.status === 409 ? T.emConflict : e instanceof AccountError && e.status === 400 ? T.emBadCode : errorText(e, T.generic) });
+        }
+      });
+    }
+
+    function renderDataCard(step: 'view' | 'confirm' = 'view', msg?: { ok?: string; err?: string }) {
+      const host = $('data-card');
+      host.innerHTML = `<h3 class="text-sm font-semibold mb-1">${esc(T.dataTitle)}</h3>
+        <p class="text-xs text-muted mb-3">${esc(T.dataHelp)}</p>
+        ${step === 'view' ? `<div class="flex flex-wrap gap-3 text-sm">
+            <button type="button" id="b-export" class="btn px-4 py-2 rounded-lg text-sm">${esc(T.dataExport)}</button>
+            <button type="button" id="b-del" class="text-red-600 underline">${esc(T.dataDelete)}</button></div>` : ''}
+        ${step === 'confirm' ? `<div id="del-box"><p class="text-sm text-default mb-3">${esc(T.delIntro)}</p>
+            <button type="button" id="b-del-send" class="btn px-4 py-2 rounded-lg text-sm">${esc(T.delSend)}</button>
+            <button type="button" id="b-del-cancel" class="btn px-4 py-2 rounded-lg text-sm ml-2">${esc(T.addrCancel)}</button></div>` : ''}
+        <p id="data-ok" class="text-green-700 text-xs mt-2" role="status" style="display:${msg?.ok ? '' : 'none'}">${esc(msg?.ok ?? '')}</p>
+        <p id="data-err" class="text-red-500 text-xs mt-2" role="alert" style="display:${msg?.err ? '' : 'none'}">${esc(msg?.err ?? '')}</p>`;
+      document.getElementById('b-export')?.addEventListener('click', async () => {
+        try {
+          const data = await guard(account.exportData());
+          if (!data) return;
+          const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+          const a = document.createElement('a');
+          a.href = url; a.download = 'my-data.json';
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+        } catch (e) { renderDataCard('view', { err: e instanceof AccountError && e.status === 429 ? errorText(e, T.exportError) : T.exportError }); }
+      });
+      document.getElementById('b-del')?.addEventListener('click', () => renderDataCard('confirm'));
+      document.getElementById('b-del-cancel')?.addEventListener('click', () => renderDataCard('view'));
+      document.getElementById('b-del-send')?.addEventListener('click', async () => {
+        try {
+          if (!(await guard(account.requestDelete()))) return;
+          const box = $('del-box');
+          box.innerHTML = `<p class="text-xs text-muted mb-2">${esc(T.delSent(customer!.email))}</p>
+            <form id="f-delc" novalidate><input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="${inputCls} tracking-[0.4em] text-center" style="font-size:18px" />
+            <div class="flex gap-2 mt-3"><button type="submit" class="px-4 py-2.5 rounded-lg text-sm font-medium bg-red-600 text-white">${esc(T.delConfirm)}</button>
+            <button type="button" id="b-del-cancel2" class="btn px-4 py-2.5 rounded-lg text-sm">${esc(T.addrCancel)}</button></div></form>
+            <p id="del-err" class="text-red-500 text-xs mt-2" role="alert" style="display:none"></p>`;
+          document.getElementById('b-del-cancel2')?.addEventListener('click', () => renderDataCard('view'));
+          document.getElementById('f-delc')!.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const code = ((ev.target as HTMLFormElement).elements.namedItem('code') as HTMLInputElement).value.replace(/\D/g, '');
+            const err = (m: string) => { const el = $('del-err'); el.textContent = m; el.style.display = ''; };
+            if (code.length !== 6) return err(T.needCode);
+            try {
+              await account.confirmDelete(code);
+              signedOut();
+              setErr('e-signin', null);
+              const note = $('e-signin'); note.textContent = T.delDone; note.className = 'text-green-700 text-xs mt-2'; note.style.display = '';
+            } catch (e) {
+              err(e instanceof AccountError && e.status === 409 ? T.delOpen : e instanceof AccountError && e.status === 400 ? T.emBadCode : errorText(e, T.generic));
+            }
+          });
+        } catch (e) {
+          renderDataCard('confirm', { err: e instanceof AccountError && e.status === 409 ? T.delOpen : errorText(e, T.generic) });
+        }
+      });
     }
 
     async function renderPasskeys(notice?: { ok?: string; err?: string }) {

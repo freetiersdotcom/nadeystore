@@ -163,6 +163,25 @@ export const account = {
   passkeyRegister(challenge_id: string, response: Record<string, any>, name?: string) {
     return req<{ passkey: Passkey }>('/passkeys/register/verify', { method: 'POST', body: JSON.stringify({ challenge_id, response, name }) }).then((r) => r.passkey);
   },
+  // Privacy
+  requestEmailChange(new_email: string) {
+    return req<{ ok: true; expires_in: number }>('/privacy/email/request', { method: 'POST', body: JSON.stringify({ new_email }) });
+  },
+  async confirmEmailChange(code: string) {
+    const r = await req<{ ok: true; customer: Customer }>('/privacy/email/confirm', { method: 'POST', body: JSON.stringify({ code }) });
+    saveHint(r.customer);
+    return r.customer;
+  },
+  exportData() {
+    return req<Record<string, unknown>>('/privacy/export');
+  },
+  requestDelete() {
+    return req<{ ok: true; expires_in: number }>('/privacy/delete/request', { method: 'POST', body: '{}' });
+  },
+  async confirmDelete(code: string) {
+    await req<{ ok: true }>('/privacy/delete/confirm', { method: 'POST', body: JSON.stringify({ code }) });
+    writeToken(null); saveHint(null);
+  },
   deletePasskey(id: string) {
     return req<{ ok: true }>(`/passkeys/${encodeURIComponent(id)}`, { method: 'DELETE' });
   },
