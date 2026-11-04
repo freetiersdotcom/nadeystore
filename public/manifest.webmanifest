@@ -1,0 +1,21 @@
+{
+  "name": "Santé Natur’",
+  "short_name": "Santé Natur’",
+  "description": "Produits naturels de bien-être, livrés chez vous.",
+  "lang": "fr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8F6F0",
+  "theme_color": "#0F6B4B",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Boutique", "url": "/fr/boutique", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Panier", "url": "/fr/panier", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

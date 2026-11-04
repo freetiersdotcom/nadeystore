@@ -14,6 +14,7 @@ import SiteVerification from '~/components/common/SiteVerification.astro';
 import Analytics from '~/components/common/Analytics.astro';
 import BasicScripts from '~/components/common/BasicScripts.astro';
 import Tracking from '~/components/common/Tracking.astro';
+import PwaMeta from '~/components/common/PwaMeta.astro';
 import AffiliateRef from '~/components/common/AffiliateRef.astro';
 import ConsentBanner from '~/components/common/ConsentBanner.astro';
 
@@ -40,6 +41,7 @@ const enHref = site + (await alternatePathFor(Astro.url.pathname, 'en'));
   <head>
     <CommonMeta />
     <Favicons />
+    <PwaMeta />
     <CustomStyles />
     <ApplyColorMode />
     <slot name="head" />

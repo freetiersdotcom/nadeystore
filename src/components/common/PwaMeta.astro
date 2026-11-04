@@ -1,0 +1,15 @@
+---
+// Makes the shop installable (manifest + light service worker, see public/sw.js).
+---
+<link rel="manifest" href="/manifest.webmanifest" />
+<meta name="theme-color" content="#0F6B4B" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Santé Natur’" />
+<script>
+  if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => { /* the shop works without it */ });
+    });
+  }
+</script>
