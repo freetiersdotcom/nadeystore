@@ -5,6 +5,8 @@
 // build time by Vite). No window globals needed or used.
 // ============================================================
 
+import { attachAffiliate } from './affiliate';
+
 // ── Config ────────────────────────────────────────────────────
 
 export function apiUrl(): string {
@@ -109,7 +111,7 @@ export interface Cart {
 }
 
 export async function createCart(customerEmail: string): Promise<Cart> {
-  return request<Cart>('/v1/carts', {
+  const cart = await request<Cart>('/v1/carts', {
     method: 'POST',
     body: JSON.stringify({
       customer_email: customerEmail,
@@ -117,6 +119,9 @@ export async function createCart(customerEmail: string): Promise<Cart> {
       currency: currency(),   // ← was missing; caused FedaPay currency mismatch
     }),
   });
+  // Affiliate links: tell the API which affiliate sent this cart (no-op without ?ref=, never blocks checkout).
+  if (typeof window !== 'undefined') void attachAffiliate(apiUrl(), cart.id);
+  return cart;
 }
 
 export async function addCartItems(
