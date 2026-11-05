@@ -47,6 +47,8 @@ const metadata = {
       <p id="confirmation-email" class="text-muted text-sm mb-8"></p>
 
       <!-- Order summary (if available) -->
+      <div id="voucher-box" class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-5 text-left mb-8" style="display:none"></div>
+
       <div id="order-summary" class="bg-gray-50 dark:bg-slate-800 rounded-xl p-5 text-left mb-8" style="display:none">
         <h2 class="font-semibold text-sm mb-3">Récapitulatif de commande</h2>
         <div id="order-items" class="space-y-2 text-sm text-muted"></div>
@@ -173,6 +175,7 @@ const metadata = {
 <script>
   import { formatPrice } from '~/scripts/cart';
   import { apiUrl, publicKey, currency as getCurrency } from '~/scripts/api';
+  import { showVouchers } from '~/scripts/vouchers';
 
   const CURRENCY = getCurrency();
 
@@ -243,6 +246,7 @@ const metadata = {
     }
 
     show('success-state');
+    void showVouchers(cart.id, 'fr');
   }
 
   const MAX_POLL_ATTEMPTS = 10;
