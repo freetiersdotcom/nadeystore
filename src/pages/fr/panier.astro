@@ -311,6 +311,7 @@ const metadata = {
   import { getBookingSlots, holdBookingSlot } from '~/scripts/api';
   import { depositPreview, depositCheckout } from '~/scripts/api';
   import { codCheckout, codCountries } from '~/scripts/api';
+  import { applyResume } from '~/scripts/resume';
 
   const CURRENCY = getCurrency();
   const PROVIDER = getProvider();
@@ -1181,6 +1182,8 @@ const metadata = {
     render();
   }
 
-  initCartPage();
+  // Coming from an abandoned-cart reminder e-mail: refill the cart first, then draw the page.
+  if (new URLSearchParams(window.location.search).has('resume')) void applyResume().then(() => initCartPage());
+  else initCartPage();
   document.addEventListener('astro:after-swap', initCartPage);
 </script>
