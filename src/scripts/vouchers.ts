@@ -8,7 +8,7 @@ const T = {
   en: { title: 'Your WiFi access', user: 'Username', pass: 'Password', wait: 'Payment received. Your code is being prepared: this page updates by itself.', keep: 'Keep this code, it will not be given again.' },
 };
 
-export async function showVouchers(cartId: string, lang: 'fr' | 'en', attempt = 0): Promise<void> {
+export async function showVouchers(cartId: string, lang: 'fr' | 'en', attempt = 0, digitalLines = 0): Promise<void> {
   const box = document.getElementById('voucher-box');
   if (!box) return;
   try {
@@ -26,6 +26,8 @@ export async function showVouchers(cartId: string, lang: 'fr' | 'en', attempt = 
     }
     if (v.status === 'ready') html += `<p class="text-xs text-muted">${esc(t.keep)}</p>`;
     box.innerHTML = html; box.style.display = 'block';
-    if (v.status === 'waiting' && attempt < 20) setTimeout(() => void showVouchers(cartId, lang, attempt + 1), 15000);
+    // Vouchers are digital items with nothing to download: when they are all the digital items, hide the "download links sent" notice.
+    if (v.items.length >= digitalLines) { const n = document.getElementById('digital-notice'); if (n) n.style.display = 'none'; }
+    if (v.status === 'waiting' && attempt < 20) setTimeout(() => void showVouchers(cartId, lang, attempt + 1, digitalLines), 15000);
   } catch { /* the order page still works without it */ }
 }

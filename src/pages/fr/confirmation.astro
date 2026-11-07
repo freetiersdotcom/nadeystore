@@ -246,7 +246,7 @@ const metadata = {
     }
 
     show('success-state');
-    void showVouchers(cart.id, 'fr');
+    void showVouchers(cart.id, 'fr', 0, cart.items.filter((i: any) => i.product_type === 'digital').length);
   }
 
   const MAX_POLL_ATTEMPTS = 10;
