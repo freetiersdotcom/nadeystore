@@ -306,11 +306,12 @@ export async function payBalance(
 
 // ── Appointments (services with online booking) ───────────────
 
-export interface BookingSlot { start: string; end: string; available: boolean }
+export interface BookingSlot { start: string; end: string; available: boolean; resource_ids?: string[] }
 export interface BookingSlots {
   bookable: boolean;
   duration_min?: number;
   tz?: string;
+  providers?: { id: string; name: string }[];
   slots: BookingSlot[];
 }
 
@@ -320,11 +321,11 @@ export async function getBookingSlots(sku: string, days = 45): Promise<BookingSl
 }
 
 /** Holds a slot for a cart (a few minutes, extended once payment starts). Errors carry `.code` ('slot_taken'…) and `.status`. */
-export async function holdBookingSlot(cartId: string, sku: string, start: string, customerTz?: string): Promise<{ id: string; start: string; end: string }> {
+export async function holdBookingSlot(cartId: string, sku: string, start: string, customerTz?: string, provider?: string): Promise<{ id: string; start: string; end: string }> {
   const res = await fetch(`${apiUrl()}/v1/bookings/hold`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${publicKey()}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cart_id: cartId, sku, start, customer_tz: customerTz }),
+    body: JSON.stringify({ cart_id: cartId, sku, start, customer_tz: customerTz, provider }),
   });
   const data: any = await res.json().catch(() => ({}));
   if (!res.ok) {

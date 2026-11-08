@@ -396,10 +396,54 @@ const metadata = {
   const BOOKING_KEY = 'santenatur_bookings';
   const SLOT_LOCALE = 'en-GB';
   const CUSTOMER_TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { return ''; } })();
-  type Slot = { start: string; end: string; available: boolean };
-  type SlotInfo = { bookable: boolean; duration_min?: number; tz?: string; slots: Slot[] };
+  type Slot = { start: string; end: string; available: boolean; resource_ids?: string[] };
+  type SlotInfo = { bookable: boolean; duration_min?: number; tz?: string; providers?: { id: string; name: string }[]; slots: Slot[] };
   const slotInfo: Record<string, SlotInfo | 'loading' | undefined> = {};
   const pickedDay: Record<string, string> = {};
+
+  // Provider choice: only offered when a service has two or more providers. 'any' = the first free one.
+  const PROVIDER_KEY = 'santenatur_providers';
+  const pickedProvider: Record<string, string> = (() => {
+    try {
+      return JSON.parse(localStorage.getItem(PROVIDER_KEY) || '{}') || {};
+    } catch {
+      return {};
+    }
+  })();
+  function providerFor(sku: string): string {
+    const p = pickedProvider[sku];
+    if (!p || p === 'any') return 'any';
+    const info = slotInfo[sku];
+    if (info && info !== 'loading' && !(info.providers ?? []).some((x) => x.id === p)) return 'any';
+    return p;
+  }
+  const isAvail = (sku: string, s: Slot) => {
+    const p = providerFor(sku);
+    return p === 'any' ? s.available : !!s.resource_ids?.includes(p);
+  };
+  function providerPicker(sku: string, info: SlotInfo): string {
+    const list = info.providers ?? [];
+    if (list.length < 2) return '';
+    const cur = providerFor(sku);
+    const opts = [`<option value="any">No preference (first available)</option>`]
+      .concat(list.map((p) => `<option value="${escHtml(p.id)}"${p.id === cur ? ' selected' : ''}>${escHtml(p.name)}</option>`))
+      .join('');
+    return `<label class="block text-xs text-muted mb-3">Provider <select data-provider-sku="${sku}" class="ml-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-transparent px-2 py-1 text-sm">${opts}</select></label>`;
+  }
+  function wireProviderPicker(box: HTMLElement) {
+    box.querySelectorAll<HTMLSelectElement>('[data-provider-sku]').forEach((el) =>
+      el.addEventListener('change', () => {
+        pickedProvider[el.dataset.providerSku!] = el.value;
+        try {
+          localStorage.setItem(PROVIDER_KEY, JSON.stringify(pickedProvider));
+        } catch {
+          /* private mode: the choice lives for this page only */
+        }
+        clearError();
+        renderPickers(getCart());
+      })
+    );
+  }
 
   function readBookings(): Record<string, string> {
     try { return JSON.parse(localStorage.getItem(BOOKING_KEY) || '{}') || {}; } catch { return {}; }
@@ -431,7 +475,7 @@ const metadata = {
     const info = slotInfo[sku];
     const start = currentBookings()[sku];
     if (!start || !info || info === 'loading' || !info.bookable) return null;
-    return info.slots.some((s) => s.start === start && s.available) ? start : null;
+    return info.slots.some((s) => s.start === start && isAvail(sku, s)) ? start : null;
   }
 
   function renderPickers(cart: CartLineItem[]) {
@@ -453,19 +497,20 @@ const metadata = {
       for (const s of info.slots) byDay.set(dayKey(s.start), [...(byDay.get(dayKey(s.start)) ?? []), s]);
       const days = [...byDay.keys()];
       const picked = validSelection(item.sku);
-      if (!byDay.size || !days.some((d) => byDay.get(d)!.some((s) => s.available))) {
-        box.innerHTML = `<p class="text-sm text-muted">No time slots available right now. Message us to arrange a date.</p>`;
+      if (!byDay.size || !days.some((d) => byDay.get(d)!.some((s) => isAvail(item.sku, s)))) {
+        box.innerHTML = `${providerPicker(item.sku, info)}<p class="text-sm text-muted">No time slots available right now. Message us to arrange a date.</p>`;
+        wireProviderPicker(box);
         continue;
       }
       let day = pickedDay[item.sku];
-      if (!day || !byDay.has(day)) day = picked ? dayKey(picked) : days.find((d) => byDay.get(d)!.some((s) => s.available))!;
+      if (!day || !byDay.has(day)) day = picked ? dayKey(picked) : days.find((d) => byDay.get(d)!.some((s) => isAvail(item.sku, s)))!;
       pickedDay[item.sku] = day;
       const d = info.duration_min ?? 60, tz = escHtml(CUSTOMER_TZ || info.tz || '');
       const dayBtns = days.map((k) => {
-        const free = byDay.get(k)!.some((s) => s.available);
+        const free = byDay.get(k)!.some((s) => isAvail(item.sku, s));
         return `<button type="button" data-slot-day="${k}" data-sku="${item.sku}" class="shrink-0 rounded-lg border px-3 py-1.5 text-sm ${k === day ? 'btn-primary border-transparent' : 'border-gray-200 dark:border-slate-700'} ${free ? '' : 'opacity-40'}">${fmtDayBtn(k)}</button>`;
       }).join('');
-      const timeBtns = byDay.get(day)!.map((s) => s.available
+      const timeBtns = byDay.get(day)!.map((s) => isAvail(item.sku, s)
         ? `<button type="button" data-slot-start="${s.start}" data-sku="${item.sku}" class="rounded-lg border px-3 py-1.5 text-sm ${s.start === picked ? 'btn-primary border-transparent' : 'border-gray-200 dark:border-slate-700 hover:border-primary'}">${fmtTimeBtn(s.start)}</button>`
         : `<button type="button" disabled title="Slot unavailable" class="rounded-lg border border-gray-100 dark:border-slate-800 px-3 py-1.5 text-sm text-muted line-through opacity-50 cursor-not-allowed">${fmtTimeBtn(s.start)}</button>`
       ).join('');
@@ -473,10 +518,12 @@ const metadata = {
         <div class="rounded-lg border border-gray-200 dark:border-slate-700 p-3">
           <p class="text-sm font-medium mb-0.5">Choose your time slot</p>
           <p class="text-xs text-muted mb-3">${`${d} min session · times shown in your time zone (${tz})`}</p>
+          ${providerPicker(item.sku, info)}
           <div class="flex gap-2 overflow-x-auto pb-2">${dayBtns}</div>
           <div class="flex flex-wrap gap-2 mt-2">${timeBtns}</div>
           ${picked ? `<p class="text-sm mt-3"><span class="text-muted">Your slot:</span> <strong>${escHtml(fmtFull(picked))}</strong></p>` : ''}
         </div>`;
+      wireProviderPicker(box);
       box.querySelectorAll<HTMLElement>('[data-slot-day]').forEach((b) => b.addEventListener('click', () => {
         pickedDay[b.dataset.sku!] = b.dataset.slotDay!;
         renderPickers(getCart());
@@ -507,7 +554,7 @@ const metadata = {
       const info = slotInfo[i.sku];
       if (!info || info === 'loading' || !info.bookable) continue;
       try {
-        await holdBookingSlot(cartId, i.sku, sel[i.sku], CUSTOMER_TZ || undefined);
+        await holdBookingSlot(cartId, i.sku, sel[i.sku], CUSTOMER_TZ || undefined, providerFor(i.sku) === 'any' ? undefined : providerFor(i.sku));
       } catch (e: any) {
         if (e?.code === 'slot_taken' || e?.code === 'slot_unavailable' || e?.status === 409) {
           const rest = { ...currentBookings() }; delete rest[i.sku]; writeBookings(rest);
