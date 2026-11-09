@@ -316,7 +316,7 @@ export interface BookingSlots {
 }
 
 /** Candidate time slots of a service, each flagged available or busy. Not bookable → { bookable: false }. */
-export async function getBookingSlots(sku: string, days = 45): Promise<BookingSlots> {
+export async function getBookingSlots(sku: string, days = 366): Promise<BookingSlots> {
   return request<BookingSlots>(`/v1/bookings/slots?sku=${encodeURIComponent(sku)}&days=${days}`);
 }
 
