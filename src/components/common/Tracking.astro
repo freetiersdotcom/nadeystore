@@ -1,7 +1,6 @@
 ---
-// Ad pixels, loaded ONLY after the visitor accepted. UTM capture is
-// first-party (sessionStorage) and runs regardless, so the order can
-// carry its source. Set PUBLIC_META_PIXEL_ID / PUBLIC_TIKTOK_PIXEL_ID to enable.
+// Campaign capture and ad pixels: both run ONLY after the visitor accepted measurement cookies (ConsentBanner).
+// Pixels also need PUBLIC_META_PIXEL_ID / PUBLIC_TIKTOK_PIXEL_ID; without them only the campaign capture runs.
 const meta = import.meta.env.PUBLIC_META_PIXEL_ID || '';
 const tiktok = import.meta.env.PUBLIC_TIKTOK_PIXEL_ID || '';
 ---
@@ -11,23 +10,51 @@ const tiktok = import.meta.env.PUBLIC_TIKTOK_PIXEL_ID || '';
     if (window.__snTracking) return;
     window.__snTracking = true;
 
-    // ── UTM capture (first touch of the session) ──
-    try {
-      var q = new URLSearchParams(location.search);
-      var keys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'ttclid'];
-      var found = {};
-      keys.forEach(function (k) {
-        if (q.get(k)) found[k] = q.get(k);
-      });
-      if (Object.keys(found).length && !sessionStorage.getItem('sn_attr')) {
-        found.landing = location.pathname;
-        sessionStorage.setItem('sn_attr', JSON.stringify(found));
+    // ── Campaign capture: only after the visitor accepted measurement cookies. Kept 30 days in this browser (last campaign wins),
+    //    reported to the API when the cart is created (scripts/ads.ts). Refusing or withdrawing erases it.
+    var consent = function () {
+      try {
+        return localStorage.getItem('sn_consent') === 'granted';
+      } catch (e) {
+        return false;
       }
-    } catch (e) {}
+    };
+    var CLICK = { fbclid: 'fbclid', ttclid: 'ttclid', gclid: 'gclid' };
+    function capture() {
+      if (!consent()) return;
+      try {
+        var q = new URLSearchParams(location.search);
+        var found = {};
+        ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(function (k) {
+          if (q.get(k)) found[k] = q.get(k);
+        });
+        Object.keys(CLICK).forEach(function (k) {
+          if (q.get(k) && !found.click_id) {
+            found.click_id_type = k;
+            found.click_id = q.get(k);
+          }
+        });
+        if (!Object.keys(found).length) return;
+        found.landing = location.pathname;
+        try {
+          if (document.referrer && new URL(document.referrer).host !== location.host) found.referrer = document.referrer;
+        } catch (e) {}
+        found.at = Date.now();
+        localStorage.setItem('sn_attr', JSON.stringify(found));
+      } catch (e) {}
+    }
+    capture();
+    document.addEventListener('astro:page-load', capture);
+    window.addEventListener('sn:consent', function (e) {
+      if (e.detail === 'granted') capture();
+    });
 
     window.snAttribution = function () {
       try {
-        return JSON.parse(sessionStorage.getItem('sn_attr') || 'null');
+        var a = JSON.parse(localStorage.getItem('sn_attr') || 'null');
+        if (!a || !consent() || Date.now() - Number(a.at) > 30 * 86400000) return null;
+        delete a.at;
+        return a;
       } catch (e) {
         return null;
       }

@@ -6,6 +6,7 @@
 // ============================================================
 
 import { attachAffiliate } from './affiliate';
+import { attachAds } from './ads';
 
 // ── Config ────────────────────────────────────────────────────
 
@@ -121,6 +122,8 @@ export async function createCart(customerEmail: string): Promise<Cart> {
   });
   // Affiliate links: tell the API which affiliate sent this cart (no-op without ?ref=, never blocks checkout).
   if (typeof window !== 'undefined') void attachAffiliate(apiUrl(), cart.id);
+  // Ad tracking: report the campaign this visitor came from (only if they accepted measurement cookies; no-op while the module is off).
+  if (typeof window !== 'undefined') void attachAds(apiUrl(), cart.id);
   return cart;
 }
 

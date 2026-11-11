@@ -2,7 +2,7 @@
 import { Icon } from 'astro-icon/components';
 import { SITE } from 'astrowind:config';
 import { getHomePermalink } from '~/utils/permalinks';
-import { getLocale } from '~/utils/i18n';
+import { getLocale, UI } from '~/utils/i18n';
 
 interface Link {
   text?: string;
@@ -25,6 +25,7 @@ export interface Props {
 }
 
 const { socialLinks = [], secondaryLinks = [], links = [], footNote = '', theme = 'light' } = Astro.props;
+const cookieLabel = UI[getLocale(Astro.url.pathname)].cookieSettings;
 ---
 
 <footer class:list={[{ dark: theme === 'dark' }, 'relative border-t border-gray-200 dark:border-slate-800 not-prose']}>
@@ -53,6 +54,14 @@ const { socialLinks = [], secondaryLinks = [], links = [], footNote = '', theme 
               </>
             ))
           }
+          {' · '}
+          <button
+            type="button"
+            data-cookie-settings
+            class="text-muted hover:text-gray-700 dark:text-gray-400 hover:underline transition duration-150 ease-in-out"
+          >
+            {cookieLabel}
+          </button>
         </div>
       </div>
       {

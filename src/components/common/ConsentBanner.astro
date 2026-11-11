@@ -1,65 +1,86 @@
 ---
-// Shown only when at least one ad pixel is configured and no choice stored yet.
+// Cookie banner, shown to every visitor in every country until they choose. Nothing that measures or advertises
+// is stored or loaded before "Accept" (see Tracking.astro and scripts/ads.ts). The choice is remembered in this browser
+// and can be changed any time from the "Cookie settings" link in the footer.
 import { getLocale, UI, page } from '~/utils/i18n';
 
-const hasPixels = !!(import.meta.env.PUBLIC_META_PIXEL_ID || import.meta.env.PUBLIC_TIKTOK_PIXEL_ID);
 const locale = getLocale(Astro.url.pathname);
 const t = UI[locale];
 ---
 
-{
-  hasPixels && (
-    <div
-      id="sn-consent"
-      hidden
-      role="dialog"
-      aria-live="polite"
-      aria-label="Cookies"
-      class="fixed inset-x-0 bottom-0 z-[60] p-3 sm:p-4"
-      transition:persist
-    >
-      <div class="mx-auto max-w-3xl rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-        <p class="text-sm flex-1">
-          {t.consentText}{' '}
-          <a href={page('privacy', locale)} class="underline">
-            {t.consentMore}
-          </a>
-        </p>
-        <div class="flex gap-2 shrink-0">
-          <button
-            type="button"
-            data-consent="denied"
-            class="btn-secondary px-4 py-2 text-sm rounded-md border border-gray-300 dark:border-slate-600"
-          >
-            {t.consentRefuse}
-          </button>
-          <button type="button" data-consent="granted" class="btn-primary px-4 py-2 text-sm rounded-md">
-            {t.consentAccept}
-          </button>
-        </div>
-      </div>
+<div
+  id="sn-consent"
+  hidden
+  role="dialog"
+  aria-live="polite"
+  aria-label="Cookies"
+  class="fixed inset-x-0 bottom-0 z-[60] p-3 sm:p-4"
+  transition:persist
+>
+  <div class="mx-auto max-w-3xl rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+    <p class="text-sm flex-1">
+      {t.consentText}{' '}
+      <a href={page('privacy', locale)} class="underline">
+        {t.consentMore}
+      </a>
+    </p>
+    <div class="flex gap-2 shrink-0">
+      <button
+        type="button"
+        data-consent="denied"
+        class="btn-secondary px-4 py-2 text-sm rounded-md border border-gray-300 dark:border-slate-600"
+      >
+        {t.consentRefuse}
+      </button>
+      <button type="button" data-consent="granted" class="btn-primary px-4 py-2 text-sm rounded-md">
+        {t.consentAccept}
+      </button>
     </div>
-  )
-}
+  </div>
+</div>
 
 <script is:inline>
   (function () {
-    var box = document.getElementById('sn-consent');
-    if (!box) return;
-    var stored = null;
-    try {
-      stored = localStorage.getItem('sn_consent');
-    } catch (e) {}
-    if (!stored) box.hidden = false;
-    box.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-consent]');
+    if (window.__snConsentUi) return;
+    window.__snConsentUi = true;
+    var box = function () {
+      return document.getElementById('sn-consent');
+    };
+    var read = function () {
+      try {
+        return localStorage.getItem('sn_consent');
+      } catch (e) {
+        return null;
+      }
+    };
+    function show() {
+      var b = box();
+      if (b) b.hidden = false;
+    }
+    function init() {
+      var b = box();
+      if (b && !read()) b.hidden = false;
+    }
+    init();
+    document.addEventListener('astro:page-load', init);
+    document.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('[data-cookie-settings]')) {
+        e.preventDefault();
+        show();
+        return;
+      }
+      var b = e.target.closest && e.target.closest('#sn-consent [data-consent]');
       if (!b) return;
       var v = b.getAttribute('data-consent');
+      var before = read();
       try {
         localStorage.setItem('sn_consent', v);
+        if (v !== 'granted') localStorage.removeItem('sn_attr');
       } catch (err) {}
-      box.hidden = true;
+      box().hidden = true;
       window.dispatchEvent(new CustomEvent('sn:consent', { detail: v }));
+      // A pixel that is already running cannot be unloaded: reload so nothing keeps measuring after a refusal.
+      if (before === 'granted' && v !== 'granted' && (window.fbq || window.ttq)) location.reload();
     });
   })();
 </script>
