@@ -20,7 +20,13 @@ export interface CartLineItem {
   image_url: string | null;
   /** The product variant title shown in the cart (e.g. "100ml / Lavender") */
   variant_title: string;
+  /** Set when the visitor chose "Subscribe": the plan (see the Subscriptions module). The line is then priced at the plan price. */
+  sub_plan?: SubPlanRef;
+  /** The normal price of the variant, kept so a line can go back to it if the subscription is dropped. */
+  base_price_cents?: number;
 }
+
+export interface SubPlanRef { id: string; name: string; price_cents: number; every_n: number; unit: 'week' | 'month' }
 
 const CART_KEY = 'merchant_cart';
 
@@ -49,7 +55,15 @@ export function clearCart(): void {
 export function addToCart(item: Omit<CartLineItem, 'qty'>): CartLineItem[] {
   const cart = getCart();
   const existing = cart.find((i) => i.sku === item.sku);
-  if (existing) {
+  if (item.sub_plan) {
+    // One subscription per order: any other subscription line goes back to a normal purchase.
+    for (const i of cart) if (i.sub_plan && i.sku !== item.sku) dropPlan(i);
+    const line: CartLineItem = existing ?? { ...item, sub_plan: undefined, qty: 0 };
+    if (!existing) cart.push(line);
+    line.base_price_cents = line.sub_plan ? line.base_price_cents : item.price_cents;
+    line.sub_plan = item.sub_plan; line.price_cents = item.sub_plan.price_cents; line.qty = Math.max(1, line.qty);
+  } else if (existing) {
+    if (existing.sub_plan) dropPlan(existing);
     existing.qty += 1;
   } else {
     cart.push({ ...item, qty: 1 });
@@ -57,6 +71,16 @@ export function addToCart(item: Omit<CartLineItem, 'qty'>): CartLineItem[] {
   saveCart(cart);
   updateCartBadge(cartItemCount(cart));
   return cart;
+}
+
+function dropPlan(i: CartLineItem): void {
+  if (i.base_price_cents != null) i.price_cents = i.base_price_cents;
+  delete i.sub_plan; delete i.base_price_cents;
+}
+
+/** Turn every subscription line back into a normal purchase (used when the shop no longer accepts the plan). */
+export function dropSubPlans(): CartLineItem[] {
+  const cart = getCart(); cart.forEach(dropPlan); saveCart(cart); return cart;
 }
 
 export function updateQty(sku: string, qty: number): CartLineItem[] {

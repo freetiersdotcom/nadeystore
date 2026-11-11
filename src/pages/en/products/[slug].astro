@@ -257,6 +257,7 @@ const metadata = {
 
 <script>
   import { addToCart, updateCartBadge, formatPrice } from '~/scripts/cart';
+  import { initSubs, readPlan } from '~/scripts/subs';
   import { currency as getCurrency } from '~/scripts/api';
 
   const CURRENCY = getCurrency();
@@ -327,6 +328,7 @@ const metadata = {
       product_type: (btn.dataset.productType as 'physical' | 'digital') || 'physical',
       image_url: btn.dataset.image || null,
       variant_title: btn.dataset.variantTitle || '',
+      sub_plan: readPlan(btn),
     });
 
     btn.textContent = 'Added ✓';
@@ -350,6 +352,7 @@ const metadata = {
     updateCartBadge();
     document.getElementById('variant-select')?.addEventListener('change', handleVariantChange);
     document.getElementById('add-to-cart')?.addEventListener('click', handleAddToCart);
+    initSubs();
   }
 
   initProductPage();

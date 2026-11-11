@@ -127,6 +127,14 @@ export async function createCart(customerEmail: string): Promise<Cart> {
   return cart;
 }
 
+/** Start-a-subscription flag for this cart (module "Subscriptions"). False when the shop refused it (plan closed, module off, price/currency mismatch). */
+export async function attachSubscription(cartId: string, planId: string): Promise<boolean> {
+  try {
+    const r = await fetch(`${apiUrl()}/m/subs/attach`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cart_id: cartId, plan_id: planId }) });
+    return r.ok && ((await r.json()) as { attached?: boolean }).attached === true;
+  } catch { return false; }
+}
+
 export async function addCartItems(
   cartId: string,
   items: Array<{ sku: string; qty: number }>

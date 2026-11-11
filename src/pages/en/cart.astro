@@ -268,6 +268,9 @@ const metadata = {
   import { countryList, postalRule, buildPhone } from '~/scripts/geo';
   import { setCartContact } from '~/scripts/api';
   import { shippingQuote, setCartShippingMethod, type ShippingQuote, type ShippingOption } from '~/scripts/api';
+  import { everyLabel } from '~/scripts/subs';
+  import { attachSubscription } from '~/scripts/api';
+  import { dropSubPlans } from '~/scripts/cart';
   import {
     getCart,
     updateQty,
@@ -583,6 +586,7 @@ const metadata = {
         <div class="flex-1 min-w-0">
           <p class="font-medium text-default text-sm">${item.title}</p>
           ${item.variant_title ? `<p class="text-xs text-muted">${item.variant_title}</p>` : ''}
+          ${item.sub_plan ? `<p class="text-xs text-primary font-medium">Subscription : ${everyLabel(item.sub_plan)}</p>` : ''}
           ${
             item.product_type === 'digital'
               ? `<span class="text-xs text-accent font-medium">⚡ Digital</span>`
@@ -966,6 +970,14 @@ const metadata = {
         cartId,
         cart.map((i) => ({ sku: i.sku, qty: i.qty }))
       );
+
+      // 2b. A subscription line: tell the shop which plan this order starts (it sets the plan price on that line).
+      const subLine = cart.find((i) => i.sub_plan);
+      if (subLine?.sub_plan && !(await attachSubscription(cartId, subLine.sub_plan.id))) {
+        dropSubPlans();
+        render();
+        throw new Error('This subscription is no longer offered: the item was switched back to a one-time purchase. Please check your cart and try again.');
+      }
 
       // 3. Set shipping if needed
       if (hasPhysical) {
