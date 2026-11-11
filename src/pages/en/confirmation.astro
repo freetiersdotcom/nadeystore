@@ -184,7 +184,35 @@ const metadata = {
     });
   }
 
+  // Ad pixels (only runs if the visitor accepted cookies and a pixel is configured). The order id is the event id,
+  // so the server-side copy of this purchase (Ad tracking module) is counted once. Cash on delivery is not a sale yet.
+  function trackPurchase(cart: any, order: any) {
+    try {
+      if (new URLSearchParams(window.location.search).get('pm') === 'cod' || !order?.id) return;
+      const done = 'sn_purchase_' + order.id;
+      if (localStorage.getItem(done)) return;
+      localStorage.setItem(done, '1');
+      const cur = (cart.currency || CURRENCY || '').toUpperCase();
+      const zero = ['XOF', 'XAF', 'GNF', 'JPY', 'KRW', 'RWF', 'UGX', 'VND', 'CLP', 'PYG', 'KMF', 'DJF', 'BIF', 'MGA', 'VUV', 'XPF'].includes(cur);
+      const total = cart.totals?.total_cents;
+      if (typeof total !== 'number' || !cur) return;
+      (window as any).snTrack?.(
+        'Purchase',
+        {
+          value: zero ? total : total / 100,
+          currency: cur,
+          content_type: 'product',
+          contents: (cart.items || []).map((i: any) => ({ id: i.sku, quantity: i.qty })),
+        },
+        order.id
+      );
+    } catch {
+      /* tracking must never break the page */
+    }
+  }
+
   function renderSuccess(cart: any, order: { needs_review: boolean }) {
+    trackPurchase(cart, order);
     const emailEl = document.getElementById('confirmation-email')!;
     if (cart.customer_email) {
       emailEl.textContent = `A confirmation email has been sent to ${cart.customer_email}.`;

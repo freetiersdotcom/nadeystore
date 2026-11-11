@@ -18,7 +18,9 @@ export async function attachAds(apiUrl: string, cartId: string): Promise<void> {
     const a = JSON.parse(localStorage.getItem(KEY) || 'null');
     if (!a || Date.now() - Number(a.at) > 30 * 86_400_000) return;
     const body: Record<string, string> = { cart_id: cartId, fbp: cookie('_fbp'), ttp: cookie('_ttp') };
-    for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'landing', 'referrer', 'click_id_type', 'click_id']) if (a[k]) body[k] = String(a[k]);
+    for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'referrer', 'click_id_type', 'click_id']) if (a[k]) body[k] = String(a[k]);
+    // Full address of the landing page (the server sends it to the ad platforms as the page where the sale started).
+    if (a.landing) body.landing = window.location.origin + String(a.landing);
     await fetch(`${apiUrl}/m/ads/attach`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true });
   } catch { /* ignore */ }
 }

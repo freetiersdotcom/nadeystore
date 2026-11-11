@@ -1,11 +1,13 @@
 ---
 // Campaign capture and ad pixels: both run ONLY after the visitor accepted measurement cookies (ConsentBanner).
-// Pixels also need PUBLIC_META_PIXEL_ID / PUBLIC_TIKTOK_PIXEL_ID; without them only the campaign capture runs.
+// Pixel ids come from the admin (Ad tracking > Pixels, served by the API) or, as a fallback, from the build variables
+// PUBLIC_META_PIXEL_ID / PUBLIC_TIKTOK_PIXEL_ID. No id = no pixel; the campaign capture still runs.
 const meta = import.meta.env.PUBLIC_META_PIXEL_ID || '';
 const tiktok = import.meta.env.PUBLIC_TIKTOK_PIXEL_ID || '';
+const api = import.meta.env.PUBLIC_MERCHANT_API_URL || '';
 ---
 
-<script is:inline define:vars={{ meta, tiktok }}>
+<script is:inline define:vars={{ meta, tiktok, api }}>
   (function () {
     if (window.__snTracking) return;
     window.__snTracking = true;
@@ -60,21 +62,24 @@ const tiktok = import.meta.env.PUBLIC_TIKTOK_PIXEL_ID || '';
       }
     };
 
-    // ── Event queue: snTrack('ViewContent', {...}) works before/after consent ──
+    // ── Event queue: snTrack('Purchase', {...}, eventId) works before/after consent and before the pixels are ready ──
+    //    eventId (the order id for a purchase) lets Meta/TikTok count the browser event and the server event once.
     var loaded = false;
+    var started = false;
+    var ids = { meta: meta, tiktok: tiktok };
     var queue = [];
-    window.snTrack = function (name, params) {
+    window.snTrack = function (name, params, eventId) {
       if (!loaded) {
-        queue.push([name, params]);
+        queue.push([name, params, eventId]);
         return;
       }
-      send(name, params);
+      send(name, params, eventId);
     };
 
-    function send(name, p) {
+    function send(name, p, eid) {
       p = p || {};
       try {
-        if (window.fbq) window.fbq('track', name, p);
+        if (window.fbq) window.fbq('track', name, p, eid ? { eventID: String(eid) } : undefined);
       } catch (e) {}
       try {
         if (window.ttq) {
@@ -85,13 +90,41 @@ const tiktok = import.meta.env.PUBLIC_TIKTOK_PIXEL_ID || '';
             Purchase: 'CompletePayment',
             Lead: 'Contact',
           };
-          window.ttq.track(map[name] || name, p);
+          window.ttq.track(map[name] || name, p, eid ? { event_id: String(eid) } : undefined);
         }
       } catch (e) {}
     }
 
+    // Pixel ids: build variables first, otherwise ask the API (cached for the session). Never blocks the shop.
+    function getIds() {
+      if (ids.meta || ids.tiktok || !api) return Promise.resolve(ids);
+      try {
+        var c = JSON.parse(sessionStorage.getItem('sn_pix') || 'null');
+        if (c) return Promise.resolve({ meta: c.meta_pixel_id || '', tiktok: c.tiktok_pixel_id || '' });
+      } catch (e) {}
+      var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+      if (ctl) setTimeout(function () { ctl.abort(); }, 4000);
+      return fetch(api + '/m/ads/config', ctl ? { signal: ctl.signal } : undefined)
+        .then(function (r) { return r.ok ? r.json() : {}; })
+        .then(function (j) {
+          try { sessionStorage.setItem('sn_pix', JSON.stringify(j || {})); } catch (e) {}
+          return { meta: (j && j.meta_pixel_id) || '', tiktok: (j && j.tiktok_pixel_id) || '' };
+        })
+        .catch(function () { return ids; });
+    }
+
     function load() {
-      if (loaded) return;
+      if (started) return;
+      started = true;
+      getIds().then(function (found) {
+        ids = found;
+        init();
+      });
+    }
+
+    function init() {
+      var meta = ids.meta;
+      var tiktok = ids.tiktok;
       loaded = true;
       if (meta) {
         !(function (f, b, e, v, n, t, s) {
@@ -156,11 +189,10 @@ const tiktok = import.meta.env.PUBLIC_TIKTOK_PIXEL_ID || '';
         })(window, document, 'ttq');
       }
       queue.splice(0).forEach(function (x) {
-        send(x[0], x[1]);
+        send(x[0], x[1], x[2]);
       });
     }
 
-    if (!meta && !tiktok) return;
     var c = null;
     try {
       c = localStorage.getItem('sn_consent');
