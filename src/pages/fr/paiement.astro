@@ -69,6 +69,7 @@ const metadata = {
 </StoreLayout>
 
 <script>
+  import { showMilestones } from '~/scripts/milestones';
   import { getPayInfo, payBalance, currency as getCurrency, provider as getProvider } from '~/scripts/api';
   import { formatPrice } from '~/scripts/cart';
 
@@ -151,6 +152,7 @@ const metadata = {
     amount.max = String(info.balance_cents / FACTOR);
     amount.value = String(info.balance_cents / FACTOR);
     $('amount-hint').textContent = t.hint(info.min_payment_cents, info.balance_cents);
+    void showMilestones(token!, FACTOR, amount, $('amount-hint'), $('pay-form'), locale as 'fr' | 'en');
 
     if (info.payments.length) {
       $('payments').innerHTML = info.payments.map((p: any) => `<li>${fmtDate(p.created_at)} — ${formatPrice(p.amount_cents, CURRENCY)}</li>`).join('');
