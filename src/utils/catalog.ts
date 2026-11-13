@@ -37,12 +37,31 @@ export function findProductBySlug(products: Product[], slug: string | undefined)
   return products.find((p) => (p.slug || p.id) === slug);
 }
 
-// Related: same tags, excluding self. Falls back to the first 3 other products.
-export function getRelatedProducts(products: Product[], product: Product): Product[] {
-  const tags = product.tags ?? [];
-  const related = products.filter(
-    (p) => p.id !== product.id && tags.length > 0 && (p.tags ?? []).some((t) => tags.includes(t))
-  );
-  if (related.length === 0) return products.filter((p) => p.id !== product.id).slice(0, 3);
-  return related.slice(0, 4);
+// Related products, ranked for relevance (kit 38).
+//  - only the same kind of product (a shop item never suggests a WiFi voucher or a coaching session, and vice versa);
+//  - only products that can be bought now (at least one variant in stock);
+//  - ranked by number of shared tags, then closest price, then newest;
+//  - when few products share tags, the list is filled with the closest-priced products of the same kind.
+type Kind = 'physical' | 'digital' | 'service';
+function kindOf(p: Product): Kind {
+  const t = new Set((p.variants ?? []).map((v) => v.product_type));
+  if (t.size === 1) return [...t][0] as Kind;
+  return t.has('physical') ? 'physical' : t.has('service') ? 'service' : 'digital';
+}
+const fromPrice = (p: Product) => Math.min(...(p.variants ?? []).map((v) => v.price_cents));
+const buyable = (p: Product) => (p.variants ?? []).some((v) => v.in_stock !== false);
+
+export function getRelatedProducts(products: Product[], product: Product, limit = 4): Product[] {
+  const tags = new Set((product.tags ?? []).map((t) => t.trim().toLowerCase()).filter(Boolean));
+  const kind = kindOf(product);
+  const base = fromPrice(product);
+  const scored = products
+    .filter((p) => p.id !== product.id && kindOf(p) === kind && buyable(p))
+    .map((p) => ({
+      p,
+      shared: (p.tags ?? []).filter((t) => tags.has(t.trim().toLowerCase())).length,
+      gap: Number.isFinite(base) && Number.isFinite(fromPrice(p)) ? Math.abs(Math.log((fromPrice(p) + 1) / (base + 1))) : 0,
+    }));
+  scored.sort((a, b) => b.shared - a.shared || a.gap - b.gap || (b.p.created_at ?? '').localeCompare(a.p.created_at ?? '') || a.p.id.localeCompare(b.p.id));
+  return scored.slice(0, limit).map((x) => x.p);
 }
