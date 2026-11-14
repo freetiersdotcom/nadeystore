@@ -1,7 +1,7 @@
 // Offers (module "Offers" on the API): suggestion cards in the cart, "with this, add that", with an optional discount.
 // The browser only shows and remembers the choice. At checkout the shop confirms each offer (attach) and sets the price itself.
 // With the module off, or no offer fitting, nothing is shown.
-import { apiUrl } from './api';
+import { apiUrl, currency } from './api';
 import { addOfferToCart, dropOffers, formatPrice, getCart } from './cart';
 
 export interface OfferItem {
@@ -60,10 +60,10 @@ export async function showOffers(box: HTMLElement, locale: 'fr' | 'en', onAdd: (
     const name = document.createElement('p'); name.className = 'text-sm font-medium text-default truncate'; name.textContent = o.headline || o.product_title; txt.appendChild(name);
     const price = document.createElement('p'); price.className = 'text-xs text-muted';
     if (o.discount_pct > 0) {
-      const old = document.createElement('s'); old.textContent = formatPrice(o.price_cents, o.currency); price.appendChild(old);
+      const old = document.createElement('s'); old.textContent = formatPrice(o.price_cents, currency()); price.appendChild(old);
       price.appendChild(document.createTextNode(' '));
-      const now = document.createElement('span'); now.className = 'font-semibold text-default'; now.textContent = `${formatPrice(o.discounted_cents, o.currency)} · ${t.off(o.discount_pct)}`; price.appendChild(now);
-    } else price.textContent = formatPrice(o.price_cents, o.currency);
+      const now = document.createElement('span'); now.className = 'font-semibold text-default'; now.textContent = `${formatPrice(o.discounted_cents, currency())} · ${t.off(o.discount_pct)}`; price.appendChild(now);
+    } else price.textContent = formatPrice(o.price_cents, currency());
     txt.appendChild(price); row.appendChild(txt);
     const b = document.createElement('button'); b.type = 'button'; b.className = 'btn-primary px-4 py-2 text-sm rounded-lg shrink-0'; b.textContent = t.add; b.setAttribute('data-testid', 'offer-add');
     b.addEventListener('click', () => {
