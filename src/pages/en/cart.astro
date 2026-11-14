@@ -33,6 +33,7 @@ const metadata = {
       <!-- Left: items + shipping -->
       <div>
         <div id="cart-items" class="mb-8"></div>
+        <div id="offers-box" class="mb-8" data-testid="offers-box"></div>
 
         <!-- Shipping section — only for physical items -->
         <div id="shipping-section" class="mb-8" style="display:none">
@@ -294,6 +295,7 @@ const metadata = {
   import { depositPreview, depositCheckout } from '~/scripts/api';
   import { codCheckout, codCountries } from '~/scripts/api';
   import { applyResume } from '~/scripts/resume';
+  import { showOffers, attachOffers, dropOffers } from '~/scripts/offers';
 
   const CURRENCY = getCurrency();
   const PROVIDER = getProvider();
@@ -323,6 +325,7 @@ const metadata = {
     renderShippingSection(cart);
     updatePaymentSection(cart);
     refreshShipping(cart);
+    void showOffers(document.getElementById('offers-box')!, 'en', render);
   }
 
   // ── Payment method (online / pay on delivery) ────────────────
@@ -977,6 +980,17 @@ const metadata = {
         dropSubPlans();
         render();
         throw new Error('This subscription is no longer offered: the item was switched back to a one-time purchase. Please check your cart and try again.');
+      }
+
+      // 2c. Offers taken from the cart suggestions: the shop confirms each one and sets its price.
+      const offerIds = [...new Set(cart.filter((i) => i.offer).map((i) => i.offer!.id))];
+      if (offerIds.length) {
+        const refusedOffers = await attachOffers(cartId, offerIds);
+        if (refusedOffers.length) {
+          dropOffers(refusedOffers);
+          render();
+          throw new Error('An offer is no longer valid: the normal price was restored. Please check your cart and try again.');
+        }
       }
 
       // 3. Set shipping if needed

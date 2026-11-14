@@ -33,6 +33,7 @@ const metadata = {
       <!-- Left: items + shipping -->
       <div>
         <div id="cart-items" class="mb-8"></div>
+        <div id="offers-box" class="mb-8" data-testid="offers-box"></div>
 
         <!-- Shipping section — only for physical items -->
         <div id="shipping-section" class="mb-8" style="display:none">
@@ -315,6 +316,7 @@ const metadata = {
   import { depositPreview, depositCheckout } from '~/scripts/api';
   import { codCheckout, codCountries } from '~/scripts/api';
   import { applyResume } from '~/scripts/resume';
+  import { showOffers, attachOffers, dropOffers } from '~/scripts/offers';
 
   const CURRENCY = getCurrency();
   const PROVIDER = getProvider();
@@ -344,6 +346,7 @@ const metadata = {
     renderShippingSection(cart);
     updatePaymentSection(cart);
     refreshShipping(cart);
+    void showOffers(document.getElementById('offers-box')!, 'fr', render);
   }
 
   // ── Payment method (online / pay on delivery) ────────────────
@@ -1083,6 +1086,17 @@ const metadata = {
         dropSubPlans();
         render();
         throw new Error('Cet abonnement n’est plus proposé : l’article a été remis en achat unique. Vérifiez votre panier puis recommencez.');
+      }
+
+      // 2c. Offers taken from the cart suggestions: the shop confirms each one and sets its price.
+      const offerIds = [...new Set(cart.filter((i) => i.offer).map((i) => i.offer!.id))];
+      if (offerIds.length) {
+        const refusedOffers = await attachOffers(cartId, offerIds);
+        if (refusedOffers.length) {
+          dropOffers(refusedOffers);
+          render();
+          throw new Error('Une offre n’est plus valable : le prix normal a été rétabli. Vérifiez votre panier puis recommencez.');
+        }
       }
 
       // 3. Set shipping if needed

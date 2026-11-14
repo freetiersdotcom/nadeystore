@@ -24,6 +24,8 @@ export interface CartLineItem {
   sub_plan?: SubPlanRef;
   /** The normal price of the variant, kept so a line can go back to it if the subscription is dropped. */
   base_price_cents?: number;
+  /** Set when the visitor added this line from a cart offer (module "Offers"). The shop confirms it, and sets the price, at checkout. */
+  offer?: { id: string; pct: number };
 }
 
 export interface SubPlanRef { id: string; name: string; price_cents: number; every_n: number; unit: 'week' | 'month' }
@@ -60,6 +62,7 @@ export function addToCart(item: Omit<CartLineItem, 'qty'>): CartLineItem[] {
     for (const i of cart) if (i.sub_plan && i.sku !== item.sku) dropPlan(i);
     const line: CartLineItem = existing ?? { ...item, sub_plan: undefined, qty: 0 };
     if (!existing) cart.push(line);
+    delete line.offer; // a subscription price replaces any cart-offer price on this line
     line.base_price_cents = line.sub_plan ? line.base_price_cents : item.price_cents;
     line.sub_plan = item.sub_plan; line.price_cents = item.sub_plan.price_cents; line.qty = Math.max(1, line.qty);
   } else if (existing) {
@@ -70,6 +73,23 @@ export function addToCart(item: Omit<CartLineItem, 'qty'>): CartLineItem[] {
   }
   saveCart(cart);
   updateCartBadge(cartItemCount(cart));
+  return cart;
+}
+
+/** Add an item from a cart offer, at the offer price. `basePrice` is the normal price, kept to go back to it if the shop refuses the offer. */
+export function addOfferToCart(item: Omit<CartLineItem, 'qty' | 'offer' | 'base_price_cents'>, offer: { id: string; pct: number }, basePrice: number): CartLineItem[] {
+  const cart = getCart();
+  if (!cart.some((i) => i.sku === item.sku)) cart.push({ ...item, qty: 1, base_price_cents: basePrice, offer });
+  saveCart(cart);
+  updateCartBadge(cartItemCount(cart));
+  return cart;
+}
+
+/** Put offer lines back to their normal price (all of them, or only the given offer ids). */
+export function dropOffers(ids?: string[]): CartLineItem[] {
+  const cart = getCart();
+  for (const i of cart) if (i.offer && (!ids || ids.includes(i.offer.id))) { if (i.base_price_cents != null) i.price_cents = i.base_price_cents; delete i.offer; delete i.base_price_cents; }
+  saveCart(cart);
   return cart;
 }
 
