@@ -9,7 +9,7 @@ import { account, mayBeSignedIn, readHint } from './account';
 import { COUNTRIES, dialOf } from './geo';
 
 declare global {
-  interface Window { promptEmail?: () => Promise<string | null> }
+  interface Window { promptEmail: () => Promise<string | null> }
 }
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T | null;

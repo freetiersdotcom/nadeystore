@@ -54,7 +54,7 @@ export function getHeaderData(locale: Locale = 'fr') {
       { text: c.blog, href: `/${locale}/blog` },
       { text: c.nav.contact, href: page('contact', locale) },
     ],
-    actions: [{ text: c.cta, href: page('shop', locale), variant: 'primary' }],
+    actions: [{ text: c.cta, href: page('shop', locale), variant: 'primary' as const }],
   };
 }
 
