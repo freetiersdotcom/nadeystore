@@ -42,7 +42,8 @@ if (!product) {
   }
   product = findProductBySlug(products, Astro.params.slug);
   if (!product) {
-    return Astro.rewrite('/404');
+    // Empty 404: Astro serves the site's 404 page. (rewrite('/404') fails for a prerendered 404 page: it answered 500.)
+    return new Response(null, { status: 404 });
   }
   related = getRelatedProducts(products, product);
 }

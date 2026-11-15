@@ -11,8 +11,6 @@ import Features3 from '~/components/widgets/Features3.astro';
 import FAQs from '~/components/widgets/FAQs.astro';
 import Brands from '~/components/widgets/Brands.astro';
 
-import { YouTube } from 'astro-embed';
-
 const metadata = {
   title: 'Startup Landing Page',
 };
@@ -46,13 +44,16 @@ const metadata = {
     </Fragment>
 
     <Fragment slot="image">
-      <YouTube id="gxBkghlglTg" title="Astro just Launched.... Could it be the ultimate web framework?" />
-      <style is:inline>
-        lite-youtube {
-          margin: 0 auto;
-          max-width: 100%;
-        }
-      </style>
+      <div class="mx-auto aspect-video w-full max-w-full">
+        <iframe
+          class="h-full w-full rounded-md"
+          src="https://www.youtube-nocookie.com/embed/gxBkghlglTg"
+          title="Astro just Launched.... Could it be the ultimate web framework?"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
     </Fragment>
   </Hero>
 

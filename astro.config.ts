@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url';
 import { defineConfig } from 'astro/config';
 
 import sitemap from '@astrojs/sitemap';
-import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
 import partytown from '@astrojs/partytown';
 import icon from 'astro-icon';
@@ -46,9 +45,6 @@ export default defineConfig({
 
   integrations: [
     productPagesMode,
-    tailwind({
-      applyBaseStyles: false,
-    }),
     sitemap(),
     mdx(),
     icon({
@@ -109,5 +105,15 @@ export default defineConfig({
     },
   },
 
-  adapter: cloudflare()
+  // Astro 7 / adapter v14: keep the previous behaviour.
+  //  - imageService 'compile': images are compressed at build time and served as plain files (no Cloudflare Images billing,
+  //    no runtime transform endpoint).
+  //  - prerenderEnvironment 'node': static pages are rendered by Node at build time. In workerd the clock reads 1970 during
+  //    the build (footer year, any new Date()).
+  adapter: cloudflare({ imageService: 'compile', prerenderEnvironment: 'node' }),
+  // No KV session store is created (the shop does not use Astro sessions).
+  session: false,
+  // Astro 7's own whitespace compression removes the space before inline links ("accept our<a>"); html-minifier-terser
+  // (astro-compress) already minifies the HTML, so turn Astro's off.
+  compressHTML: false,
 });

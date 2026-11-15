@@ -54,7 +54,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   });
   cached.headers.set('Cache-Control', `public, s-maxage=${CACHE_SECONDS}`);
 
-  const ctx = (context.locals as { runtime?: { ctx?: { waitUntil(p: Promise<unknown>): void } } }).runtime?.ctx;
+  // Astro 6+ (adapter 13+): the Cloudflare execution context is `locals.cfContext` (`locals.runtime.ctx` was removed).
+  let ctx: { waitUntil(p: Promise<unknown>): void } | undefined;
+  try {
+    ctx = (context.locals as { cfContext?: { waitUntil(p: Promise<unknown>): void } }).cfContext;
+  } catch {
+    ctx = undefined;
+  }
   const putting = cache.put(key, cached);
   if (ctx?.waitUntil) ctx.waitUntil(putting);
   else await putting;

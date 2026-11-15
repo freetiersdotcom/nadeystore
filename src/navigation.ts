@@ -1,7 +1,6 @@
 import type { Locale } from './utils/i18n';
 import { page } from './utils/i18n';
 
-const year = new Date().getFullYear();
 const ADDRESS = 'Fidjrossè Fiyegnon Jacquot, C/1755, Maison Alassane, Cotonou, Bénin';
 const ADDRESS_EN = 'Fidjrossè Fiyegnon Jacquot, C/1755, Maison Alassane, Cotonou, Benin';
 
@@ -60,6 +59,8 @@ export function getHeaderData(locale: Locale = 'fr') {
 }
 
 export function getFooterData(locale: Locale = 'fr') {
+  // Evaluated on each render, not at module load: at module load the Workers clock can still read 1970.
+  const year = new Date().getFullYear();
   const c = copy[locale];
   return {
     links: [
