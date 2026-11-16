@@ -4,6 +4,7 @@
 // Products are fetched client-side from the Merchant API.
 // Cart state lives in localStorage; no backend cart is created here.
 import StoreLayout from '~/layouts/StoreLayout.astro';
+import { site } from '~/site.config';
 
 const metadata = {
   title: 'Shop',
@@ -25,20 +26,24 @@ const metadata = {
   <!-- Filter tabs -->
   <div class="border-b border-gray-200 dark:border-slate-700">
     <div class="max-w-6xl mx-auto px-6">
-      <div class="flex gap-1 py-3">
+      <div class:list={['flex gap-1 py-3', site.sells.length < 2 && 'hidden']}>
         <button
           data-filter="all"
           class="px-4 py-1.5 rounded-lg text-sm font-medium bg-primary text-white transition-colors">All</button
         >
         <button
           data-filter="physical"
-          class="px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default"
-          >Physical</button
+          class:list={[
+            'px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default',
+            !site.sells.includes('physical') && 'hidden',
+          ]}>Physical</button
         >
         <button
           data-filter="digital"
-          class="px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default"
-          >Digital</button
+          class:list={[
+            'px-4 py-1.5 rounded-lg text-sm font-medium text-muted transition-colors hover:text-default',
+            !site.sells.includes('digital') && 'hidden',
+          ]}>Digital</button
         >
         <button
           data-filter="service"
