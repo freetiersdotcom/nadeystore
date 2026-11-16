@@ -1,0 +1,17 @@
+src/components/pages/PageFromContent.astro
+src/components/pages/SectionRenderer.astro
+src/content/pages/en/about.yaml
+src/content/pages/en/contact.yaml
+src/content/pages/en/faq.yaml
+src/content/pages/en/home.yaml
+src/content/pages/en/privacy.md
+src/content/pages/en/refund.md
+src/content/pages/en/terms.md
+src/content/pages/fr/about.yaml
+src/content/pages/fr/contact.yaml
+src/content/pages/fr/faq.yaml
+src/content/pages/fr/home.yaml
+src/content/pages/fr/privacy.md
+src/content/pages/fr/refund.md
+src/content/pages/fr/terms.md
+src/utils/pages.ts

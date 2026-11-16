@@ -1,0 +1,78 @@
+metadata:
+  title: Questions fréquentes
+  description: 'Commande, paiement, livraison, produits numériques, retours : les réponses aux questions les plus fréquentes sur {brand}.'
+sections:
+  - type: hero-text
+    tagline: Aide
+    title: Questions fréquentes
+    subtitle: 'Commande, paiement, livraison, produits numériques, retours : l’essentiel en quelques réponses.'
+  - type: faq
+    groups:
+      - title: Commander et payer
+        items:
+          - q: Comment passer commande ?
+            a: Parcourez la boutique, choisissez votre produit (et son option si besoin), ajoutez-le au panier, puis cliquez sur « Passer la commande ». Indiquez votre adresse e-mail et vos informations de livraison, puis réglez en ligne. Vous recevez une confirmation par e-mail.
+            link:
+              href: /fr/boutique
+              label: Voir la boutique
+          - q: Quels moyens de paiement acceptez-vous ?
+            a: 'Le paiement s’effectue en ligne, de façon sécurisée : Mobile Money (via FedaPay) et carte bancaire Visa ou Mastercard. Nous ne vous demandons jamais vos codes ou numéros de carte par message.'
+          - q: Dans quelle devise sont affichés les prix ?
+            a: Les prix sont affichés en francs CFA (XOF), toutes taxes comprises. Si vous payez par carte depuis l’étranger, votre banque peut appliquer son propre taux de change.
+          - q: Puis-je commander ou poser une question par WhatsApp ?
+            a: Oui. Écrivez-nous sur WhatsApp pour une question avant d’acheter ou pour le suivi d’une commande. Le paiement, lui, se fait toujours sur le site.
+            link:
+              href: https://wa.me/{whatsapp}
+              label: Écrire sur WhatsApp
+      - title: Livraison
+        items:
+          - q: Où livrez-vous ?
+            a: 'Nous livrons au Bénin, dans la région et auprès de la diaspora (Europe, Amérique du Nord…). Saisissez votre pays et votre adresse dans le panier : les options disponibles pour votre destination s’affichent avant le paiement.'
+          - q: Combien coûte la livraison ?
+            a: Les frais de livraison dépendent du poids de votre commande et de votre région. Ils sont calculés et affichés dans le panier, avant que vous ne payiez.
+          - q: Quels sont les délais de livraison ?
+            a: Ils varient selon votre destination et le transporteur. Les délais estimés vous sont communiqués avant le paiement, puis le suivi de votre colis vous est transmis dès l’expédition. Les délais sont indicatifs et peuvent être allongés par les formalités douanières.
+          - q: Dois-je payer des droits de douane ?
+            a: Selon votre pays, des droits de douane ou taxes d’importation peuvent s’appliquer à la réception. Ils sont à la charge de l’acheteur et ne sont pas inclus dans nos prix. Renseignez-vous auprès des douanes de votre pays avant de commander.
+          - q: 'Ma commande est livrée garantie : que cela signifie-t-il ?'
+            a: 'Si votre commande n’arrive pas, ou arrive endommagée, contactez-nous : nous suivons votre dossier jusqu’à une solution (renvoi ou remboursement), selon notre politique de remboursement.'
+            link:
+              href: /fr/remboursement
+              label: Politique de remboursement
+      - title: Nos produits
+        items:
+          - q: Vos produits remplacent-ils un traitement médical ?
+            a: Non. Nos produits naturels sont proposés à titre informatif et de bien-être ; ils ne sont pas destinés à diagnostiquer, traiter, guérir ou prévenir une maladie. En cas de grossesse, d’allaitement, de traitement en cours ou de doute, demandez l’avis d’un professionnel de santé avant utilisation.
+          - q: D’où viennent vos produits ?
+            a: Nos produits sont sélectionnés avec soin au Bénin. Chaque fiche produit présente sa description et, selon les produits, une vidéo de présentation.
+          - q: Comment utiliser un produit ?
+            a: 'Reportez-vous à la fiche du produit et à la vidéo de présentation lorsqu’elle existe. Pour une explication plus précise, écrivez-nous : nous prenons le temps de vous accompagner.'
+            link:
+              href: /fr/contact
+              label: Nous contacter
+      - title: Livres et produits numériques
+        items:
+          - q: Comment recevoir mon produit numérique ?
+            a: 'Après le paiement, vous recevez un lien de téléchargement personnel par e-mail et sur la page de confirmation. Le lien est valable un temps limité et pour un nombre limité de téléchargements : téléchargez votre fichier rapidement et conservez-le.'
+          - q: Je n’ai pas reçu mon lien ou il ne fonctionne plus
+            a: 'Vérifiez d’abord vos courriers indésirables. Sinon, écrivez-nous avec votre numéro de commande : nous vous renverrons un nouveau lien.'
+      - title: Retours et remboursements
+        items:
+          - q: Puis-je me faire rembourser ?
+            a: 'Oui, dans les cas prévus par notre politique : produit endommagé ou défectueux, produit non conforme à sa description ou commande non reçue. Contactez-nous avec votre numéro de commande dans les délais indiqués.'
+            link:
+              href: /fr/remboursement
+              label: Lire la politique de remboursement
+          - q: Comment contacter le service client ?
+            a: Par e-mail ou par WhatsApp. Nous répondons en général sous 24 à 48 heures ouvrées.
+            link:
+              href: /fr/contact
+              label: Nos coordonnées
+  - type: cta
+    title: Vous ne trouvez pas votre réponse ?
+    subtitle: 'Écrivez-nous par e-mail ou sur WhatsApp : nous vous répondons rapidement.'
+    actions:
+      - variant: primary
+        text: Nous contacter
+        href: /fr/contact
+        icon: tabler:message

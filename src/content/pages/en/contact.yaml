@@ -1,0 +1,23 @@
+metadata:
+  title: Contact — {brand}
+  description: A question about our products, an order, or a partnership? Contact the {brand} team.
+sections:
+  - type: hero-text
+    tagline: Contact us
+    title: A question? We are here.
+    subtitle: Whether it is a product question, a delivery issue or a partnership opportunity — our team usually replies within 24 to 48 business hours.
+  - type: features-grid
+    title: How to reach us
+    columns: 3
+    items:
+      - title: Email
+        description: For any general question, order or complaint:<br/><a href="mailto:{email}" class="text-primary hover:underline font-medium">{email}</a>
+        icon: tabler:mail
+      - title: WhatsApp
+        description: For quick order follow-up or an urgent question:<br/><a href="https://wa.me/{whatsapp}" class="text-primary hover:underline font-medium">{phone}</a>
+        icon: tabler:brand-whatsapp
+      - title: Address
+        description: '{brand}<br/>{city}, {country}<br/><span class="text-muted text-xs">In-person pickup is not available at the moment.</span>'
+        icon: tabler:map-pin
+  - type: contact-form
+    locale: en

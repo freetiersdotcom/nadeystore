@@ -22,6 +22,8 @@ export const site = {
   /** Digits only, with the country code: https://wa.me/<whatsapp> */
   whatsapp: '2290194458956',
   email: 'agroalafia@gmail.com',
+  /** Phone number as shown on the contact page (free format) */
+  phone: '+229 01 94 45 89 56',
 
   locales: ['fr', 'en'] as Locale[],
   features: { shop: true, account: true, blog: true, faq: true } as Record<FeatureName, boolean>,

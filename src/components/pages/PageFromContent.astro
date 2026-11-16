@@ -1,0 +1,28 @@
+---
+// A whole page built from src/content/pages/<locale>/<slug>.yaml (or .md for legal pages).
+import Layout from '~/layouts/PageLayout.astro';
+import SectionRenderer from '~/components/pages/SectionRenderer.astro';
+import { loadPage, type FaqGroup } from '~/utils/pages';
+
+interface Props {
+  locale: 'fr' | 'en';
+  slug: string;
+}
+const { locale, slug } = Astro.props;
+const { metadata, sections } = loadPage(locale, slug);
+
+// FAQ sections also publish their questions as FAQPage structured data.
+const faq = sections.filter((s) => s.type === 'faq').flatMap((s) => s.groups as FaqGroup[]);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.flatMap((g) =>
+    g.items.map((i) => ({ '@type': 'Question', name: i.q, acceptedAnswer: { '@type': 'Answer', text: i.a } }))
+  ),
+};
+---
+
+<Layout metadata={metadata}>
+  {faq.length > 0 && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  {sections.map((section) => <SectionRenderer section={section} locale={locale} />)}
+</Layout>

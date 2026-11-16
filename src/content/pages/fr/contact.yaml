@@ -1,0 +1,23 @@
+metadata:
+  title: Contact — {brand}
+  description: Une question sur nos produits, une commande, ou un partenariat ? Contactez l'équipe {brand}.
+sections:
+  - type: hero-text
+    tagline: Nous contacter
+    title: Une question ? Nous sommes là.
+    subtitle: Que ce soit pour une question sur un produit, un problème de livraison ou une opportunité de partenariat — notre équipe vous répond en général sous 24 à 48 heures ouvrées.
+  - type: features-grid
+    title: Comment nous joindre
+    columns: 3
+    items:
+      - title: E-mail
+        description: Pour toute question générale, commande ou réclamation :<br/><a href="mailto:{email}" class="text-primary hover:underline font-medium">{email}</a>
+        icon: tabler:mail
+      - title: WhatsApp
+        description: Pour un suivi rapide de commande ou une question urgente :<br/><a href="https://wa.me/{whatsapp}" class="text-primary hover:underline font-medium">{phone}</a>
+        icon: tabler:brand-whatsapp
+      - title: Adresse
+        description: '{brand}<br/>{city}, {country}<br/><span class="text-muted text-xs">Retrait sur place non disponible pour le moment.</span>'
+        icon: tabler:map-pin
+  - type: contact-form
+    locale: fr
