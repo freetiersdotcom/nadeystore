@@ -10,11 +10,15 @@
 // - Cached pages are not used when PRODUCT_PAGES_MODE=static: those pages are
 //   prerendered files and never reach this code at runtime.
 import { defineMiddleware } from 'astro:middleware';
+import { isPathEnabled } from './utils/features';
 
 const CACHE_SECONDS = 60;
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { request, url } = context;
+
+  // An area switched off in src/site.config.ts does not exist (static pages are also removed at build time).
+  if (!isPathEnabled(url.pathname)) return new Response(null, { status: 404 });
 
   const cache = (globalThis as { caches?: { default?: Cache } }).caches?.default;
   const cacheable =

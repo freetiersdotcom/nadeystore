@@ -6,12 +6,15 @@
 // built statically, so Astro.url.search is empty at build time: a tiny script
 // copies the real query string onto the link in the browser.
 import { getLocale, alternatePath, UI } from '~/utils/i18n';
+import { site } from '~/site.config';
 
 const { class: className = '' } = Astro.props;
 const pathname = Astro.url.pathname;
 const current = getLocale(pathname);
 const other = current === 'fr' ? 'en' : 'fr';
 const href = alternatePath(pathname, other) + (Astro.url.search || '');
+// A site published in one language has no switcher.
+if (site.locales.length < 2) return;
 ---
 
 <a

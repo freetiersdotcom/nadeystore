@@ -1,14 +1,16 @@
 import type { Locale } from './utils/i18n';
 import { page } from './utils/i18n';
+import { site } from './site.config';
 
-const ADDRESS = 'Fidjrossè Fiyegnon Jacquot, C/1755, Maison Alassane, Cotonou, Bénin';
-const ADDRESS_EN = 'Fidjrossè Fiyegnon Jacquot, C/1755, Maison Alassane, Cotonou, Benin';
+const ADDRESS = site.address.fr;
+const ADDRESS_EN = site.address.en;
 
 const copy = {
   fr: {
     nav: { shop: 'Boutique', about: 'À propos', contact: 'Contact' },
     blog: 'Blog',
     cta: 'Voir la boutique',
+    ctaContact: 'Nous contacter',
     shopTitle: 'Boutique',
     allProducts: 'Tous les produits',
     cart: 'Panier',
@@ -28,6 +30,7 @@ const copy = {
     nav: { shop: 'Shop', about: 'About', contact: 'Contact' },
     blog: 'Blog',
     cta: 'Visit the shop',
+    ctaContact: 'Contact us',
     shopTitle: 'Shop',
     allProducts: 'All products',
     cart: 'Cart',
@@ -49,12 +52,14 @@ export function getHeaderData(locale: Locale = 'fr') {
   const c = copy[locale];
   return {
     links: [
-      { text: c.nav.shop, href: page('shop', locale) },
+      ...(site.features.shop ? [{ text: c.nav.shop, href: page('shop', locale) }] : []),
       { text: c.nav.about, href: page('about', locale) },
-      { text: c.blog, href: `/${locale}/blog` },
+      ...(site.features.blog ? [{ text: c.blog, href: `/${locale}/blog` }] : []),
       { text: c.nav.contact, href: page('contact', locale) },
     ],
-    actions: [{ text: c.cta, href: page('shop', locale), variant: 'primary' as const }],
+    actions: site.features.shop
+      ? [{ text: c.cta, href: page('shop', locale), variant: 'primary' as const }]
+      : [{ text: c.ctaContact, href: page('contact', locale), variant: 'primary' as const }],
   };
 }
 
@@ -64,20 +69,25 @@ export function getFooterData(locale: Locale = 'fr') {
   const c = copy[locale];
   return {
     links: [
-      {
-        title: c.shopTitle,
-        links: [
-          { text: c.allProducts, href: page('shop', locale) },
-          { text: c.cart, href: page('cart', locale) },
-          { text: c.blog, href: `/${locale}/blog` },
-        ],
-      },
+      ...(site.features.shop
+        ? [
+            {
+              title: c.shopTitle,
+              links: [
+                { text: c.allProducts, href: page('shop', locale) },
+                { text: c.cart, href: page('cart', locale) },
+                ...(site.features.blog ? [{ text: c.blog, href: `/${locale}/blog` }] : []),
+              ],
+            },
+          ]
+        : []),
       {
         title: c.aboutTitle,
         links: [
           { text: c.story, href: page('about', locale) },
-          { text: c.faq, href: page('faq', locale) },
+          ...(site.features.faq ? [{ text: c.faq, href: page('faq', locale) }] : []),
           { text: c.nav.contact, href: page('contact', locale) },
+          ...(!site.features.shop && site.features.blog ? [{ text: c.blog, href: `/${locale}/blog` }] : []),
         ],
       },
       {
@@ -95,10 +105,10 @@ export function getFooterData(locale: Locale = 'fr') {
     ],
     socialLinks: [
       // Add the client's actual social handles here
-      { ariaLabel: 'WhatsApp', icon: 'tabler:brand-whatsapp', href: 'https://wa.me/2290194458956' },
+      { ariaLabel: 'WhatsApp', icon: 'tabler:brand-whatsapp', href: `https://wa.me/${site.whatsapp}` },
     ],
     footNote: `
-    <span class="text-sm text-muted">© ${year} Santé Natur’ · ${c.rights}</span>
+    <span class="text-sm text-muted">© ${year} ${site.brand} · ${c.rights}</span>
     <span class="block text-xs text-muted mt-1">${c.address}</span>
   `,
   };

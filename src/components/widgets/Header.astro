@@ -13,6 +13,7 @@ import type { CallToAction } from '~/types';
 
 import CartIcon from '~/components/store/CartIcon.astro';
 import AccountIcon from '~/components/store/AccountIcon.astro';
+import { site } from '~/site.config';
 
 interface Link {
   text?: string;
@@ -158,8 +159,8 @@ const currentPath = `/${trimSlash(new URL(Astro.url).pathname)}`;
         </div>
         <!-- Cart icon — always visible on store pages -->
         <LanguageSwitcher class="mr-1" />
-        <AccountIcon />
-        <CartIcon cartUrl={page('cart', locale)} />
+        {site.features.account && <AccountIcon />}
+        {site.features.shop && <CartIcon cartUrl={page('cart', locale)} />}
         {
           actions?.length ? (
             <span class="ml-4 rtl:ml-0 rtl:mr-4">

@@ -15,6 +15,8 @@ import astrowind from './vendor/integration';
 import { readingTimeRemarkPlugin, responsiveTablesRehypePlugin, lazyImagesRehypePlugin } from './src/utils/frontmatter';
 
 import cloudflare from "@astrojs/cloudflare";
+import { featureGate } from './src/integrations/feature-gate';
+import { isPathEnabled } from './src/utils/features';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -45,7 +47,8 @@ export default defineConfig({
 
   integrations: [
     productPagesMode,
-    sitemap(),
+    featureGate(),
+    sitemap({ filter: (page) => isPathEnabled(new URL(page).pathname) }),
     mdx(),
     icon({
       include: {
