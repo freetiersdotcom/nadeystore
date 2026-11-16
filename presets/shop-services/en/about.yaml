@@ -1,0 +1,24 @@
+# STARTER CONTENT: rewrite every text for this client (placeholders such as {brand} come from src/site.config.ts).
+metadata:
+  title: About
+  description: '{brand} is based in {city}, {country}. Describe the business and its story here.'
+sections:
+  - type: hero-text
+    tagline: Who we are
+    title: About {brand}
+    subtitle: '{brand} is based in {city}, {country}. Describe the business and its story here.'
+  - type: content
+    tagline: What we do
+    title: What we do
+    content: <p>Present your products or services here.</p><p class="mt-4">Explain who you serve and what makes you different.</p>
+  - type: cta
+    title: A question? Write to us
+    subtitle: We reply quickly on WhatsApp and by email.
+    actions:
+      - variant: primary
+        text: Contact us
+        href: /en/contact
+        icon: tabler:message
+      - text: WhatsApp
+        href: https://wa.me/{whatsapp}
+        icon: tabler:brand-whatsapp

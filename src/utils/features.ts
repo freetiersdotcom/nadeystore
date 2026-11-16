@@ -11,6 +11,7 @@ const AREAS: Record<FeatureName, string[]> = {
   account: ['/fr/compte', '/en/account'],
   blog: ['/fr/blog', '/en/blog', '/fr/rss.xml', '/en/rss.xml'],
   faq: ['/fr/faq', '/en/faq'],
+  services: ['/fr/services', '/en/services'],
 };
 const ALL_LOCALES: Locale[] = ['fr', 'en'];
 

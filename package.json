@@ -8,6 +8,9 @@
     "node": ">=22.23.4"
   },
   "scripts": {
+    "gen:pwa": "node scripts/gen-pwa.mjs",
+    "predev": "node scripts/gen-pwa.mjs",
+    "prebuild": "node scripts/gen-pwa.mjs",
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",

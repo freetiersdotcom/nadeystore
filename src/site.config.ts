@@ -9,7 +9,7 @@
 //        account = customer account.  blog = blog and RSS.  faq = FAQ page.  Home, about, contact and the legal pages are always on.
 
 export type Locale = 'fr' | 'en';
-export type FeatureName = 'shop' | 'account' | 'blog' | 'faq';
+export type FeatureName = 'shop' | 'account' | 'blog' | 'faq' | 'services';
 
 export const site = {
   brand: 'Santé Natur’',
@@ -25,6 +25,12 @@ export const site = {
   /** Phone number as shown on the contact page (free format) */
   phone: '+229 01 94 45 89 56',
 
+  /** One sentence, used as the app description (manifest). */
+  tagline: { fr: 'Produits naturels de bien-être, livrés chez vous.', en: 'Natural wellness products, delivered to your door.' },
+  /** Browser/app colours (manifest and offline page). The site's own colours are in the Tailwind theme. */
+  themeColor: '#0F6B4B',
+  backgroundColor: '#F8F6F0',
+
   locales: ['fr', 'en'] as Locale[],
-  features: { shop: true, account: true, blog: true, faq: true } as Record<FeatureName, boolean>,
+  features: { shop: true, account: true, blog: true, faq: true, services: false } as Record<FeatureName, boolean>,
 };

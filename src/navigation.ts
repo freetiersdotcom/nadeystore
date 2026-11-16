@@ -11,6 +11,7 @@ const copy = {
     blog: 'Blog',
     cta: 'Voir la boutique',
     ctaContact: 'Nous contacter',
+    services: 'Services',
     shopTitle: 'Boutique',
     allProducts: 'Tous les produits',
     cart: 'Panier',
@@ -31,6 +32,7 @@ const copy = {
     blog: 'Blog',
     cta: 'Visit the shop',
     ctaContact: 'Contact us',
+    services: 'Services',
     shopTitle: 'Shop',
     allProducts: 'All products',
     cart: 'Cart',
@@ -53,6 +55,7 @@ export function getHeaderData(locale: Locale = 'fr') {
   return {
     links: [
       ...(site.features.shop ? [{ text: c.nav.shop, href: page('shop', locale) }] : []),
+      ...(site.features.services ? [{ text: c.services, href: page('services', locale) }] : []),
       { text: c.nav.about, href: page('about', locale) },
       ...(site.features.blog ? [{ text: c.blog, href: `/${locale}/blog` }] : []),
       { text: c.nav.contact, href: page('contact', locale) },
@@ -85,6 +88,7 @@ export function getFooterData(locale: Locale = 'fr') {
         title: c.aboutTitle,
         links: [
           { text: c.story, href: page('about', locale) },
+          ...(site.features.services ? [{ text: c.services, href: page('services', locale) }] : []),
           ...(site.features.faq ? [{ text: c.faq, href: page('faq', locale) }] : []),
           { text: c.nav.contact, href: page('contact', locale) },
           ...(!site.features.shop && site.features.blog ? [{ text: c.blog, href: `/${locale}/blog` }] : []),

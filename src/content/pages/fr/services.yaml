@@ -1,0 +1,45 @@
+# STARTER CONTENT: rewrite every text for this client (placeholders such as {brand} come from src/site.config.ts).
+metadata:
+  title: Nos services
+  description: Décrivez chaque service, avec si possible un prix ou une fourchette de prix.
+sections:
+  - type: hero-text
+    tagline: Nos services
+    title: Ce que nous faisons pour vous
+    subtitle: Décrivez chaque service, avec si possible un prix ou une fourchette de prix.
+  - type: features-grid
+    columns: 3
+    items:
+      - title: Service 1
+        description: Décrivez ce service et ce qu’il apporte au client.<br/><span class="text-muted text-xs">À partir de … F CFA</span>
+        icon: tabler:briefcase
+      - title: Service 2
+        description: Décrivez ce service et ce qu’il apporte au client.
+        icon: tabler:tools
+      - title: Service 3
+        description: Décrivez ce service et ce qu’il apporte au client.
+        icon: tabler:calendar-event
+  - type: steps
+    tagline: Comment ça marche
+    title: Travailler avec nous en 3 étapes
+    items:
+      - title: Vous nous contactez
+        description: Par WhatsApp, email ou le formulaire de contact.
+        icon: tabler:message-circle
+      - title: Nous convenons des détails
+        description: Besoin, délai et prix, par écrit.
+        icon: tabler:list-details
+      - title: Nous réalisons le travail
+        description: Avec un suivi jusqu’à votre satisfaction.
+        icon: tabler:circle-check
+  - type: cta
+    title: Un projet ? Un devis ?
+    subtitle: 'Écrivez-nous : nous répondons en général sous 24 à 48 heures ouvrées.'
+    actions:
+      - variant: primary
+        text: Demander un devis
+        href: /fr/contact
+        icon: tabler:message
+      - text: WhatsApp
+        href: https://wa.me/{whatsapp}
+        icon: tabler:brand-whatsapp

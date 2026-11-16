@@ -1,0 +1,42 @@
+# STARTER CONTENT: rewrite every text for this client (placeholders such as {brand} come from src/site.config.ts).
+metadata:
+  title: Your services, made simple
+  description: '{brand}, {city}'
+sections:
+  - type: hero
+    tagline: '{city}, {country}'
+    title: Your services, made simple
+    subtitle: Describe in one sentence the services you offer and to whom.
+    actions:
+      - variant: primary
+        text: Request a quote
+        href: /en/contact
+        icon: tabler:briefcase
+      - text: Message us on WhatsApp
+        href: https://wa.me/{whatsapp}
+        icon: tabler:brand-whatsapp
+  - type: features
+    title: Why choose us
+    subtitle: Three reasons to trust us.
+    columns: 3
+    items:
+      - title: Expertise
+        description: A team that knows its trade.
+        icon: tabler:award
+      - title: Responsiveness
+        description: Quick answers on WhatsApp or by email.
+        icon: tabler:message-circle
+      - title: Follow-up
+        description: We stay available until you are satisfied.
+        icon: tabler:heart-handshake
+  - type: cta
+    title: Let’s talk about your project
+    subtitle: We reply quickly on WhatsApp and by email.
+    actions:
+      - variant: primary
+        text: Contact us
+        href: /en/contact
+        icon: tabler:message
+      - text: WhatsApp
+        href: https://wa.me/{whatsapp}
+        icon: tabler:brand-whatsapp

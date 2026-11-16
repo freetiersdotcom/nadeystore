@@ -1,0 +1,42 @@
+# STARTER CONTENT: rewrite every text for this client (placeholders such as {brand} come from src/site.config.ts).
+metadata:
+  title: Your online shop
+  description: '{brand}, {city}'
+sections:
+  - type: hero
+    tagline: '{city}, {country}'
+    title: Your online shop
+    subtitle: Describe in one sentence what you sell and to whom.
+    actions:
+      - variant: primary
+        text: Order now
+        href: /en/shop
+        icon: tabler:shopping-cart
+      - text: Message us on WhatsApp
+        href: https://wa.me/{whatsapp}
+        icon: tabler:brand-whatsapp
+  - type: features
+    title: Why choose us
+    subtitle: Three reasons to trust us.
+    columns: 3
+    items:
+      - title: Careful selection
+        description: Products chosen with care.
+        icon: tabler:leaf
+      - title: Secure payment
+        description: Mobile Money or bank card, through secure payment providers.
+        icon: tabler:lock
+      - title: Tracked delivery
+        description: Delivery fees are calculated before you pay.
+        icon: tabler:truck-delivery
+  - type: cta
+    title: Discover the shop
+    subtitle: We reply quickly on WhatsApp and by email.
+    actions:
+      - variant: primary
+        text: Order now
+        href: /en/shop
+        icon: tabler:shopping-cart
+      - text: WhatsApp
+        href: https://wa.me/{whatsapp}
+        icon: tabler:brand-whatsapp

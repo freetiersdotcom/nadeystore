@@ -22,6 +22,7 @@ const PAGE_MAP: Array<[fr: string, en: string]> = [
   ['/fr/paiement', '/en/payment'],
   ['/fr/telechargements', '/en/downloads'],
   ['/fr/compte', '/en/account'],
+  ['/fr/services', '/en/services'],
 ];
 
 const PRODUCT_FR = '/fr/produits/';
@@ -73,6 +74,7 @@ const NAMED: Record<string, [string, string]> = {
   downloads: ['/fr/telechargements', '/en/downloads'],
   payment: ['/fr/paiement', '/en/payment'],
   account: ['/fr/compte', '/en/account'],
+  services: ['/fr/services', '/en/services'],
 };
 export function page(name: keyof typeof NAMED, locale: Locale): string {
   return NAMED[name][locale === 'en' ? 1 : 0];
