@@ -28,6 +28,9 @@ export function provider(): 'fedapay' | 'stripe' {
 
 // ── Base request ──────────────────────────────────────────────
 
+/** Shape of the API's error answers: { error: { code, message } }. */
+type ApiErrorBody = { error?: { code?: string; message?: string } };
+
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${apiUrl()}${endpoint}`, {
     ...options,
@@ -38,13 +41,13 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     },
   });
 
-  const data = await res.json();
+  const data: ApiErrorBody = await res.json();
 
   if (!res.ok) {
-    throw new Error((data as any)?.error?.message || `API error ${res.status}`);
+    throw new Error(data?.error?.message || `API error ${res.status}`);
   }
 
-  return data as T;
+  return data as unknown as T;
 }
 
 // ── Products ──────────────────────────────────────────────────
@@ -338,9 +341,9 @@ export async function holdBookingSlot(cartId: string, sku: string, start: string
     headers: { Authorization: `Bearer ${publicKey()}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ cart_id: cartId, sku, start, customer_tz: customerTz, provider }),
   });
-  const data: any = await res.json().catch(() => ({}));
+  const data = (await res.json().catch(() => ({}))) as ApiErrorBody & { id: string; start: string; end: string };
   if (!res.ok) {
-    const err: any = new Error(data?.error?.message || `API error ${res.status}`);
+    const err = new Error(data?.error?.message || `API error ${res.status}`) as Error & { code?: string; status?: number };
     err.code = data?.error?.code;
     err.status = res.status;
     throw err;

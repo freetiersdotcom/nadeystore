@@ -1,8 +1,12 @@
 // Landing content = one JSON file per campaign in src/content/landing/.
 // File name = URL slug:  decouverte.json -> /offre/decouverte and /en/offer/decouverte
-const files = import.meta.glob('/src/content/landing/*.json', { eager: true, import: 'default' }) as Record<string, any>;
+// Campaign JSON files are free-form (every block is optional), so the content is typed loosely on purpose.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LandingData = Record<string, any>;
 
-const bySlug: Record<string, any> = {};
+const files = import.meta.glob('/src/content/landing/*.json', { eager: true, import: 'default' }) as Record<string, LandingData>;
+
+const bySlug: Record<string, LandingData> = {};
 for (const [path, data] of Object.entries(files)) {
   const slug = path.split('/').pop()!.replace(/\.json$/, '');
   bySlug[slug] = data;

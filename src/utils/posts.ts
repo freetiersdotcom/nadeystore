@@ -19,7 +19,7 @@ export type BlogPost = {
   author?: string;
   publishDate: Date;
   updateDate?: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 };
 
 export const blogIndexPath = (lang: Locale) => `/${lang}/blog`;
@@ -49,7 +49,7 @@ function normalize(entry: CollectionEntry<'post'>): BlogPost | null {
     author: d.author,
     publishDate: d.publishDate ?? new Date(0),
     updateDate: d.updateDate,
-    metadata: (d.metadata ?? {}) as Record<string, any>,
+    metadata: (d.metadata ?? {}) as Record<string, unknown>,
   };
 }
 

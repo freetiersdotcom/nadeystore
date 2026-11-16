@@ -13,6 +13,7 @@
 // ============================================================
 
 import { apiUrl } from './api';
+import type { CreationOptionsJson, RequestOptionsJson } from './passkeys';
 
 const TOKEN_KEY = 'merchant_customer_session';
 const HINT_KEY = 'merchant_customer_hint';
@@ -85,7 +86,7 @@ function readToken(): string | null {
   try { return localStorage.getItem(TOKEN_KEY); } catch { return null; }
 }
 function writeToken(token: string | null) {
-  try { token ? localStorage.setItem(TOKEN_KEY, token) : localStorage.removeItem(TOKEN_KEY); } catch { /* private mode */ }
+  try { if (token) localStorage.setItem(TOKEN_KEY, token); else localStorage.removeItem(TOKEN_KEY); } catch { /* private mode */ }
 }
 
 /** Remembered only so the page can skip the sign-in form flash; the server is the source of truth. */
@@ -122,13 +123,13 @@ async function req<T>(path: string, init: RequestInit = {}, signedIn = true): Pr
   } catch {
     throw new AccountError('network', 0);
   }
-  const data = await res.json().catch(() => ({}));
+  const data: { error?: { message?: string } } = await res.json().catch(() => ({}));
   if (!res.ok) {
     const retry = Number(res.headers.get('Retry-After')) || undefined;
     if (res.status === 401 && signedIn) { writeToken(null); saveHint(null); }
-    throw new AccountError((data as any)?.error?.message || `error ${res.status}`, res.status, retry);
+    throw new AccountError(data?.error?.message || `error ${res.status}`, res.status, retry);
   }
-  return data as T;
+  return data as unknown as T;
 }
 
 export const account = {
@@ -144,9 +145,9 @@ export const account = {
     return r.customer;
   },
   passkeyLoginOptions() {
-    return req<{ challenge_id: string; options: Record<string, any> }>('/passkeys/login/options', { method: 'POST', body: '{}' }, false);
+    return req<{ challenge_id: string; options: RequestOptionsJson }>('/passkeys/login/options', { method: 'POST', body: '{}' }, false);
   },
-  async passkeyLogin(challenge_id: string, response: Record<string, any>) {
+  async passkeyLogin(challenge_id: string, response: Record<string, unknown>) {
     const r = await req<{ ok: true; customer: Customer; session_token?: string }>(
       '/passkeys/login/verify', { method: 'POST', body: JSON.stringify({ challenge_id, response, mode: AUTH_MODE }) }, false
     );
@@ -158,9 +159,9 @@ export const account = {
     return req<{ items: Passkey[] }>('/passkeys').then((r) => r.items);
   },
   passkeyRegisterOptions() {
-    return req<{ challenge_id: string; options: Record<string, any> }>('/passkeys/register/options', { method: 'POST', body: '{}' });
+    return req<{ challenge_id: string; options: CreationOptionsJson }>('/passkeys/register/options', { method: 'POST', body: '{}' });
   },
-  passkeyRegister(challenge_id: string, response: Record<string, any>, name?: string) {
+  passkeyRegister(challenge_id: string, response: Record<string, unknown>, name?: string) {
     return req<{ passkey: Passkey }>('/passkeys/register/verify', { method: 'POST', body: JSON.stringify({ challenge_id, response, name }) }).then((r) => r.passkey);
   },
   // Privacy

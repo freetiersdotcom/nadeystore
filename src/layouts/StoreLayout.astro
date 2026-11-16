@@ -16,7 +16,7 @@ interface Props {
 }
 
 const locale = getLocale(Astro.url.pathname);
-const { metadata, cartUrl = page('cart', locale), cancelUrl = page('shop', locale) } = Astro.props;
+const { metadata, cartUrl = page('cart', locale) } = Astro.props;
 ---
 
 <PageLayout metadata={metadata}>

@@ -30,7 +30,7 @@ export function readPlan(btn: HTMLElement | null): SubPlanRef | undefined {
   try { return btn?.dataset.plan ? (JSON.parse(btn.dataset.plan) as SubPlanRef) : undefined; } catch { return undefined; }
 }
 
-function showPrice(btn: HTMLElement, cents: number) {
+function showPrice(_btn: HTMLElement, cents: number) {
   const el = document.getElementById('product-price');
   if (el) el.textContent = formatPrice(cents, currency());
 }
