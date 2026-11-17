@@ -4,14 +4,32 @@
 // the build variables of Cloudflare, ...). This check stops the build, or warns, before such a site is published.
 //   SKIP_ENV_GUARD=1  turns the check off
 import type { AstroIntegration } from 'astro';
+import fs from 'node:fs';
+import path from 'node:path';
 import { loadEnv } from 'vite';
 
 export function envGuard(): AstroIntegration {
   return {
     name: 'env-guard',
     hooks: {
-      'astro:config:setup': ({ command, logger }) => {
+      'astro:config:setup': ({ command, logger, updateConfig }) => {
         if ((command !== 'build' && command !== 'dev') || process.env.SKIP_ENV_GUARD) return;
+        // Values given by the build environment win over any .env / .env.local file that happens to be in the project.
+        const forced: Record<string, string> = {};
+        for (const [k, v] of Object.entries(process.env))
+          if (/^PUBLIC_/.test(k) && v) forced[`import.meta.env.${k}`] = JSON.stringify(v);
+        if (Object.keys(forced).length) updateConfig({ vite: { define: forced } });
+        for (const name of ['.env', '.env.local', '.env.production', '.env.production.local']) {
+          const f = path.join(process.cwd(), name);
+          if (!fs.existsSync(f)) continue;
+          for (const line of fs.readFileSync(f, 'utf8').split(/\r?\n/)) {
+            const m = /^\s*(PUBLIC_[A-Z0-9_]+)\s*=\s*["']?([^"'#\s]*)/.exec(line);
+            if (m && process.env[m[1]] && process.env[m[1]] !== m[2])
+              logger.warn(
+                `${name} sets ${m[1]} differently from the build environment; the build environment value is used. Remove it from ${name} (and from git) to avoid confusion.`
+              );
+          }
+        }
         const file = loadEnv(command === 'build' ? 'production' : 'development', process.cwd(), 'PUBLIC_');
         const url = process.env.PUBLIC_MERCHANT_API_URL ?? file.PUBLIC_MERCHANT_API_URL;
         const key = process.env.PUBLIC_MERCHANT_PUBLIC_KEY ?? file.PUBLIC_MERCHANT_PUBLIC_KEY;
