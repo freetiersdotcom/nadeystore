@@ -11,7 +11,11 @@ import { attachAds } from './ads';
 // ── Config ────────────────────────────────────────────────────
 
 export function apiUrl(): string {
-  return import.meta.env.PUBLIC_MERCHANT_API_URL || 'http://localhost:8787';
+  const url = import.meta.env.PUBLIC_MERCHANT_API_URL;
+  if (url) return url;
+  // Only the local dev server may fall back to the local API; a published site without its address must fail loudly.
+  if (import.meta.env.DEV) return 'http://localhost:8787';
+  throw new Error('PUBLIC_MERCHANT_API_URL was not set when this site was built. Set it in the build environment and build again.');
 }
 
 export function publicKey(): string {

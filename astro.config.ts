@@ -16,6 +16,7 @@ import { readingTimeRemarkPlugin, responsiveTablesRehypePlugin, lazyImagesRehype
 
 import cloudflare from "@astrojs/cloudflare";
 import { featureGate } from './src/integrations/feature-gate';
+import { envGuard } from './src/integrations/env-guard';
 import { isPathEnabled } from './src/utils/features';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -47,6 +48,7 @@ export default defineConfig({
 
   integrations: [
     productPagesMode,
+    envGuard(),
     featureGate(),
     sitemap({ filter: (page) => isPathEnabled(new URL(page).pathname) }),
     mdx(),
