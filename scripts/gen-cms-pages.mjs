@@ -65,6 +65,8 @@ const T = {
       'contact-form': 'Formulaire de contact',
       faq: 'Questions fréquentes',
       prose: 'Texte libre',
+      stats: 'Chiffres clés',
+      testimonials: 'Témoignages',
     },
     files: {
       home: 'Accueil',
@@ -77,6 +79,19 @@ const T = {
       refund: 'Remboursement',
     },
     variants: { primary: 'Principal', secondary: 'Secondaire', tertiary: 'Discret', link: 'Lien' },
+    layout: 'Présentation',
+    layoutHint: 'Change seulement la mise en forme de cette section.',
+    heroLayouts: { split: 'Image à côté du texte', centered: 'Texte centré, image dessous' },
+    featuresLayouts: { icons: 'Liste avec icônes', cards: 'Cartes', image: 'Avec une image' },
+    stepsLayouts: { image: 'Étapes avec image', numbered: 'Étapes numérotées' },
+    stats: 'Chiffres',
+    stat: 'chiffre',
+    amount: 'Valeur (ex. 500+)',
+    testimonials: 'Témoignages',
+    testimonial: 'témoignage',
+    quote: 'Témoignage',
+    person: 'Nom',
+    job: 'Qualité (ex. cliente à Cotonou)',
   },
   en: {
     coll: 'Site pages (English)',
@@ -133,6 +148,8 @@ const T = {
       'contact-form': 'Contact form',
       faq: 'Frequently asked questions',
       prose: 'Free text',
+      stats: 'Key figures',
+      testimonials: 'Testimonials',
     },
     files: {
       home: 'Home',
@@ -145,6 +162,19 @@ const T = {
       refund: 'Refund policy',
     },
     variants: { primary: 'Primary', secondary: 'Secondary', tertiary: 'Quiet', link: 'Link' },
+    layout: 'Layout',
+    layoutHint: 'Only changes how this section is laid out.',
+    heroLayouts: { split: 'Image beside the text', centered: 'Centered text, image below' },
+    featuresLayouts: { icons: 'List with icons', cards: 'Cards', image: 'With an image' },
+    stepsLayouts: { image: 'Steps with an image', numbered: 'Numbered steps' },
+    stats: 'Figures',
+    stat: 'figure',
+    amount: 'Value (e.g. 500+)',
+    testimonials: 'Testimonials',
+    testimonial: 'testimonial',
+    quote: 'Testimonial',
+    person: 'Name',
+    job: 'Role (e.g. customer in Cotonou)',
   },
 };
 
@@ -197,16 +227,53 @@ function build(loc) {
     str('title', t.title, { hint: t.placeholders }),
     txt('subtitle', t.subtitle),
   ];
+  const layout = (options) => ({
+    name: 'variant',
+    label: t.layout,
+    widget: 'select',
+    hint: t.layoutHint,
+    required: false,
+    default: Object.keys(options)[0],
+    options: Object.entries(options).map(([value, label]) => ({ label, value })),
+  });
+  const statsList = {
+    name: 'stats',
+    label: t.stats,
+    label_singular: t.stat,
+    widget: 'list',
+    summary: '{{fields.amount}} {{fields.title}}',
+    ...opt,
+    fields: [str('amount', t.amount, { required: true }), str('title', t.itemTitle, { required: true }), icon],
+  };
+  const testimonialsList = {
+    name: 'testimonials',
+    label: t.testimonials,
+    label_singular: t.testimonial,
+    widget: 'list',
+    summary: '{{fields.name}}',
+    ...opt,
+    fields: [
+      txt('testimonial', t.quote, { required: true }),
+      str('name', t.person, { required: true }),
+      str('job', t.job),
+      image,
+    ],
+  };
   const columns = { name: 'columns', label: t.columns, widget: 'number', value_type: 'int', min: 1, max: 4, ...opt };
   const anchor = str('id', t.anchor);
   const types = [
-    { name: 'hero', label: t.types.hero, summary: '{{fields.title}}', fields: [...head, action, image] },
+    {
+      name: 'hero',
+      label: t.types.hero,
+      summary: '{{fields.title}}',
+      fields: [layout(t.heroLayouts), ...head, action, image],
+    },
     { name: 'hero-text', label: t.types['hero-text'], summary: '{{fields.title}}', fields: head },
     {
       name: 'features',
       label: t.types.features,
       summary: '{{fields.title}}',
-      fields: [anchor, ...head, columns, items],
+      fields: [layout(t.featuresLayouts), anchor, ...head, columns, items, image],
     },
     {
       name: 'features-grid',
@@ -242,7 +309,21 @@ function build(loc) {
       name: 'steps',
       label: t.types.steps,
       summary: '{{fields.title}}',
-      fields: [anchor, str('tagline', t.tagline), str('title', t.title, { required: true }), items, image],
+      fields: [
+        layout(t.stepsLayouts),
+        anchor,
+        str('tagline', t.tagline),
+        str('title', t.title, { required: true }),
+        items,
+        image,
+      ],
+    },
+    { name: 'stats', label: t.types.stats, summary: '{{fields.title}}', fields: [...head, statsList] },
+    {
+      name: 'testimonials',
+      label: t.types.testimonials,
+      summary: '{{fields.title}}',
+      fields: [...head, testimonialsList],
     },
     { name: 'cta', label: t.types.cta, summary: '{{fields.title}}', fields: [...head, action] },
     {

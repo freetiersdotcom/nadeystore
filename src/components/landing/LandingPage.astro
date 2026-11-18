@@ -3,6 +3,7 @@
 // Every block is optional: leave it out of the JSON and it disappears.
 import Layout from '~/layouts/Layout.astro';
 import { page, offerPath, type Locale } from '~/utils/i18n';
+import { site } from '~/site.config';
 
 export interface Props {
   content: any;
@@ -11,6 +12,17 @@ export interface Props {
 }
 const { content, locale, slug } = Astro.props;
 const { hero, benefits, steps, products, faq, final } = content;
+
+// Template ("template" in the campaign JSON): classic = image beside the text; centered = text first, wide image below;
+// focus = for ads: products right after the hero and a WhatsApp bar fixed at the bottom on phones.
+const tpl: 'classic' | 'centered' | 'focus' = ['centered', 'focus'].includes(content.template)
+  ? content.template
+  : 'classic';
+const centered = tpl !== 'classic';
+const order =
+  tpl === 'focus'
+    ? { hero: 1, products: 2, benefits: 3, steps: 4, faq: 5, final: 6 }
+    : { hero: 1, benefits: 2, products: 3, steps: 4, faq: 5, final: 6 };
 
 const WA = (import.meta.env.PUBLIC_WHATSAPP_NUMBER || '2290194458956').replace(/\D/g, '');
 const waHref = `https://wa.me/${WA}?text=${encodeURIComponent(content.whatsapp_message || '')}`;
@@ -53,20 +65,26 @@ const metadata = {
 <Layout metadata={metadata}>
   <header class="border-b border-gray-200 dark:border-slate-800">
     <div class="mx-auto max-w-5xl px-4 h-14 flex items-center justify-between">
-      <a href={page('home', locale)} class="font-bold text-lg">Santé Natur’</a>
+      <a href={page('home', locale)} class="font-bold text-lg">{site.brand}</a>
       <a href={otherHref} data-astro-reload class="text-sm underline" hreflang={other}>{other.toUpperCase()}</a>
     </div>
   </header>
 
-  <main>
+  <main class="flex flex-col">
     {
       hero && (
-        <section class="mx-auto max-w-5xl px-4 py-10 md:py-16 grid md:grid-cols-2 gap-8 items-center">
+        <section
+          style={`order:${order.hero}`}
+          class:list={[
+            'mx-auto max-w-5xl px-4 py-10 md:py-16',
+            centered ? 'text-center' : 'grid md:grid-cols-2 gap-8 items-center',
+          ]}
+        >
           <div>
             {hero.eyebrow && <p class="text-sm uppercase tracking-wide text-muted mb-2">{hero.eyebrow}</p>}
             <h1 class="text-3xl md:text-5xl font-bold leading-tight mb-4">{hero.title}</h1>
             {hero.subtitle && <p class="text-lg text-muted mb-6">{hero.subtitle}</p>}
-            <div class="flex flex-col sm:flex-row gap-3">
+            <div class:list={['flex flex-col sm:flex-row gap-3', centered && 'sm:justify-center']}>
               <a
                 href={waHref}
                 target="_blank"
@@ -89,7 +107,10 @@ const metadata = {
             <img
               src={hero.image}
               alt={hero.image_alt || ''}
-              class="w-full rounded-xl object-cover aspect-[4/3]"
+              class:list={[
+                'w-full rounded-xl object-cover',
+                centered ? 'aspect-[16/9] mt-8 max-w-3xl mx-auto' : 'aspect-[4/3]',
+              ]}
               fetchpriority="high"
             />
           )}
@@ -99,7 +120,7 @@ const metadata = {
 
     {
       benefits?.items?.length > 0 && (
-        <section class="bg-gray-50 dark:bg-slate-900/50 py-10">
+        <section style={`order:${order.benefits}`} class="bg-gray-50 dark:bg-slate-900/50 py-10">
           <div class="mx-auto max-w-5xl px-4">
             {benefits.title && <h2 class="text-2xl font-bold mb-6">{benefits.title}</h2>}
             <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
@@ -117,7 +138,7 @@ const metadata = {
 
     {
       products?.slugs?.length > 0 && (
-        <section class="mx-auto max-w-5xl px-4 py-10">
+        <section style={`order:${order.products}`} class="mx-auto max-w-5xl px-4 py-10">
           {products.title && <h2 class="text-2xl font-bold mb-6">{products.title}</h2>}
           <div
             id="lp-products"
@@ -136,7 +157,7 @@ const metadata = {
 
     {
       steps?.items?.length > 0 && (
-        <section class="bg-gray-50 dark:bg-slate-900/50 py-10">
+        <section style={`order:${order.steps}`} class="bg-gray-50 dark:bg-slate-900/50 py-10">
           <div class="mx-auto max-w-5xl px-4">
             {steps.title && <h2 class="text-2xl font-bold mb-6">{steps.title}</h2>}
             <ol class="grid md:grid-cols-3 gap-5">
@@ -159,7 +180,7 @@ const metadata = {
 
     {
       faq?.items?.length > 0 && (
-        <section class="mx-auto max-w-3xl px-4 py-10">
+        <section style={`order:${order.faq}`} class="mx-auto max-w-3xl px-4 py-10">
           {faq.title && <h2 class="text-2xl font-bold mb-6">{faq.title}</h2>}
           <div class="divide-y divide-gray-200 dark:divide-slate-800">
             {faq.items.map((f: any) => (
@@ -175,7 +196,7 @@ const metadata = {
 
     {
       final && (
-        <section class="bg-primary text-white py-12 text-center px-4">
+        <section style={`order:${order.final}`} class="bg-primary text-white py-12 text-center px-4">
           <h2 class="text-2xl md:text-3xl font-bold mb-2">{final.title}</h2>
           {final.text && <p class="mb-6 opacity-90">{final.text}</p>}
           <a
@@ -192,7 +213,28 @@ const metadata = {
     }
   </main>
 
-  <footer class="border-t border-gray-200 dark:border-slate-800 py-6 text-sm text-muted">
+  {
+    tpl === 'focus' && (
+      <div class="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 p-3 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-900/95">
+        <a
+          href={waHref}
+          target="_blank"
+          rel="noopener"
+          data-track="Lead"
+          class="btn-primary block rounded-md px-5 py-3 text-center font-medium"
+        >
+          {hero?.cta_label || L.whatsapp}
+        </a>
+      </div>
+    )
+  }
+
+  <footer
+    class:list={[
+      'border-t border-gray-200 dark:border-slate-800 py-6 text-sm text-muted',
+      tpl === 'focus' && 'mb-16 md:mb-0',
+    ]}
+  >
     <div class="mx-auto max-w-5xl px-4 flex flex-wrap gap-x-5 gap-y-2 justify-center">
       <a href={page('terms', locale)}>{L.terms}</a>
       <a href={page('privacy', locale)}>{L.privacy}</a>

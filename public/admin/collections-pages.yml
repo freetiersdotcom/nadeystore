@@ -30,6 +30,17 @@
                 label: En-tête avec image
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: split
+                    options:
+                      - label: Image à côté du texte
+                        value: split
+                      - label: Texte centré, image dessous
+                        value: centered
                   - name: tagline
                     label: Sur-titre
                     widget: string
@@ -111,6 +122,19 @@
                 label: Atouts (liste avec icônes)
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: icons
+                    options:
+                      - label: Liste avec icônes
+                        value: icons
+                      - label: Cartes
+                        value: cards
+                      - label: Avec une image
+                        value: image
                   - name: id
                     label: Ancre (id, facultatif)
                     widget: string
@@ -155,6 +179,19 @@
                         widget: string
                         required: false
                         hint: "Nom d’icône, par exemple tabler:truck-delivery ou tabler:brand-whatsapp (liste : tabler.io/icons)."
+                  - name: image
+                    label: Image
+                    widget: object
+                    required: false
+                    fields:
+                      - name: src
+                        label: Image (fichier ou adresse)
+                        widget: image
+                        choose_url: true
+                      - name: alt
+                        label: Description de l’image (accessibilité)
+                        widget: string
+                        required: false
               - name: features-grid
                 label: Grille d’atouts
                 summary: "{{fields.title}}"
@@ -285,6 +322,17 @@
                 label: Étapes
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: image
+                    options:
+                      - label: Étapes avec image
+                        value: image
+                      - label: Étapes numérotées
+                        value: numbered
                   - name: id
                     label: Ancre (id, facultatif)
                     widget: string
@@ -330,6 +378,92 @@
                         label: Description de l’image (accessibilité)
                         widget: string
                         required: false
+              - name: stats
+                label: Chiffres clés
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Sur-titre
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Titre
+                    widget: string
+                    required: false
+                    hint: "Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Sous-titre
+                    widget: text
+                    required: false
+                  - name: stats
+                    label: Chiffres
+                    label_singular: chiffre
+                    widget: list
+                    summary: "{{fields.amount}} {{fields.title}}"
+                    required: false
+                    fields:
+                      - name: amount
+                        label: Valeur (ex. 500+)
+                        widget: string
+                        required: true
+                      - name: title
+                        label: Titre
+                        widget: string
+                        required: true
+                      - name: icon
+                        label: Icône
+                        widget: string
+                        required: false
+                        hint: "Nom d’icône, par exemple tabler:truck-delivery ou tabler:brand-whatsapp (liste : tabler.io/icons)."
+              - name: testimonials
+                label: Témoignages
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Sur-titre
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Titre
+                    widget: string
+                    required: false
+                    hint: "Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Sous-titre
+                    widget: text
+                    required: false
+                  - name: testimonials
+                    label: Témoignages
+                    label_singular: témoignage
+                    widget: list
+                    summary: "{{fields.name}}"
+                    required: false
+                    fields:
+                      - name: testimonial
+                        label: Témoignage
+                        widget: text
+                        required: true
+                      - name: name
+                        label: Nom
+                        widget: string
+                        required: true
+                      - name: job
+                        label: Qualité (ex. cliente à Cotonou)
+                        widget: string
+                        required: false
+                      - name: image
+                        label: Image
+                        widget: object
+                        required: false
+                        fields:
+                          - name: src
+                            label: Image (fichier ou adresse)
+                            widget: image
+                            choose_url: true
+                          - name: alt
+                            label: Description de l’image (accessibilité)
+                            widget: string
+                            required: false
               - name: cta
                 label: Appel à l’action (boutons)
                 summary: "{{fields.title}}"
@@ -464,6 +598,17 @@
                 label: En-tête avec image
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: split
+                    options:
+                      - label: Image à côté du texte
+                        value: split
+                      - label: Texte centré, image dessous
+                        value: centered
                   - name: tagline
                     label: Sur-titre
                     widget: string
@@ -545,6 +690,19 @@
                 label: Atouts (liste avec icônes)
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: icons
+                    options:
+                      - label: Liste avec icônes
+                        value: icons
+                      - label: Cartes
+                        value: cards
+                      - label: Avec une image
+                        value: image
                   - name: id
                     label: Ancre (id, facultatif)
                     widget: string
@@ -589,6 +747,19 @@
                         widget: string
                         required: false
                         hint: "Nom d’icône, par exemple tabler:truck-delivery ou tabler:brand-whatsapp (liste : tabler.io/icons)."
+                  - name: image
+                    label: Image
+                    widget: object
+                    required: false
+                    fields:
+                      - name: src
+                        label: Image (fichier ou adresse)
+                        widget: image
+                        choose_url: true
+                      - name: alt
+                        label: Description de l’image (accessibilité)
+                        widget: string
+                        required: false
               - name: features-grid
                 label: Grille d’atouts
                 summary: "{{fields.title}}"
@@ -719,6 +890,17 @@
                 label: Étapes
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: image
+                    options:
+                      - label: Étapes avec image
+                        value: image
+                      - label: Étapes numérotées
+                        value: numbered
                   - name: id
                     label: Ancre (id, facultatif)
                     widget: string
@@ -764,6 +946,92 @@
                         label: Description de l’image (accessibilité)
                         widget: string
                         required: false
+              - name: stats
+                label: Chiffres clés
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Sur-titre
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Titre
+                    widget: string
+                    required: false
+                    hint: "Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Sous-titre
+                    widget: text
+                    required: false
+                  - name: stats
+                    label: Chiffres
+                    label_singular: chiffre
+                    widget: list
+                    summary: "{{fields.amount}} {{fields.title}}"
+                    required: false
+                    fields:
+                      - name: amount
+                        label: Valeur (ex. 500+)
+                        widget: string
+                        required: true
+                      - name: title
+                        label: Titre
+                        widget: string
+                        required: true
+                      - name: icon
+                        label: Icône
+                        widget: string
+                        required: false
+                        hint: "Nom d’icône, par exemple tabler:truck-delivery ou tabler:brand-whatsapp (liste : tabler.io/icons)."
+              - name: testimonials
+                label: Témoignages
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Sur-titre
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Titre
+                    widget: string
+                    required: false
+                    hint: "Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Sous-titre
+                    widget: text
+                    required: false
+                  - name: testimonials
+                    label: Témoignages
+                    label_singular: témoignage
+                    widget: list
+                    summary: "{{fields.name}}"
+                    required: false
+                    fields:
+                      - name: testimonial
+                        label: Témoignage
+                        widget: text
+                        required: true
+                      - name: name
+                        label: Nom
+                        widget: string
+                        required: true
+                      - name: job
+                        label: Qualité (ex. cliente à Cotonou)
+                        widget: string
+                        required: false
+                      - name: image
+                        label: Image
+                        widget: object
+                        required: false
+                        fields:
+                          - name: src
+                            label: Image (fichier ou adresse)
+                            widget: image
+                            choose_url: true
+                          - name: alt
+                            label: Description de l’image (accessibilité)
+                            widget: string
+                            required: false
               - name: cta
                 label: Appel à l’action (boutons)
                 summary: "{{fields.title}}"
@@ -898,6 +1166,17 @@
                 label: En-tête avec image
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: split
+                    options:
+                      - label: Image à côté du texte
+                        value: split
+                      - label: Texte centré, image dessous
+                        value: centered
                   - name: tagline
                     label: Sur-titre
                     widget: string
@@ -979,6 +1258,19 @@
                 label: Atouts (liste avec icônes)
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: icons
+                    options:
+                      - label: Liste avec icônes
+                        value: icons
+                      - label: Cartes
+                        value: cards
+                      - label: Avec une image
+                        value: image
                   - name: id
                     label: Ancre (id, facultatif)
                     widget: string
@@ -1023,6 +1315,19 @@
                         widget: string
                         required: false
                         hint: "Nom d’icône, par exemple tabler:truck-delivery ou tabler:brand-whatsapp (liste : tabler.io/icons)."
+                  - name: image
+                    label: Image
+                    widget: object
+                    required: false
+                    fields:
+                      - name: src
+                        label: Image (fichier ou adresse)
+                        widget: image
+                        choose_url: true
+                      - name: alt
+                        label: Description de l’image (accessibilité)
+                        widget: string
+                        required: false
               - name: features-grid
                 label: Grille d’atouts
                 summary: "{{fields.title}}"
@@ -1153,6 +1458,17 @@
                 label: Étapes
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: image
+                    options:
+                      - label: Étapes avec image
+                        value: image
+                      - label: Étapes numérotées
+                        value: numbered
                   - name: id
                     label: Ancre (id, facultatif)
                     widget: string
@@ -1198,6 +1514,92 @@
                         label: Description de l’image (accessibilité)
                         widget: string
                         required: false
+              - name: stats
+                label: Chiffres clés
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Sur-titre
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Titre
+                    widget: string
+                    required: false
+                    hint: "Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Sous-titre
+                    widget: text
+                    required: false
+                  - name: stats
+                    label: Chiffres
+                    label_singular: chiffre
+                    widget: list
+                    summary: "{{fields.amount}} {{fields.title}}"
+                    required: false
+                    fields:
+                      - name: amount
+                        label: Valeur (ex. 500+)
+                        widget: string
+                        required: true
+                      - name: title
+                        label: Titre
+                        widget: string
+                        required: true
+                      - name: icon
+                        label: Icône
+                        widget: string
+                        required: false
+                        hint: "Nom d’icône, par exemple tabler:truck-delivery ou tabler:brand-whatsapp (liste : tabler.io/icons)."
+              - name: testimonials
+                label: Témoignages
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Sur-titre
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Titre
+                    widget: string
+                    required: false
+                    hint: "Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Sous-titre
+                    widget: text
+                    required: false
+                  - name: testimonials
+                    label: Témoignages
+                    label_singular: témoignage
+                    widget: list
+                    summary: "{{fields.name}}"
+                    required: false
+                    fields:
+                      - name: testimonial
+                        label: Témoignage
+                        widget: text
+                        required: true
+                      - name: name
+                        label: Nom
+                        widget: string
+                        required: true
+                      - name: job
+                        label: Qualité (ex. cliente à Cotonou)
+                        widget: string
+                        required: false
+                      - name: image
+                        label: Image
+                        widget: object
+                        required: false
+                        fields:
+                          - name: src
+                            label: Image (fichier ou adresse)
+                            widget: image
+                            choose_url: true
+                          - name: alt
+                            label: Description de l’image (accessibilité)
+                            widget: string
+                            required: false
               - name: cta
                 label: Appel à l’action (boutons)
                 summary: "{{fields.title}}"
@@ -1332,6 +1734,17 @@
                 label: En-tête avec image
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: split
+                    options:
+                      - label: Image à côté du texte
+                        value: split
+                      - label: Texte centré, image dessous
+                        value: centered
                   - name: tagline
                     label: Sur-titre
                     widget: string
@@ -1413,6 +1826,19 @@
                 label: Atouts (liste avec icônes)
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: icons
+                    options:
+                      - label: Liste avec icônes
+                        value: icons
+                      - label: Cartes
+                        value: cards
+                      - label: Avec une image
+                        value: image
                   - name: id
                     label: Ancre (id, facultatif)
                     widget: string
@@ -1457,6 +1883,19 @@
                         widget: string
                         required: false
                         hint: "Nom d’icône, par exemple tabler:truck-delivery ou tabler:brand-whatsapp (liste : tabler.io/icons)."
+                  - name: image
+                    label: Image
+                    widget: object
+                    required: false
+                    fields:
+                      - name: src
+                        label: Image (fichier ou adresse)
+                        widget: image
+                        choose_url: true
+                      - name: alt
+                        label: Description de l’image (accessibilité)
+                        widget: string
+                        required: false
               - name: features-grid
                 label: Grille d’atouts
                 summary: "{{fields.title}}"
@@ -1587,6 +2026,17 @@
                 label: Étapes
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: image
+                    options:
+                      - label: Étapes avec image
+                        value: image
+                      - label: Étapes numérotées
+                        value: numbered
                   - name: id
                     label: Ancre (id, facultatif)
                     widget: string
@@ -1632,6 +2082,92 @@
                         label: Description de l’image (accessibilité)
                         widget: string
                         required: false
+              - name: stats
+                label: Chiffres clés
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Sur-titre
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Titre
+                    widget: string
+                    required: false
+                    hint: "Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Sous-titre
+                    widget: text
+                    required: false
+                  - name: stats
+                    label: Chiffres
+                    label_singular: chiffre
+                    widget: list
+                    summary: "{{fields.amount}} {{fields.title}}"
+                    required: false
+                    fields:
+                      - name: amount
+                        label: Valeur (ex. 500+)
+                        widget: string
+                        required: true
+                      - name: title
+                        label: Titre
+                        widget: string
+                        required: true
+                      - name: icon
+                        label: Icône
+                        widget: string
+                        required: false
+                        hint: "Nom d’icône, par exemple tabler:truck-delivery ou tabler:brand-whatsapp (liste : tabler.io/icons)."
+              - name: testimonials
+                label: Témoignages
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Sur-titre
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Titre
+                    widget: string
+                    required: false
+                    hint: "Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Sous-titre
+                    widget: text
+                    required: false
+                  - name: testimonials
+                    label: Témoignages
+                    label_singular: témoignage
+                    widget: list
+                    summary: "{{fields.name}}"
+                    required: false
+                    fields:
+                      - name: testimonial
+                        label: Témoignage
+                        widget: text
+                        required: true
+                      - name: name
+                        label: Nom
+                        widget: string
+                        required: true
+                      - name: job
+                        label: Qualité (ex. cliente à Cotonou)
+                        widget: string
+                        required: false
+                      - name: image
+                        label: Image
+                        widget: object
+                        required: false
+                        fields:
+                          - name: src
+                            label: Image (fichier ou adresse)
+                            widget: image
+                            choose_url: true
+                          - name: alt
+                            label: Description de l’image (accessibilité)
+                            widget: string
+                            required: false
               - name: cta
                 label: Appel à l’action (boutons)
                 summary: "{{fields.title}}"
@@ -1766,6 +2302,17 @@
                 label: En-tête avec image
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: split
+                    options:
+                      - label: Image à côté du texte
+                        value: split
+                      - label: Texte centré, image dessous
+                        value: centered
                   - name: tagline
                     label: Sur-titre
                     widget: string
@@ -1847,6 +2394,19 @@
                 label: Atouts (liste avec icônes)
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: icons
+                    options:
+                      - label: Liste avec icônes
+                        value: icons
+                      - label: Cartes
+                        value: cards
+                      - label: Avec une image
+                        value: image
                   - name: id
                     label: Ancre (id, facultatif)
                     widget: string
@@ -1891,6 +2451,19 @@
                         widget: string
                         required: false
                         hint: "Nom d’icône, par exemple tabler:truck-delivery ou tabler:brand-whatsapp (liste : tabler.io/icons)."
+                  - name: image
+                    label: Image
+                    widget: object
+                    required: false
+                    fields:
+                      - name: src
+                        label: Image (fichier ou adresse)
+                        widget: image
+                        choose_url: true
+                      - name: alt
+                        label: Description de l’image (accessibilité)
+                        widget: string
+                        required: false
               - name: features-grid
                 label: Grille d’atouts
                 summary: "{{fields.title}}"
@@ -2021,6 +2594,17 @@
                 label: Étapes
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Présentation
+                    widget: select
+                    hint: Change seulement la mise en forme de cette section.
+                    required: false
+                    default: image
+                    options:
+                      - label: Étapes avec image
+                        value: image
+                      - label: Étapes numérotées
+                        value: numbered
                   - name: id
                     label: Ancre (id, facultatif)
                     widget: string
@@ -2066,6 +2650,92 @@
                         label: Description de l’image (accessibilité)
                         widget: string
                         required: false
+              - name: stats
+                label: Chiffres clés
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Sur-titre
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Titre
+                    widget: string
+                    required: false
+                    hint: "Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Sous-titre
+                    widget: text
+                    required: false
+                  - name: stats
+                    label: Chiffres
+                    label_singular: chiffre
+                    widget: list
+                    summary: "{{fields.amount}} {{fields.title}}"
+                    required: false
+                    fields:
+                      - name: amount
+                        label: Valeur (ex. 500+)
+                        widget: string
+                        required: true
+                      - name: title
+                        label: Titre
+                        widget: string
+                        required: true
+                      - name: icon
+                        label: Icône
+                        widget: string
+                        required: false
+                        hint: "Nom d’icône, par exemple tabler:truck-delivery ou tabler:brand-whatsapp (liste : tabler.io/icons)."
+              - name: testimonials
+                label: Témoignages
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Sur-titre
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Titre
+                    widget: string
+                    required: false
+                    hint: "Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Sous-titre
+                    widget: text
+                    required: false
+                  - name: testimonials
+                    label: Témoignages
+                    label_singular: témoignage
+                    widget: list
+                    summary: "{{fields.name}}"
+                    required: false
+                    fields:
+                      - name: testimonial
+                        label: Témoignage
+                        widget: text
+                        required: true
+                      - name: name
+                        label: Nom
+                        widget: string
+                        required: true
+                      - name: job
+                        label: Qualité (ex. cliente à Cotonou)
+                        widget: string
+                        required: false
+                      - name: image
+                        label: Image
+                        widget: object
+                        required: false
+                        fields:
+                          - name: src
+                            label: Image (fichier ou adresse)
+                            widget: image
+                            choose_url: true
+                          - name: alt
+                            label: Description de l’image (accessibilité)
+                            widget: string
+                            required: false
               - name: cta
                 label: Appel à l’action (boutons)
                 summary: "{{fields.title}}"
@@ -2521,6 +3191,17 @@
                 label: Header with image
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: split
+                    options:
+                      - label: Image beside the text
+                        value: split
+                      - label: Centered text, image below
+                        value: centered
                   - name: tagline
                     label: Small heading above
                     widget: string
@@ -2602,6 +3283,19 @@
                 label: Strengths (list with icons)
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: icons
+                    options:
+                      - label: List with icons
+                        value: icons
+                      - label: Cards
+                        value: cards
+                      - label: With an image
+                        value: image
                   - name: id
                     label: Anchor (id, optional)
                     widget: string
@@ -2646,6 +3340,19 @@
                         widget: string
                         required: false
                         hint: "Icon name, for example tabler:truck-delivery or tabler:brand-whatsapp (list: tabler.io/icons)."
+                  - name: image
+                    label: Image
+                    widget: object
+                    required: false
+                    fields:
+                      - name: src
+                        label: Image (file or address)
+                        widget: image
+                        choose_url: true
+                      - name: alt
+                        label: Image description (accessibility)
+                        widget: string
+                        required: false
               - name: features-grid
                 label: Strengths grid
                 summary: "{{fields.title}}"
@@ -2776,6 +3483,17 @@
                 label: Steps
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: image
+                    options:
+                      - label: Steps with an image
+                        value: image
+                      - label: Numbered steps
+                        value: numbered
                   - name: id
                     label: Anchor (id, optional)
                     widget: string
@@ -2821,6 +3539,92 @@
                         label: Image description (accessibility)
                         widget: string
                         required: false
+              - name: stats
+                label: Key figures
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Small heading above
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Title
+                    widget: string
+                    required: false
+                    hint: "Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Subtitle
+                    widget: text
+                    required: false
+                  - name: stats
+                    label: Figures
+                    label_singular: figure
+                    widget: list
+                    summary: "{{fields.amount}} {{fields.title}}"
+                    required: false
+                    fields:
+                      - name: amount
+                        label: Value (e.g. 500+)
+                        widget: string
+                        required: true
+                      - name: title
+                        label: Title
+                        widget: string
+                        required: true
+                      - name: icon
+                        label: Icon
+                        widget: string
+                        required: false
+                        hint: "Icon name, for example tabler:truck-delivery or tabler:brand-whatsapp (list: tabler.io/icons)."
+              - name: testimonials
+                label: Testimonials
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Small heading above
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Title
+                    widget: string
+                    required: false
+                    hint: "Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Subtitle
+                    widget: text
+                    required: false
+                  - name: testimonials
+                    label: Testimonials
+                    label_singular: testimonial
+                    widget: list
+                    summary: "{{fields.name}}"
+                    required: false
+                    fields:
+                      - name: testimonial
+                        label: Testimonial
+                        widget: text
+                        required: true
+                      - name: name
+                        label: Name
+                        widget: string
+                        required: true
+                      - name: job
+                        label: Role (e.g. customer in Cotonou)
+                        widget: string
+                        required: false
+                      - name: image
+                        label: Image
+                        widget: object
+                        required: false
+                        fields:
+                          - name: src
+                            label: Image (file or address)
+                            widget: image
+                            choose_url: true
+                          - name: alt
+                            label: Image description (accessibility)
+                            widget: string
+                            required: false
               - name: cta
                 label: Call to action (buttons)
                 summary: "{{fields.title}}"
@@ -2955,6 +3759,17 @@
                 label: Header with image
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: split
+                    options:
+                      - label: Image beside the text
+                        value: split
+                      - label: Centered text, image below
+                        value: centered
                   - name: tagline
                     label: Small heading above
                     widget: string
@@ -3036,6 +3851,19 @@
                 label: Strengths (list with icons)
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: icons
+                    options:
+                      - label: List with icons
+                        value: icons
+                      - label: Cards
+                        value: cards
+                      - label: With an image
+                        value: image
                   - name: id
                     label: Anchor (id, optional)
                     widget: string
@@ -3080,6 +3908,19 @@
                         widget: string
                         required: false
                         hint: "Icon name, for example tabler:truck-delivery or tabler:brand-whatsapp (list: tabler.io/icons)."
+                  - name: image
+                    label: Image
+                    widget: object
+                    required: false
+                    fields:
+                      - name: src
+                        label: Image (file or address)
+                        widget: image
+                        choose_url: true
+                      - name: alt
+                        label: Image description (accessibility)
+                        widget: string
+                        required: false
               - name: features-grid
                 label: Strengths grid
                 summary: "{{fields.title}}"
@@ -3210,6 +4051,17 @@
                 label: Steps
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: image
+                    options:
+                      - label: Steps with an image
+                        value: image
+                      - label: Numbered steps
+                        value: numbered
                   - name: id
                     label: Anchor (id, optional)
                     widget: string
@@ -3255,6 +4107,92 @@
                         label: Image description (accessibility)
                         widget: string
                         required: false
+              - name: stats
+                label: Key figures
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Small heading above
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Title
+                    widget: string
+                    required: false
+                    hint: "Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Subtitle
+                    widget: text
+                    required: false
+                  - name: stats
+                    label: Figures
+                    label_singular: figure
+                    widget: list
+                    summary: "{{fields.amount}} {{fields.title}}"
+                    required: false
+                    fields:
+                      - name: amount
+                        label: Value (e.g. 500+)
+                        widget: string
+                        required: true
+                      - name: title
+                        label: Title
+                        widget: string
+                        required: true
+                      - name: icon
+                        label: Icon
+                        widget: string
+                        required: false
+                        hint: "Icon name, for example tabler:truck-delivery or tabler:brand-whatsapp (list: tabler.io/icons)."
+              - name: testimonials
+                label: Testimonials
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Small heading above
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Title
+                    widget: string
+                    required: false
+                    hint: "Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Subtitle
+                    widget: text
+                    required: false
+                  - name: testimonials
+                    label: Testimonials
+                    label_singular: testimonial
+                    widget: list
+                    summary: "{{fields.name}}"
+                    required: false
+                    fields:
+                      - name: testimonial
+                        label: Testimonial
+                        widget: text
+                        required: true
+                      - name: name
+                        label: Name
+                        widget: string
+                        required: true
+                      - name: job
+                        label: Role (e.g. customer in Cotonou)
+                        widget: string
+                        required: false
+                      - name: image
+                        label: Image
+                        widget: object
+                        required: false
+                        fields:
+                          - name: src
+                            label: Image (file or address)
+                            widget: image
+                            choose_url: true
+                          - name: alt
+                            label: Image description (accessibility)
+                            widget: string
+                            required: false
               - name: cta
                 label: Call to action (buttons)
                 summary: "{{fields.title}}"
@@ -3389,6 +4327,17 @@
                 label: Header with image
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: split
+                    options:
+                      - label: Image beside the text
+                        value: split
+                      - label: Centered text, image below
+                        value: centered
                   - name: tagline
                     label: Small heading above
                     widget: string
@@ -3470,6 +4419,19 @@
                 label: Strengths (list with icons)
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: icons
+                    options:
+                      - label: List with icons
+                        value: icons
+                      - label: Cards
+                        value: cards
+                      - label: With an image
+                        value: image
                   - name: id
                     label: Anchor (id, optional)
                     widget: string
@@ -3514,6 +4476,19 @@
                         widget: string
                         required: false
                         hint: "Icon name, for example tabler:truck-delivery or tabler:brand-whatsapp (list: tabler.io/icons)."
+                  - name: image
+                    label: Image
+                    widget: object
+                    required: false
+                    fields:
+                      - name: src
+                        label: Image (file or address)
+                        widget: image
+                        choose_url: true
+                      - name: alt
+                        label: Image description (accessibility)
+                        widget: string
+                        required: false
               - name: features-grid
                 label: Strengths grid
                 summary: "{{fields.title}}"
@@ -3644,6 +4619,17 @@
                 label: Steps
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: image
+                    options:
+                      - label: Steps with an image
+                        value: image
+                      - label: Numbered steps
+                        value: numbered
                   - name: id
                     label: Anchor (id, optional)
                     widget: string
@@ -3689,6 +4675,92 @@
                         label: Image description (accessibility)
                         widget: string
                         required: false
+              - name: stats
+                label: Key figures
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Small heading above
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Title
+                    widget: string
+                    required: false
+                    hint: "Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Subtitle
+                    widget: text
+                    required: false
+                  - name: stats
+                    label: Figures
+                    label_singular: figure
+                    widget: list
+                    summary: "{{fields.amount}} {{fields.title}}"
+                    required: false
+                    fields:
+                      - name: amount
+                        label: Value (e.g. 500+)
+                        widget: string
+                        required: true
+                      - name: title
+                        label: Title
+                        widget: string
+                        required: true
+                      - name: icon
+                        label: Icon
+                        widget: string
+                        required: false
+                        hint: "Icon name, for example tabler:truck-delivery or tabler:brand-whatsapp (list: tabler.io/icons)."
+              - name: testimonials
+                label: Testimonials
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Small heading above
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Title
+                    widget: string
+                    required: false
+                    hint: "Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Subtitle
+                    widget: text
+                    required: false
+                  - name: testimonials
+                    label: Testimonials
+                    label_singular: testimonial
+                    widget: list
+                    summary: "{{fields.name}}"
+                    required: false
+                    fields:
+                      - name: testimonial
+                        label: Testimonial
+                        widget: text
+                        required: true
+                      - name: name
+                        label: Name
+                        widget: string
+                        required: true
+                      - name: job
+                        label: Role (e.g. customer in Cotonou)
+                        widget: string
+                        required: false
+                      - name: image
+                        label: Image
+                        widget: object
+                        required: false
+                        fields:
+                          - name: src
+                            label: Image (file or address)
+                            widget: image
+                            choose_url: true
+                          - name: alt
+                            label: Image description (accessibility)
+                            widget: string
+                            required: false
               - name: cta
                 label: Call to action (buttons)
                 summary: "{{fields.title}}"
@@ -3823,6 +4895,17 @@
                 label: Header with image
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: split
+                    options:
+                      - label: Image beside the text
+                        value: split
+                      - label: Centered text, image below
+                        value: centered
                   - name: tagline
                     label: Small heading above
                     widget: string
@@ -3904,6 +4987,19 @@
                 label: Strengths (list with icons)
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: icons
+                    options:
+                      - label: List with icons
+                        value: icons
+                      - label: Cards
+                        value: cards
+                      - label: With an image
+                        value: image
                   - name: id
                     label: Anchor (id, optional)
                     widget: string
@@ -3948,6 +5044,19 @@
                         widget: string
                         required: false
                         hint: "Icon name, for example tabler:truck-delivery or tabler:brand-whatsapp (list: tabler.io/icons)."
+                  - name: image
+                    label: Image
+                    widget: object
+                    required: false
+                    fields:
+                      - name: src
+                        label: Image (file or address)
+                        widget: image
+                        choose_url: true
+                      - name: alt
+                        label: Image description (accessibility)
+                        widget: string
+                        required: false
               - name: features-grid
                 label: Strengths grid
                 summary: "{{fields.title}}"
@@ -4078,6 +5187,17 @@
                 label: Steps
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: image
+                    options:
+                      - label: Steps with an image
+                        value: image
+                      - label: Numbered steps
+                        value: numbered
                   - name: id
                     label: Anchor (id, optional)
                     widget: string
@@ -4123,6 +5243,92 @@
                         label: Image description (accessibility)
                         widget: string
                         required: false
+              - name: stats
+                label: Key figures
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Small heading above
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Title
+                    widget: string
+                    required: false
+                    hint: "Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Subtitle
+                    widget: text
+                    required: false
+                  - name: stats
+                    label: Figures
+                    label_singular: figure
+                    widget: list
+                    summary: "{{fields.amount}} {{fields.title}}"
+                    required: false
+                    fields:
+                      - name: amount
+                        label: Value (e.g. 500+)
+                        widget: string
+                        required: true
+                      - name: title
+                        label: Title
+                        widget: string
+                        required: true
+                      - name: icon
+                        label: Icon
+                        widget: string
+                        required: false
+                        hint: "Icon name, for example tabler:truck-delivery or tabler:brand-whatsapp (list: tabler.io/icons)."
+              - name: testimonials
+                label: Testimonials
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Small heading above
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Title
+                    widget: string
+                    required: false
+                    hint: "Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Subtitle
+                    widget: text
+                    required: false
+                  - name: testimonials
+                    label: Testimonials
+                    label_singular: testimonial
+                    widget: list
+                    summary: "{{fields.name}}"
+                    required: false
+                    fields:
+                      - name: testimonial
+                        label: Testimonial
+                        widget: text
+                        required: true
+                      - name: name
+                        label: Name
+                        widget: string
+                        required: true
+                      - name: job
+                        label: Role (e.g. customer in Cotonou)
+                        widget: string
+                        required: false
+                      - name: image
+                        label: Image
+                        widget: object
+                        required: false
+                        fields:
+                          - name: src
+                            label: Image (file or address)
+                            widget: image
+                            choose_url: true
+                          - name: alt
+                            label: Image description (accessibility)
+                            widget: string
+                            required: false
               - name: cta
                 label: Call to action (buttons)
                 summary: "{{fields.title}}"
@@ -4257,6 +5463,17 @@
                 label: Header with image
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: split
+                    options:
+                      - label: Image beside the text
+                        value: split
+                      - label: Centered text, image below
+                        value: centered
                   - name: tagline
                     label: Small heading above
                     widget: string
@@ -4338,6 +5555,19 @@
                 label: Strengths (list with icons)
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: icons
+                    options:
+                      - label: List with icons
+                        value: icons
+                      - label: Cards
+                        value: cards
+                      - label: With an image
+                        value: image
                   - name: id
                     label: Anchor (id, optional)
                     widget: string
@@ -4382,6 +5612,19 @@
                         widget: string
                         required: false
                         hint: "Icon name, for example tabler:truck-delivery or tabler:brand-whatsapp (list: tabler.io/icons)."
+                  - name: image
+                    label: Image
+                    widget: object
+                    required: false
+                    fields:
+                      - name: src
+                        label: Image (file or address)
+                        widget: image
+                        choose_url: true
+                      - name: alt
+                        label: Image description (accessibility)
+                        widget: string
+                        required: false
               - name: features-grid
                 label: Strengths grid
                 summary: "{{fields.title}}"
@@ -4512,6 +5755,17 @@
                 label: Steps
                 summary: "{{fields.title}}"
                 fields:
+                  - name: variant
+                    label: Layout
+                    widget: select
+                    hint: Only changes how this section is laid out.
+                    required: false
+                    default: image
+                    options:
+                      - label: Steps with an image
+                        value: image
+                      - label: Numbered steps
+                        value: numbered
                   - name: id
                     label: Anchor (id, optional)
                     widget: string
@@ -4557,6 +5811,92 @@
                         label: Image description (accessibility)
                         widget: string
                         required: false
+              - name: stats
+                label: Key figures
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Small heading above
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Title
+                    widget: string
+                    required: false
+                    hint: "Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Subtitle
+                    widget: text
+                    required: false
+                  - name: stats
+                    label: Figures
+                    label_singular: figure
+                    widget: list
+                    summary: "{{fields.amount}} {{fields.title}}"
+                    required: false
+                    fields:
+                      - name: amount
+                        label: Value (e.g. 500+)
+                        widget: string
+                        required: true
+                      - name: title
+                        label: Title
+                        widget: string
+                        required: true
+                      - name: icon
+                        label: Icon
+                        widget: string
+                        required: false
+                        hint: "Icon name, for example tabler:truck-delivery or tabler:brand-whatsapp (list: tabler.io/icons)."
+              - name: testimonials
+                label: Testimonials
+                summary: "{{fields.title}}"
+                fields:
+                  - name: tagline
+                    label: Small heading above
+                    widget: string
+                    required: false
+                  - name: title
+                    label: Title
+                    widget: string
+                    required: false
+                    hint: "Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+                  - name: subtitle
+                    label: Subtitle
+                    widget: text
+                    required: false
+                  - name: testimonials
+                    label: Testimonials
+                    label_singular: testimonial
+                    widget: list
+                    summary: "{{fields.name}}"
+                    required: false
+                    fields:
+                      - name: testimonial
+                        label: Testimonial
+                        widget: text
+                        required: true
+                      - name: name
+                        label: Name
+                        widget: string
+                        required: true
+                      - name: job
+                        label: Role (e.g. customer in Cotonou)
+                        widget: string
+                        required: false
+                      - name: image
+                        label: Image
+                        widget: object
+                        required: false
+                        fields:
+                          - name: src
+                            label: Image (file or address)
+                            widget: image
+                            choose_url: true
+                          - name: alt
+                            label: Image description (accessibility)
+                            widget: string
+                            required: false
               - name: cta
                 label: Call to action (buttons)
                 summary: "{{fields.title}}"

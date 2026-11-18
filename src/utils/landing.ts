@@ -19,5 +19,7 @@ export function landingSlugs(): string[] {
 export function landingContent(slug: string, locale: 'fr' | 'en') {
   const d = bySlug[slug];
   // Fall back to French if an English version has not been written yet.
-  return d?.[locale] ?? d?.fr;
+  const c = d?.[locale] ?? d?.fr;
+  // "template" can be written once at the top of the file (for both languages) or inside one language.
+  return c && d?.template && !c.template ? { ...c, template: d.template } : c;
 }

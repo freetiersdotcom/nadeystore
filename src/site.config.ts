@@ -11,6 +11,8 @@
 export type Locale = 'fr' | 'en';
 export type FeatureName = 'shop' | 'account' | 'blog' | 'faq' | 'services' | 'downloads';
 export type SellType = 'physical' | 'digital' | 'service';
+/** Colours and fonts of the site: see src/themes.ts. */
+export type ThemeName = 'emerald' | 'ocean' | 'terracotta';
 
 export const site = {
   brand: 'Santé Natur’',
@@ -31,6 +33,8 @@ export const site = {
     fr: 'Produits naturels de bien-être, livrés chez vous.',
     en: 'Natural wellness products, delivered to your door.',
   },
+  /** Look of the site: 'emerald' (emerald and gold), 'ocean' (blue and amber) or 'terracotta' (clay, olive and a serif heading font). */
+  theme: 'emerald' as ThemeName,
   /** Browser/app colours (manifest and offline page). The site's own colours are in the Tailwind theme. */
   themeColor: '#0F6B4B',
   backgroundColor: '#F8F6F0',

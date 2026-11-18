@@ -1,11 +1,16 @@
 ---
 // One section of a content page (see src/content/pages). `type` picks the widget; the other keys are its props.
+import Hero from '~/components/widgets/Hero.astro';
 import Hero2 from '~/components/widgets/Hero2.astro';
 import HeroText from '~/components/widgets/HeroText.astro';
 import Features from '~/components/widgets/Features.astro';
 import Features2 from '~/components/widgets/Features2.astro';
+import Features3 from '~/components/widgets/Features3.astro';
 import Content from '~/components/widgets/Content.astro';
 import Steps from '~/components/widgets/Steps.astro';
+import Steps2 from '~/components/widgets/Steps2.astro';
+import Stats from '~/components/widgets/Stats.astro';
+import Testimonials from '~/components/widgets/Testimonials.astro';
 import CallToAction from '~/components/widgets/CallToAction.astro';
 import ContactForm from '~/components/store/ContactForm.astro';
 import type { Section, FaqGroup } from '~/utils/pages';
@@ -15,18 +20,27 @@ interface Props {
   locale: 'fr' | 'en';
 }
 const { section, locale } = Astro.props;
-const { type, ...rest } = section;
+// `variant` (optional) is the layout of the section; the other keys are the widget's own props.
+const { type, variant, ...rest } = section;
 // The remaining keys are the widget's own props, written in the YAML file.
 const props = rest as Record<string, never>;
 const groups = (rest.groups ?? []) as FaqGroup[];
+// hero: split (default) | centered.  features: icons (default) | cards | image (needs an image).  steps: image (default) | numbered.
+const featuresLayout = variant === 'cards' ? 'cards' : variant === 'image' && props.image ? 'image' : 'icons';
 ---
 
-{type === 'hero' && <Hero2 {...props} />}
+{type === 'hero' && variant === 'centered' && <Hero {...props} />}
+{type === 'hero' && variant !== 'centered' && <Hero2 {...props} />}
 {type === 'hero-text' && <HeroText {...props} />}
-{type === 'features' && <Features {...props} />}
+{type === 'features' && featuresLayout === 'icons' && <Features {...props} />}
+{type === 'features' && featuresLayout === 'cards' && <Features2 {...props} />}
+{type === 'features' && featuresLayout === 'image' && <Features3 {...props} />}
 {type === 'features-grid' && <Features2 {...props} />}
 {type === 'content' && <Content {...props} />}
-{type === 'steps' && <Steps {...props} />}
+{type === 'steps' && variant !== 'numbered' && <Steps {...props} />}
+{type === 'steps' && variant === 'numbered' && <Steps2 {...props} />}
+{type === 'stats' && <Stats {...props} />}
+{type === 'testimonials' && <Testimonials {...props} />}
 {type === 'cta' && <CallToAction {...props} />}
 {type === 'contact-form' && <ContactForm locale={locale} />}
 {
