@@ -47,6 +47,22 @@ if (
   isUnpicCompatible(_image)
 ) {
   image = await getImagesOptimized(_image, props, unpicOptimizer);
+} else if (typeof _image === 'string' && _image.startsWith('/')) {
+  // A file of the public folder (for example uploaded through the CMS into /uploads): used as it is.
+  const own = props as Record<string, string | number | undefined>;
+  image = {
+    src: _image,
+    attributes: {
+      alt: props.alt,
+      width: own.width,
+      height: own.height,
+      loading: props.loading,
+      decoding: props.decoding,
+      class: own.class,
+      sizes: own.sizes,
+      style: own.style,
+    } as HTMLAttributes<'img'>,
+  };
 } else if (_image) {
   image = await getImagesOptimized(_image, props, astroAssetsOptimizer);
 }

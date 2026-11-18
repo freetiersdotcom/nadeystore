@@ -1,0 +1,3 @@
+scripts/gen-cms-pages.mjs
+scripts/check-cms.mjs
+public/admin/collections-pages.yml
