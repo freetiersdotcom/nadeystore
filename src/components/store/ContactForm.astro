@@ -33,6 +33,7 @@ const T = {
     captcha: 'La vérification anti-spam a échoué. Rechargez la page et réessayez.',
     privacy: 'Vos informations ne seront jamais partagées avec des tiers. Consultez notre',
     privacyLink: 'politique de confidentialité',
+    quote: 'Bonjour, je souhaite un devis pour : {title}.\n\n',
   },
   en: {
     title: 'Send us a message',
@@ -54,6 +55,7 @@ const T = {
     captcha: 'The spam check failed. Please reload the page and try again.',
     privacy: 'Your information will never be shared with third parties. See our',
     privacyLink: 'privacy policy',
+    quote: 'Hello, I would like a quote for: {title}.\n\n',
   },
 }[locale];
 const input =
@@ -143,7 +145,7 @@ const input =
   </div>
 </section>
 
-<script is:inline define:vars={{ MSG: { need: T.need, ok: T.ok, fail: T.fail, limit: T.limit, captcha: T.captcha } }}>
+<script is:inline define:vars={{ MSG: { need: T.need, ok: T.ok, fail: T.fail, limit: T.limit, captcha: T.captcha, quote: T.quote } }}>
   window.__snMsg = MSG;
 </script>
 
@@ -203,6 +205,10 @@ const input =
     const status = document.getElementById('cf-status')!;
     const btn = document.getElementById('cf-submit') as HTMLButtonElement;
     const msg = window.__snMsg || {};
+    // Coming from a "Request a quote" button: the message starts with the name of the service.
+    const asked = new URLSearchParams(location.search).get('quote');
+    const box = document.getElementById('cf-message') as HTMLTextAreaElement | null;
+    if (asked && box && !box.value && msg.quote) box.value = msg.quote.replace('{title}', asked.slice(0, 200));
     const show = (text: string, ok: boolean) => {
       status.textContent = text;
       status.className = `text-sm mb-4 ${ok ? 'text-green-700' : 'text-red-600'}`;

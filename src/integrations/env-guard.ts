@@ -3,16 +3,54 @@
 // PUBLIC_* values are read when the site is BUILT, so they must exist in the build environment (.env / .env.local on your computer,
 // the build variables of Cloudflare, ...). This check stops the build, or warns, before such a site is published.
 //   SKIP_ENV_GUARD=1  turns the check off
-import type { AstroIntegration } from 'astro';
+import type { AstroIntegration, AstroIntegrationLogger } from 'astro';
 import fs from 'node:fs';
 import path from 'node:path';
 import { loadEnv } from 'vite';
+import { site } from '../site.config';
+
+// What the API plan lets this business sell, compared with site.config.ts (shown in the build log; PLAN_CHECK=strict stops the build on a mismatch,
+// SKIP_PLAN_CHECK=1 skips the check). An API that cannot be reached from the build is only mentioned.
+async function checkPlan(url: string, key: string, logger: AstroIntegrationLogger): Promise<void> {
+  if (process.env.SKIP_PLAN_CHECK) return;
+  try {
+    const res = await fetch(`${url.replace(/\/+$/, '')}/v1/capabilities`, {
+      headers: { Authorization: `Bearer ${key}` },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return logger.info(`plan check skipped: the API answered ${res.status} to /v1/capabilities.`);
+    const plan = (await res.json()) as { tier?: string; label?: string; sells?: string[] };
+    if (!Array.isArray(plan.sells)) return logger.info('plan check skipped: the API did not say what the plan sells.');
+    const name = plan.label || plan.tier || 'plan';
+    const sold = plan.sells;
+    const tooMuch = site.sells.filter((s) => !sold.includes(s));
+    const unused = sold.filter((s) => !(site.sells as string[]).includes(s));
+    if (tooMuch.length) {
+      const msg = `site.config.ts says the site sells ${tooMuch.join(', ')}, but the API plan "${name}" only allows ${sold.join(', ')}. The shop will promise something the API refuses. Change "sells" in src/site.config.ts or the plan of this client.`;
+      if (process.env.PLAN_CHECK === 'strict') throw new Error(`env-guard: ${msg}`);
+      logger.warn(msg);
+    } else {
+      logger.info(
+        `plan check: API plan "${name}" allows ${sold.join(', ')}; this site sells ${site.sells.join(', ')}.`
+      );
+    }
+    if (unused.length)
+      logger.info(
+        `The plan also allows ${unused.join(', ')}: products of those kinds are hidden on this site because "sells" in src/site.config.ts leaves them out.`
+      );
+  } catch (e) {
+    if (e instanceof Error && e.message.startsWith('env-guard:')) throw e;
+    logger.info(
+      `plan check skipped: the API could not be reached from the build (${e instanceof Error ? e.message : String(e)}).`
+    );
+  }
+}
 
 export function envGuard(): AstroIntegration {
   return {
     name: 'env-guard',
     hooks: {
-      'astro:config:setup': ({ command, logger, updateConfig }) => {
+      'astro:config:setup': async ({ command, logger, updateConfig }) => {
         if ((command !== 'build' && command !== 'dev') || process.env.SKIP_ENV_GUARD) return;
         // Values given by the build environment win over any .env / .env.local file that happens to be in the project.
         const forced: Record<string, string> = {};
@@ -57,7 +95,10 @@ export function envGuard(): AstroIntegration {
           if (command === 'build' && ci) problems.push(msg);
           else if (command === 'build') logger.warn(`${msg} Fine for a local test, wrong for a published site.`);
         }
-        if (!problems.length) return;
+        if (!problems.length) {
+          if (command === 'build' && url && key) await checkPlan(url, key, logger);
+          return;
+        }
         const text = `${problems.join('\n  ')}\n  Set them in the environment that builds the site, then build again (SKIP_ENV_GUARD=1 skips this check).`;
         if (command === 'build') throw new Error(`env-guard: ${text}`);
         logger.warn(text);

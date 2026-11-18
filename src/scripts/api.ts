@@ -7,6 +7,7 @@
 
 import { attachAffiliate } from './affiliate';
 import { attachAds } from './ads';
+import { applySells } from '~/utils/catalog-rules';
 
 // ── Config ────────────────────────────────────────────────────
 
@@ -85,7 +86,8 @@ export interface Product {
 
 export async function getProducts(): Promise<Product[]> {
   const data = await request<{ items: Product[] }>('/v1/products');
-  return data.items.filter((p) => p.status === 'active' && p.variants?.length > 0);
+  // Only what this site sells (site.config.ts: sells); see src/utils/catalog-rules.ts.
+  return applySells(data.items.filter((p) => p.status === 'active' && p.variants?.length > 0));
 }
 
 export async function getProduct(id: string): Promise<Product> {

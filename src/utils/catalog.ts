@@ -5,6 +5,7 @@
 // a burst of visitors doesn't turn into a burst of API calls. A product edit in
 // the admin is therefore visible on the product page within TTL_MS.
 import type { Product } from '~/scripts/api';
+import { applySells } from '~/utils/catalog-rules';
 
 const TTL_MS = 30_000;
 
@@ -22,7 +23,8 @@ export async function getActiveProducts(): Promise<Product[]> {
     });
     if (!res.ok) throw new Error(`Catalog request failed: ${res.status}`);
     const data = (await res.json()) as { items: Product[] };
-    const items = data.items.filter((p) => p.status === 'active' && p.variants?.length > 0);
+    // Only what this site sells (site.config.ts: sells); see src/utils/catalog-rules.ts.
+    const items = applySells(data.items.filter((p) => p.status === 'active' && p.variants?.length > 0));
     cache = { at: Date.now(), items };
     return items;
   } catch (e) {

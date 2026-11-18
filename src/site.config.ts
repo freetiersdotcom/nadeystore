@@ -35,9 +35,11 @@ export const site = {
   themeColor: '#0F6B4B',
   backgroundColor: '#F8F6F0',
 
-  /** What this business sells. physical = delivered goods, digital = downloads, service = appointments / bookable services. */
+  /** What this business sells. physical = delivered goods, digital = downloads, service = appointments / bookable services.
+   *  Anything else is hidden from the shop, product pages, related products and landing pages, even if the API holds such products.
+   *  Keep it equal to (or inside) what the API plan allows: the build prints a warning when it is not. */
   sells: ['physical', 'digital'] as SellType[],
-  /** Services answered by quote (contact form / WhatsApp) instead of being sold and paid online. */
+  /** Services answered by quote instead of being sold and paid online: no price, cart or booking, a "Request a quote" button leads to the contact form (or WhatsApp). */
   quoteOnly: false,
 
   locales: ['fr', 'en'] as Locale[],

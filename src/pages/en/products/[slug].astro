@@ -12,6 +12,7 @@ import StoreLayout from '~/layouts/StoreLayout.astro';
 import ProductVideo from '~/components/store/ProductVideo.astro';
 import type { Product } from '~/scripts/api';
 import { getActiveProducts, findProductBySlug, getRelatedProducts } from '~/utils/catalog';
+import { isQuote, quoteUrl, whatsappQuoteUrl } from '~/utils/catalog-rules';
 
 // Default is on-demand; astro.config.ts overrides this to `true` in static mode.
 export const prerender = false;
@@ -54,6 +55,10 @@ const description = product.description_en || product.description;
 const defaultVariant = product.variants[0];
 const isDigital = (defaultVariant.product_type || 'physical') === 'digital';
 const isService = (defaultVariant.product_type || 'physical') === 'service';
+// Services answered by quote (site.config.ts: quoteOnly): no price, no cart, a quote request instead.
+const quote = isQuote(defaultVariant);
+const quoteHref = quoteUrl('en', product.title);
+const waHref = whatsappQuoteUrl('en', product.title);
 const mainImage =
   defaultVariant.image_url || product.image_url || 'https://placehold.co/600x600/f4f4f5/a1a1aa?text=Image';
 
@@ -111,7 +116,9 @@ const metadata = {
           {product.title}
         </h1>
 
-        <p id="product-price" class="text-2xl font-semibold text-default mb-4">
+        {quote && <p class="text-2xl font-semibold text-default mb-4">On quote</p>}
+
+        <p id="product-price" hidden={quote} class="text-2xl font-semibold text-default mb-4">
           — {/* filled by JS */}
         </p>
 
@@ -125,7 +132,7 @@ const metadata = {
 
         <!-- Variant selector -->
         {
-          product.variants.length > 1 && (
+          product.variants.length > 1 && !quote && (
             <div class="mb-5">
               <label class="block text-sm font-medium text-default mb-2">Option</label>
               <select
@@ -150,8 +157,28 @@ const metadata = {
           )
         }
 
+        {
+          quote && (
+            <div class="mb-4">
+              <a
+                href={quoteHref}
+                class="btn-primary inline-block text-center py-3.5 px-8 text-base rounded-xl font-semibold"
+              >
+                Request a quote
+              </a>
+              <p class="text-xs text-muted mt-3">
+                <a href={waHref} class="text-primary hover:underline">
+                  or write to us on WhatsApp
+                </a>
+              </p>
+            </div>
+          )
+        }
+
         <button
           id="add-to-cart"
+          hidden={quote}
+          style={quote ? 'display:none' : undefined}
           type="button"
           class="btn-primary py-3.5 px-8 text-base rounded-xl font-semibold mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
           data-sku={defaultVariant.sku}
@@ -169,7 +196,9 @@ const metadata = {
             isDigital
               ? 'Download link sent by email after payment.'
               : isService
-                ? 'After payment, we will contact you to agree on the date and arrangements for your session.'
+                ? quote
+                  ? 'Tell us what you need and we will send you a quote. No commitment.'
+                  : 'After payment, we will contact you to agree on the date and arrangements for your session.'
                 : 'Delivery fees are calculated in the cart before payment.'
           }
         </p>
@@ -245,7 +274,7 @@ const metadata = {
                 <p class="font-medium text-sm text-default group-hover:text-primary transition-colors">{rp.title}</p>
                 <p class="text-xs text-muted mt-0.5">
                   {/* Price rendered by JS to avoid SSG currency mismatch */}
-                  <span data-price={rv.price_cents} data-currency class="related-price" />
+                  {isQuote(rv) ? 'On quote' : <span data-price={rv.price_cents} data-currency class="related-price" />}
                 </p>
               </a>
             );

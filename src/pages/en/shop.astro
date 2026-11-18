@@ -26,7 +26,7 @@ const metadata = {
   <!-- Filter tabs -->
   <div class="border-b border-gray-200 dark:border-slate-700">
     <div class="max-w-6xl mx-auto px-6">
-      <div class:list={['flex gap-1 py-3', site.sells.length < 2 && 'hidden']}>
+      <div id="filter-tabs" class:list={['flex gap-1 py-3', site.sells.length < 2 && 'hidden']}>
         <button
           data-filter="all"
           class="px-4 py-1.5 rounded-lg text-sm font-medium bg-primary text-white transition-colors">All</button
@@ -82,6 +82,7 @@ const metadata = {
 <script>
   import { getProducts, currency as getCurrency } from '~/scripts/api';
   import { addToCart, updateCartBadge, formatPrice } from '~/scripts/cart';
+  import { isQuote, quoteUrl } from '~/utils/catalog-rules';
 
   const CURRENCY = getCurrency();
 
@@ -112,9 +113,13 @@ const metadata = {
         return;
       }
 
-      if (allProducts.some((pr) => pr.variants.some((v) => v.product_type === 'service'))) {
-        document.getElementById('filter-service')?.classList.remove('hidden');
-      }
+      // Only the kinds that are really on sale get a tab, and there are no tabs at all when there is a single kind.
+      const kinds = new Set(allProducts.flatMap((pr) => pr.variants.map((v) => v.product_type || 'physical')));
+      document.querySelectorAll<HTMLElement>('[data-filter]').forEach((tab) => {
+        const k = tab.dataset.filter!;
+        if (k !== 'all') tab.classList.toggle('hidden', !kinds.has(k as 'physical'));
+      });
+      document.getElementById('filter-tabs')?.classList.toggle('hidden', kinds.size < 2);
 
       renderGrid();
       setupFilters();
@@ -161,6 +166,7 @@ const metadata = {
     const productType = defaultVariant.product_type || 'physical';
     const isDigital = productType === 'digital';
     const isService = productType === 'service';
+    const quote = isQuote(defaultVariant);
     const image =
       defaultVariant.image_url || product.image_url || 'https://placehold.co/400x400/f4f4f5/a1a1aa?text=Image';
     const slug = product.slug || product.id;
@@ -206,17 +212,17 @@ const metadata = {
         <a href="/en/products/${slug}" class="block hover:text-primary transition-colors">
           <h3 class="font-semibold text-default mb-1">${product.title}</h3>
         </a>
-        <p class="text-muted text-sm mb-1">${formatPrice(defaultVariant.price_cents, CURRENCY)}</p>
+        <p class="text-muted text-sm mb-1">${quote ? 'On quote' : formatPrice(defaultVariant.price_cents, CURRENCY)}</p>
         ${
           isDigital
             ? `<p class="text-accent text-xs mb-3">⚡ Instant download</p>`
             : isService
-              ? `<p class="text-muted text-xs mb-3">Scheduled with you after purchase</p>`
+              ? `<p class="text-muted text-xs mb-3">${quote ? 'Quote on request, no commitment' : 'Scheduled with you after purchase'}</p>`
               : `<p class="text-muted text-xs mb-3">Shipping required</p>`
         }
 
         ${
-          product.variants.length > 1
+          product.variants.length > 1 && !quote
             ? `
           <select class="variant-select w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-default mb-3 focus:outline-none focus:border-primary">
             ${product.variants
@@ -238,8 +244,14 @@ const metadata = {
             : ''
         }
 
+        ${
+          quote
+            ? `<a href="${quoteUrl('en', product.title)}" class="block text-center w-full btn-primary py-2.5 rounded-lg text-sm font-medium">Request a quote</a>`
+            : ''
+        }
+
         <button
-          class="add-to-cart w-full btn-primary py-2.5 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          class="add-to-cart ${quote ? 'hidden ' : ''}w-full btn-primary py-2.5 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           data-sku="${defaultVariant.sku}"
           data-product-type="${defaultVariant.product_type || 'physical'}"
           data-variant-title="${defaultVariant.title}"
