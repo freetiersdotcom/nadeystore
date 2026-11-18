@@ -9,7 +9,7 @@ interface Props {
   slug: string;
 }
 const { locale, slug } = Astro.props;
-const { metadata, sections } = loadPage(locale, slug);
+const { metadata, sections } = await loadPage(locale, slug);
 
 // FAQ sections also publish their questions as FAQPage structured data.
 const faq = sections.filter((s) => s.type === 'faq').flatMap((s) => s.groups as FaqGroup[]);

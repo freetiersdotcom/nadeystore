@@ -37,7 +37,7 @@ const T = {
     image: 'Image',
     src: 'Image (fichier ou adresse)',
     alt: 'Description de l’image (accessibilité)',
-    htmlHint: 'HTML autorisé : <p>…</p>, <strong>…</strong>, <a href="…">…</a>.',
+    mdHint: 'Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté.',
     content: 'Texte',
     reversed: 'Image à gauche',
     cta: 'Bouton',
@@ -47,7 +47,7 @@ const T = {
     a: 'Réponse',
     link: 'Lien (facultatif)',
     linkLabel: 'Texte du lien',
-    body: 'Texte de la page (HTML)',
+    body: 'Texte de la page',
     robots: 'Moteurs de recherche',
     index: 'Indexer cette page',
     follow: 'Suivre les liens',
@@ -64,7 +64,7 @@ const T = {
       cta: 'Appel à l’action (boutons)',
       'contact-form': 'Formulaire de contact',
       faq: 'Questions fréquentes',
-      prose: 'Texte libre (HTML)',
+      prose: 'Texte libre',
     },
     files: {
       home: 'Accueil',
@@ -105,7 +105,7 @@ const T = {
     image: 'Image',
     src: 'Image (file or address)',
     alt: 'Image description (accessibility)',
-    htmlHint: 'HTML allowed: <p>…</p>, <strong>…</strong>, <a href="…">…</a>.',
+    mdHint: 'Write normally: bold, lists, links, headings. An older text written in HTML is still accepted.',
     content: 'Text',
     reversed: 'Image on the left',
     cta: 'Button',
@@ -115,7 +115,7 @@ const T = {
     a: 'Answer',
     link: 'Link (optional)',
     linkLabel: 'Link text',
-    body: 'Page text (HTML)',
+    body: 'Page text',
     robots: 'Search engines',
     index: 'Index this page',
     follow: 'Follow links',
@@ -132,7 +132,7 @@ const T = {
       cta: 'Call to action (buttons)',
       'contact-form': 'Contact form',
       faq: 'Frequently asked questions',
-      prose: 'Free text (HTML)',
+      prose: 'Free text',
     },
     files: {
       home: 'Home',
@@ -221,7 +221,7 @@ function build(loc) {
       fields: [
         anchor,
         ...head,
-        txt('content', t.content, { hint: t.htmlHint }),
+        { name: 'content', label: t.content, widget: 'markdown', hint: t.mdHint, ...opt },
         image,
         { name: 'isReversed', label: t.reversed, widget: 'boolean', default: false },
         items,
@@ -291,7 +291,7 @@ function build(loc) {
     {
       name: 'prose',
       label: t.types.prose,
-      fields: [{ name: 'html', label: t.content, widget: 'text', hint: t.htmlHint }],
+      fields: [{ name: 'html', label: t.content, widget: 'markdown', hint: t.mdHint, required: false }],
     },
   ];
   const sections = {
@@ -348,7 +348,7 @@ function build(loc) {
         str('tagline', t.tagline),
         str('title', t.title, { required: true }),
         txt('subtitle', t.subtitle),
-        { name: 'body', label: t.body, widget: 'text', hint: t.htmlHint + ' ' + t.placeholders },
+        { name: 'body', label: t.body, widget: 'markdown', hint: t.mdHint + ' ' + t.placeholders, required: false },
         after,
       ],
       { format: 'yaml-frontmatter' }

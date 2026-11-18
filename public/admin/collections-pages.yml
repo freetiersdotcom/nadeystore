@@ -222,9 +222,9 @@
                     required: false
                   - name: content
                     label: Texte
-                    widget: text
+                    widget: markdown
+                    hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté."
                     required: false
-                    hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
                   - name: image
                     label: Image
                     widget: object
@@ -430,12 +430,13 @@
                                 widget: string
                                 required: true
               - name: prose
-                label: Texte libre (HTML)
+                label: Texte libre
                 fields:
                   - name: html
                     label: Texte
-                    widget: text
-                    hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
+                    widget: markdown
+                    hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté."
+                    required: false
       - name: about
         label: À propos
         file: src/content/pages/fr/about.yaml
@@ -655,9 +656,9 @@
                     required: false
                   - name: content
                     label: Texte
-                    widget: text
+                    widget: markdown
+                    hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté."
                     required: false
-                    hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
                   - name: image
                     label: Image
                     widget: object
@@ -863,12 +864,13 @@
                                 widget: string
                                 required: true
               - name: prose
-                label: Texte libre (HTML)
+                label: Texte libre
                 fields:
                   - name: html
                     label: Texte
-                    widget: text
-                    hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
+                    widget: markdown
+                    hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté."
+                    required: false
       - name: contact
         label: Contact
         file: src/content/pages/fr/contact.yaml
@@ -1088,9 +1090,9 @@
                     required: false
                   - name: content
                     label: Texte
-                    widget: text
+                    widget: markdown
+                    hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté."
                     required: false
-                    hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
                   - name: image
                     label: Image
                     widget: object
@@ -1296,12 +1298,13 @@
                                 widget: string
                                 required: true
               - name: prose
-                label: Texte libre (HTML)
+                label: Texte libre
                 fields:
                   - name: html
                     label: Texte
-                    widget: text
-                    hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
+                    widget: markdown
+                    hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté."
+                    required: false
       - name: faq
         label: FAQ
         file: src/content/pages/fr/faq.yaml
@@ -1521,9 +1524,9 @@
                     required: false
                   - name: content
                     label: Texte
-                    widget: text
+                    widget: markdown
+                    hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté."
                     required: false
-                    hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
                   - name: image
                     label: Image
                     widget: object
@@ -1729,12 +1732,13 @@
                                 widget: string
                                 required: true
               - name: prose
-                label: Texte libre (HTML)
+                label: Texte libre
                 fields:
                   - name: html
                     label: Texte
-                    widget: text
-                    hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
+                    widget: markdown
+                    hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté."
+                    required: false
       - name: services
         label: Services
         file: src/content/pages/fr/services.yaml
@@ -1954,9 +1958,9 @@
                     required: false
                   - name: content
                     label: Texte
-                    widget: text
+                    widget: markdown
+                    hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté."
                     required: false
-                    hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
                   - name: image
                     label: Image
                     widget: object
@@ -2162,12 +2166,13 @@
                                 widget: string
                                 required: true
               - name: prose
-                label: Texte libre (HTML)
+                label: Texte libre
                 fields:
                   - name: html
                     label: Texte
-                    widget: text
-                    hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
+                    widget: markdown
+                    hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté."
+                    required: false
       - name: privacy
         label: Confidentialité
         file: src/content/pages/fr/privacy.md
@@ -2211,9 +2216,10 @@
             widget: text
             required: false
           - name: body
-            label: Texte de la page (HTML)
-            widget: text
-            hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>. Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            label: Texte de la page
+            widget: markdown
+            hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté. Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            required: false
           - name: after
             label: Sections après le texte
             label_singular: section
@@ -2316,9 +2322,10 @@
             widget: text
             required: false
           - name: body
-            label: Texte de la page (HTML)
-            widget: text
-            hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>. Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            label: Texte de la page
+            widget: markdown
+            hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté. Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            required: false
           - name: after
             label: Sections après le texte
             label_singular: section
@@ -2421,9 +2428,10 @@
             widget: text
             required: false
           - name: body
-            label: Texte de la page (HTML)
-            widget: text
-            hint: "HTML autorisé : <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>. Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            label: Texte de la page
+            widget: markdown
+            hint: "Écrivez normalement : gras, listes, liens, titres. Un texte ancien écrit en HTML reste accepté. Mots entre accolades remplacés automatiquement : {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            required: false
           - name: after
             label: Sections après le texte
             label_singular: section
@@ -2705,9 +2713,9 @@
                     required: false
                   - name: content
                     label: Text
-                    widget: text
+                    widget: markdown
+                    hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted."
                     required: false
-                    hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
                   - name: image
                     label: Image
                     widget: object
@@ -2913,12 +2921,13 @@
                                 widget: string
                                 required: true
               - name: prose
-                label: Free text (HTML)
+                label: Free text
                 fields:
                   - name: html
                     label: Text
-                    widget: text
-                    hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
+                    widget: markdown
+                    hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted."
+                    required: false
       - name: about
         label: About
         file: src/content/pages/en/about.yaml
@@ -3138,9 +3147,9 @@
                     required: false
                   - name: content
                     label: Text
-                    widget: text
+                    widget: markdown
+                    hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted."
                     required: false
-                    hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
                   - name: image
                     label: Image
                     widget: object
@@ -3346,12 +3355,13 @@
                                 widget: string
                                 required: true
               - name: prose
-                label: Free text (HTML)
+                label: Free text
                 fields:
                   - name: html
                     label: Text
-                    widget: text
-                    hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
+                    widget: markdown
+                    hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted."
+                    required: false
       - name: contact
         label: Contact
         file: src/content/pages/en/contact.yaml
@@ -3571,9 +3581,9 @@
                     required: false
                   - name: content
                     label: Text
-                    widget: text
+                    widget: markdown
+                    hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted."
                     required: false
-                    hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
                   - name: image
                     label: Image
                     widget: object
@@ -3779,12 +3789,13 @@
                                 widget: string
                                 required: true
               - name: prose
-                label: Free text (HTML)
+                label: Free text
                 fields:
                   - name: html
                     label: Text
-                    widget: text
-                    hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
+                    widget: markdown
+                    hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted."
+                    required: false
       - name: faq
         label: FAQ
         file: src/content/pages/en/faq.yaml
@@ -4004,9 +4015,9 @@
                     required: false
                   - name: content
                     label: Text
-                    widget: text
+                    widget: markdown
+                    hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted."
                     required: false
-                    hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
                   - name: image
                     label: Image
                     widget: object
@@ -4212,12 +4223,13 @@
                                 widget: string
                                 required: true
               - name: prose
-                label: Free text (HTML)
+                label: Free text
                 fields:
                   - name: html
                     label: Text
-                    widget: text
-                    hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
+                    widget: markdown
+                    hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted."
+                    required: false
       - name: services
         label: Services
         file: src/content/pages/en/services.yaml
@@ -4437,9 +4449,9 @@
                     required: false
                   - name: content
                     label: Text
-                    widget: text
+                    widget: markdown
+                    hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted."
                     required: false
-                    hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
                   - name: image
                     label: Image
                     widget: object
@@ -4645,12 +4657,13 @@
                                 widget: string
                                 required: true
               - name: prose
-                label: Free text (HTML)
+                label: Free text
                 fields:
                   - name: html
                     label: Text
-                    widget: text
-                    hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>."
+                    widget: markdown
+                    hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted."
+                    required: false
       - name: privacy
         label: Privacy
         file: src/content/pages/en/privacy.md
@@ -4694,9 +4707,10 @@
             widget: text
             required: false
           - name: body
-            label: Page text (HTML)
-            widget: text
-            hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>. Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            label: Page text
+            widget: markdown
+            hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted. Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            required: false
           - name: after
             label: Sections after the text
             label_singular: section
@@ -4799,9 +4813,10 @@
             widget: text
             required: false
           - name: body
-            label: Page text (HTML)
-            widget: text
-            hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>. Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            label: Page text
+            widget: markdown
+            hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted. Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            required: false
           - name: after
             label: Sections after the text
             label_singular: section
@@ -4904,9 +4919,10 @@
             widget: text
             required: false
           - name: body
-            label: Page text (HTML)
-            widget: text
-            hint: "HTML allowed: <p>…</p>, <strong>…</strong>, <a href=\"…\">…</a>. Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            label: Page text
+            widget: markdown
+            hint: "Write normally: bold, lists, links, headings. An older text written in HTML is still accepted. Words in braces are replaced automatically: {brand} {city} {country} {address} {whatsapp} {phone} {email}."
+            required: false
           - name: after
             label: Sections after the text
             label_singular: section

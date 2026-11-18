@@ -60,7 +60,7 @@ const T = {
     aboutSub: '{brand} est basé à {city}, {country}. Décrivez ici l’activité et l’histoire de l’entreprise.',
     block: 'Notre activité',
     blockHtml:
-      '<p>Présentez ici vos produits ou services.</p><p class="mt-4">Expliquez à qui vous vous adressez et ce qui vous distingue.</p>',
+      'Présentez ici vos produits ou services.\n\nExpliquez à qui vous vous adressez et ce qui vous distingue.',
     svcTag: 'Nos services',
     svcTitle: 'Ce que nous faisons pour vous',
     svcSub: 'Décrivez chaque service, avec si possible un prix ou une fourchette de prix.',
@@ -139,8 +139,7 @@ const T = {
     aboutTitle: 'About {brand}',
     aboutSub: '{brand} is based in {city}, {country}. Describe the business and its story here.',
     block: 'What we do',
-    blockHtml:
-      '<p>Present your products or services here.</p><p class="mt-4">Explain who you serve and what makes you different.</p>',
+    blockHtml: 'Present your products or services here.\n\nExplain who you serve and what makes you different.',
     svcTag: 'Our services',
     svcTitle: 'What we do for you',
     svcSub: 'Describe each service, with a price or price range if possible.',
