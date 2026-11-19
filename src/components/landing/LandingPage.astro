@@ -24,7 +24,7 @@ const order =
     ? { hero: 1, products: 2, benefits: 3, steps: 4, faq: 5, final: 6 }
     : { hero: 1, benefits: 2, products: 3, steps: 4, faq: 5, final: 6 };
 
-const WA = (import.meta.env.PUBLIC_WHATSAPP_NUMBER || '2290194458956').replace(/\D/g, '');
+const WA = (import.meta.env.PUBLIC_WHATSAPP_NUMBER || site.whatsapp).replace(/\D/g, '');
 const waHref = `https://wa.me/${WA}?text=${encodeURIComponent(content.whatsapp_message || '')}`;
 const shopHref = page('shop', locale);
 const L =

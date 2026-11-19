@@ -6,6 +6,9 @@
 //   --sells        any of: physical (delivered goods), digital (downloads), service (appointments / bookable services). Comma separated.
 //   --quote-only   the services are not sold online: visitors ask for a quote (contact form / WhatsApp). Without it, services are paid in the shop.
 //   --preset       shortcuts for --sells: shop (physical,digital) | physical | digital | services (service, quote-only) | booking (service, paid) | shop-services (physical,digital,service)
+//   --theme        a look: emerald | ocean | terracotta (needs kit 60), or a #hex for the browser/app colour. Default emerald.
+//   --worker-name  name of the storefront Worker (wrangler.jsonc "name"), e.g. acme-store
+//   --repo         owner/name of the GitHub repo the CMS edits (public/admin/config.yml), and --branch (default: left as is)
 // Run it on a fresh copy of the template: it REPLACES src/site.config.ts, the home/about (and services) content files and the names in src/config.yaml.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -58,6 +61,23 @@ if (!locales.every((l) => ['fr', 'en'].includes(l))) {
 const cfr = a['country-fr'] || a['country-en'] || '',
   cen = a['country-en'] || a['country-fr'] || '';
 const addr = (l) => a['address-' + l] || `${a.city}, ${l === 'fr' ? cfr : cen}`;
+// kit 61: look of the site (kit 60) and the names the template hard-codes
+const hasThemes = fs.existsSync(path.join(root, 'src/themes.ts'));
+const THEME_HEX = { emerald: '#0F6B4B', ocean: '#0E7490', terracotta: '#A6482A' };
+const isHex = typeof a.theme === 'string' && /^#[0-9a-fA-F]{6}$/.test(a.theme);
+const themeName = typeof a.theme === 'string' && THEME_HEX[a.theme] ? a.theme : 'emerald';
+const bad = [];
+if (a.theme && !isHex && !THEME_HEX[a.theme]) bad.push('--theme: emerald, ocean, terracotta or a #RRGGBB colour');
+if (THEME_HEX[a.theme] && !hasThemes) bad.push('--theme ' + a.theme + ' needs kit 60 (src/themes.ts not found)');
+if (a['worker-name'] && !/^[a-z0-9][a-z0-9-]{0,62}$/.test(a['worker-name']))
+  bad.push('--worker-name: lowercase letters, digits and dashes');
+if (a.repo && !/^[\w.-]+\/[\w.-]+$/.test(a.repo)) bad.push('--repo: owner/name');
+if (a.branch && !/^[\w./-]+$/.test(a.branch)) bad.push('--branch: a branch name');
+if (bad.length) {
+  console.error(bad.join('\n'));
+  process.exit(1);
+}
+const themeHex = isHex ? a.theme : THEME_HEX[themeName];
 const goods = sells.includes('physical') || sells.includes('digital');
 const paidServices = sells.includes('service') && !quoteOnly;
 const shop = goods || paidServices;
@@ -83,7 +103,11 @@ const cfg = `// src/site.config.ts
 
 export type Locale = 'fr' | 'en';
 export type FeatureName = 'shop' | 'account' | 'blog' | 'faq' | 'services' | 'downloads';
-export type SellType = 'physical' | 'digital' | 'service';
+export type SellType = 'physical' | 'digital' | 'service';${
+  hasThemes
+    ? "\n/** Colours and fonts of the site: see src/themes.ts. */\nexport type ThemeName = 'emerald' | 'ocean' | 'terracotta';"
+    : ''
+}
 
 export const site = {
   brand: ${q(a.brand)},
@@ -100,8 +124,12 @@ export const site = {
   phone: ${q(a.phone || '+' + a.whatsapp)},
   /** One sentence, used as the app description (manifest). */
   tagline: { fr: ${q(a['tagline-fr'] || '')}, en: ${q(a['tagline-en'] || '')} },
-  /** Browser/app colours (manifest and offline page). The site's own colours are in the Tailwind theme. */
-  themeColor: ${q(a.theme || '#0F6B4B')},
+${
+  hasThemes
+    ? `  /** Look of the site: 'emerald', 'ocean' or 'terracotta' (see src/themes.ts). */\n  theme: ${q(themeName)} as ThemeName,\n`
+    : ''
+}  /** Browser/app colours (manifest and offline page). */
+  themeColor: ${q(themeHex)},
   backgroundColor: ${q(a.background || '#F8F6F0')},
 
   /** What this business sells. physical = delivered goods, digital = downloads, service = appointments / bookable services. */
@@ -131,6 +159,38 @@ y = y
 const desc = a['tagline-' + locales[0]];
 if (desc) y = y.replace(/^(\s{2}description: ).*$/m, `$1${JSON.stringify(desc)}`);
 fs.writeFileSync(cy, crlf ? y.replace(/\n/g, '\r\n') : y);
+// kit 61: names the template hard-codes (Worker, CMS repo, CMS page title)
+const touchFile = (rel, fn) => {
+  const f = path.join(root, rel);
+  if (!fs.existsSync(f)) return false;
+  const raw = fs.readFileSync(f, 'utf8');
+  const eol = raw.includes('\r\n');
+  const out = fn(raw.replace(/\r\n/g, '\n'));
+  fs.writeFileSync(f, eol ? out.replace(/\n/g, '\r\n') : out);
+  return true;
+};
+const renamed = [];
+if (
+  a['worker-name'] &&
+  touchFile('wrangler.jsonc', (t) => t.replace(/^(\s*"name"\s*:\s*)"[^"]*"/m, `$1"${a['worker-name']}"`))
+)
+  renamed.push('wrangler.jsonc (Worker name)');
+if (
+  (a.repo || a.branch) &&
+  touchFile('public/admin/config.yml', (t) => {
+    if (a.repo) t = t.replace(/^(\s*repo:\s*).*$/m, `$1${a.repo}`);
+    if (a.branch) t = t.replace(/^(\s*branch:\s*).*$/m, `$1${a.branch}`);
+    return t;
+  })
+)
+  renamed.push('public/admin/config.yml (repo/branch)');
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+if (
+  touchFile('public/admin/index.html', (t) =>
+    t.replace(/<title>[^<]*<\/title>/, `<title>Contenu — ${esc(a.brand)}</title>`)
+  )
+)
+  renamed.push('public/admin/index.html (title)');
 // content
 const content = starterContent(sells, quoteOnly);
 const copied = [];
@@ -160,4 +220,28 @@ console.log(
     ]
       .map((s) => '  - ' + s)
       .join('\n')
+);
+// kit 61: what was renamed, and what still mentions the first client
+if (renamed.length) console.log('Also updated: ' + renamed.join(', '));
+const LEFT = /nadeystore|freetiers|Santé Natur|2290194458956/i;
+const SKIP_DIR = ['node_modules', 'dist', '.astro', '.git', '.wrangler'];
+const SKIP_FILE = /\.(bak|png|jpe?g|webp|svg|ico|woff2?|zip)$|package-lock\.json$|\.created$/;
+const found = [];
+const walk = (d) => {
+  for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+    if (SKIP_DIR.includes(e.name)) continue;
+    const f = path.join(d, e.name);
+    if (e.isDirectory()) walk(f);
+    else if (!SKIP_FILE.test(e.name) && e.name !== 'new-client.mjs') {
+      const t = fs.readFileSync(f, 'utf8');
+      const n = t.includes('\0') ? 0 : t.split('\n').filter((l) => LEFT.test(l)).length;
+      if (n) found.push(`${path.relative(root, f)} (${n} line${n > 1 ? 's' : ''})`);
+    }
+  }
+};
+walk(root);
+console.log(
+  found.length
+    ? '\nStill mention the first client (rewrite or remove):\n' + found.map((s) => '  - ' + s).join('\n')
+    : '\nNo file mentions the first client any more.'
 );

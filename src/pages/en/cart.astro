@@ -3,6 +3,7 @@
 // Cart page — renders from localStorage, runs the full checkout pipeline
 // (create cart → add items → set shipping → redirect to payment) on submit.
 import StoreLayout from '~/layouts/StoreLayout.astro';
+import { site } from '~/site.config';
 
 const metadata = {
   title: 'Your cart',
@@ -232,7 +233,7 @@ const metadata = {
           </p>
 
           <a
-            href="https://wa.me/2290194458956?text=Hello%2C%20I%20have%20a%20question%20before%20placing%20an%20order."
+            href={`https://wa.me/${site.whatsapp}?text=Hello%2C%20I%20have%20a%20question%20before%20placing%20an%20order.`}
             target="_blank"
             rel="noopener noreferrer"
             class="mt-3 flex items-center justify-center gap-2 text-sm font-medium text-primary hover:underline"
